@@ -1,0 +1,2 @@
+[cors]
+origin = "http://localhost:28080"

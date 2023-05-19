@@ -7,3 +7,9 @@ services:
       - ./api:/app
     ports:
       - 58000:8000
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/frontend
+    ports:
+      - 43000:3000

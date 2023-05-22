@@ -11,6 +11,8 @@ services:
     build: ./frontend
     volumes:
       - ./frontend:/frontend
+    environment:
+      - WDS_SOCKET_PORT=0
     ports:
       - 43000:3000
   mysql:

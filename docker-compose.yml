@@ -13,3 +13,14 @@ services:
       - ./frontend:/frontend
     ports:
       - 43000:3000
+  mysql:
+    image: mysql:8
+    ports:
+      - 53306:3306
+    volumes:
+      - mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: "rent-bernard"
+      MYSQL_ROOT_PASSWORD: "root"
+volumes:
+  mysql:

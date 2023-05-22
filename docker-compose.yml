@@ -5,6 +5,8 @@ services:
     build: ./api
     volumes:
       - ./api:/app
+    environment:
+      DATABASE_URL: "mysql://root:root@mysql:3306/rent-bernard"
     ports:
       - 58000:8000
   frontend:

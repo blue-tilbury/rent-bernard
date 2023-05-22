@@ -1,3 +1,5 @@
+#![warn(clippy::all, clippy::pedantic)]
+
 use fairing::cors::Cors;
 use rocket::{
     figment::providers::{Format, Toml},

@@ -1,39 +1,26 @@
 #![warn(clippy::all, clippy::pedantic)]
 
-use fairing::cors::Cors;
+use controller::{cors_handler, rooms};
+use fairing::{cors::Cors, db::DbConn};
 use rocket::{
     figment::providers::{Format, Toml},
-    http::Status,
-    serde::json::Json,
     Config,
 };
-use serde::Serialize;
 
 #[macro_use]
 extern crate rocket;
+mod controller;
 mod fairing;
-
-// TODO: delete after testing
-#[derive(Serialize)]
-pub struct Test {
-    pub success: bool,
-}
-
-// TODO: delete after testing
-#[get("/")]
-pub async fn test() -> Json<Test> {
-    let res = Test { success: true };
-    Json(res)
-}
-
-#[options("/<_..>")]
-fn cors_handler() -> Status {
-    Status::NoContent
-}
+mod model;
+mod schema;
+mod view;
 
 #[launch]
 fn rocket() -> _ {
-    let apis = routes![test, cors_handler];
+    let apis = routes![rooms::show, cors_handler];
     let figment = Config::figment().merge(Toml::file("App.toml").nested());
-    rocket::custom(figment).mount("/", apis).attach(Cors)
+    rocket::custom(figment)
+        .mount("/", apis)
+        .attach(Cors)
+        .attach(DbConn::fairing())
 }

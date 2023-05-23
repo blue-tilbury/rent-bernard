@@ -8,4 +8,6 @@ edition = "2021"
 [dependencies]
 rocket = { version = "=0.5.0-rc.3", features = ["json"] }
 serde = "1.0.160"
-diesel = { version = "2.0.0", features = ["mysql"] }
+diesel = { version = "2.0.0", features = ["mysql", "chrono"] }
+chrono = "0.4.24"
+rocket_sync_db_pools = { version = "0.1.0-rc.2", features = ["diesel_mysql_pool"] }

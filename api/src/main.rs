@@ -17,7 +17,7 @@ mod view;
 
 #[launch]
 fn rocket() -> _ {
-    let apis = routes![rooms::show, cors_handler];
+    let apis = routes![rooms::show, rooms::create, cors_handler];
     let figment = Config::figment().merge(Toml::file("App.toml").nested());
     rocket::custom(figment)
         .mount("/", apis)

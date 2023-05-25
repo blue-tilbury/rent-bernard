@@ -14,6 +14,7 @@ pub struct GetRoom {
     is_pet_friendly: bool,
     description: String,
     images: Vec<GetImage>,
+    contact_information: GetContactInformation,
     created_at: String,
     updated_at: String,
 }
@@ -21,6 +22,11 @@ pub struct GetRoom {
 #[derive(Serialize, Deserialize)]
 struct GetImage {
     url: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct GetContactInformation {
+    email: String,
 }
 
 impl GetRoom {
@@ -35,6 +41,7 @@ impl GetRoom {
             is_pet_friendly,
             description,
             images,
+            contact_information,
             created_at,
             updated_at,
         } = room;
@@ -51,6 +58,9 @@ impl GetRoom {
                 .into_iter()
                 .map(|image| GetImage { url: image.url })
                 .collect(),
+            contact_information: GetContactInformation {
+                email: contact_information.email,
+            },
             created_at: created_at.to_string(),
             updated_at: updated_at.to_string(),
         };
@@ -62,7 +72,7 @@ impl GetRoom {
 mod tests {
     use chrono::Local;
 
-    use crate::model::room::model::Image;
+    use crate::model::room::model::{ContactInformation, Image};
 
     use super::*;
 
@@ -81,6 +91,9 @@ mod tests {
             is_pet_friendly: false,
             description: "description".to_string(),
             images: vec![image],
+            contact_information: ContactInformation {
+                email: "email".to_string(),
+            },
             created_at: Local::now().naive_local(),
             updated_at: Local::now().naive_local(),
         };
@@ -93,6 +106,7 @@ mod tests {
         assert!(json.is_furnished);
         assert!(!json.is_pet_friendly);
         assert_eq!(json.images[0].url, "url".to_string());
+        assert_eq!(json.contact_information.email, "email".to_string());
         assert_eq!(json.description, "description".to_string());
         assert!(!json.created_at.to_string().is_empty());
         assert!(!json.updated_at.to_string().is_empty());

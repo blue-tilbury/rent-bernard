@@ -15,6 +15,7 @@ pub struct Room {
     pub is_pet_friendly: bool,
     pub description: String,
     pub images: Vec<Image>,
+    pub contact_information: ContactInformation,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -29,11 +30,17 @@ pub struct CreateRoom {
     pub is_pet_friendly: bool,
     pub description: String,
     pub images: Vec<Image>,
+    pub contact_information: ContactInformation,
 }
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct Image {
     pub url: String,
+}
+
+#[derive(Default, Serialize, Deserialize)]
+pub struct ContactInformation {
+    pub email: String,
 }
 
 impl Room {
@@ -50,6 +57,7 @@ impl Room {
                 is_pet_friendly: room.is_pet_friendly,
                 description: room.description,
                 images: room.images,
+                contact_information: room.contact_information,
                 created_at: Local::now().naive_local(),
                 updated_at: Local::now().naive_local(),
             })
@@ -79,6 +87,7 @@ impl IdConverter<RoomResource, Self> for Room {
             is_pet_friendly: room.is_pet_friendly,
             description: room.description,
             images: room.images,
+            contact_information: room.contact_information,
             created_at: room.created_at,
             updated_at: room.updated_at,
         }
@@ -107,6 +116,9 @@ mod tests {
             is_furnished: true,
             is_pet_friendly: false,
             images: vec![image],
+            contact_information: ContactInformation {
+                email: "email".to_string(),
+            },
             description: "description".to_string(),
         };
 
@@ -118,6 +130,7 @@ mod tests {
         assert!(result.is_furnished);
         assert!(!result.is_pet_friendly);
         assert_eq!(result.images[0].url, "url".to_string());
+        assert_eq!(result.contact_information.email, "email".to_string());
         assert_eq!(result.description, "description".to_string());
     }
 
@@ -136,6 +149,9 @@ mod tests {
             is_furnished: Some(true),
             is_pet_friendly: Some(false),
             images: Some(vec![image]),
+            contact_information: Some(ContactInformation {
+                email: "email".to_string(),
+            }),
             description: Some("description".to_string()),
         };
         let Room { id, .. } = RoomFactory::create(&db, params).await;
@@ -150,6 +166,7 @@ mod tests {
         assert!(!result.is_pet_friendly);
         assert_eq!(result.images[0].url, "url".to_string());
         assert_eq!(result.description, "description".to_string());
+        assert_eq!(result.contact_information.email, "email".to_string());
         assert!(!result.created_at.to_string().is_empty());
         assert!(!result.updated_at.to_string().is_empty());
     }

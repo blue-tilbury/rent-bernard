@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
-    model::room::model::{CreateRoom, Image, Room},
+    model::room::model::{ContactInformation, CreateRoom, Image, Room},
     view::room::GetRoom,
 };
 
@@ -16,12 +16,18 @@ pub struct PostRoom {
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub images: Vec<PostImage>,
+    pub contact_information: PostContactInformation,
     pub description: String,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct PostImage {
     pub url: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct PostContactInformation {
+    pub email: String,
 }
 
 type DB = State<Surreal<Client>>;
@@ -55,6 +61,7 @@ pub async fn create(room: Json<PostRoom>, db: &DB) -> Result<Json<GetRoom>, Stat
         is_furnished,
         is_pet_friendly,
         images,
+        contact_information,
         description,
     } = room.0;
     let create_room_params = CreateRoom {
@@ -68,6 +75,9 @@ pub async fn create(room: Json<PostRoom>, db: &DB) -> Result<Json<GetRoom>, Stat
             .into_iter()
             .map(|image| Image { url: image.url })
             .collect(),
+        contact_information: ContactInformation {
+            email: contact_information.email,
+        },
         description,
     };
     match Room::create(db.inner(), create_room_params).await {
@@ -102,6 +112,9 @@ mod tests {
             is_furnished: true,
             is_pet_friendly: false,
             images: vec![image],
+            contact_information: PostContactInformation {
+                email: "email".to_string(),
+            },
             description: "description".to_string(),
         };
         let uri = uri!(create);
@@ -125,6 +138,9 @@ mod tests {
             is_furnished: true,
             is_pet_friendly: false,
             images: vec![image],
+            contact_information: PostContactInformation {
+                email: "email".to_string(),
+            },
             description: "description".to_string(),
         };
         let uri = uri!(create);

@@ -1,11 +1,11 @@
 use rocket::serde::json::Json;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::model::room::model::Room;
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct GetRoom {
-    id: String,
+    pub id: String,
     title: String,
     price: i64,
     area: String,

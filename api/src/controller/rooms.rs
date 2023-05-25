@@ -1,5 +1,5 @@
 use rocket::{http::Status, serde::json::Json, State};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
@@ -7,7 +7,7 @@ use crate::{
     view::room::GetRoom,
 };
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct PostRoom {
     pub title: String,
     pub price: i64,
@@ -68,5 +68,56 @@ pub async fn create(room: Json<PostRoom>, db: &DB) -> Result<Json<GetRoom>, Stat
             eprintln!("{err}");
             Err(Status::InternalServerError)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::controller::tests::create_client;
+
+    use super::*;
+
+    #[test]
+    fn test_create() {
+        let client = create_client(routes![create]);
+        let body = PostRoom {
+            title: "title".to_string(),
+            price: 10000,
+            area: "area".to_string(),
+            street: None,
+            is_furnished: true,
+            is_pet_friendly: false,
+            description: "description".to_string(),
+        };
+        let uri = uri!(create);
+        let response = client.post(uri).json(&body).dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        let json: String = response.into_string().unwrap();
+        assert!(!json.is_empty())
+    }
+
+    #[test]
+    fn test_show() {
+        let client = create_client(routes![create, show]);
+
+        let body = PostRoom {
+            title: "title".to_string(),
+            price: 10000,
+            area: "area".to_string(),
+            street: None,
+            is_furnished: true,
+            is_pet_friendly: false,
+            description: "description".to_string(),
+        };
+        let uri = uri!(create);
+        let response = client.post(uri).json(&body).dispatch();
+
+        let GetRoom { id, .. } = response.into_json().unwrap();
+        let uri = uri!(show(id));
+
+        let response = client.get(uri).dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        let json = response.into_string().unwrap();
+        assert!(!json.is_empty());
     }
 }

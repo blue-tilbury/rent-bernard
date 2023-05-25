@@ -1,4 +1,5 @@
 use chrono::{Local, NaiveDateTime};
+use serde::{Deserialize, Serialize};
 
 use crate::{fairing::db::DB, model::IdConverter};
 
@@ -13,6 +14,7 @@ pub struct Room {
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
+    pub images: Vec<Image>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -26,6 +28,12 @@ pub struct CreateRoom {
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
+    pub images: Vec<Image>,
+}
+
+#[derive(Default, Serialize, Deserialize)]
+pub struct Image {
+    pub url: String,
 }
 
 impl Room {
@@ -41,6 +49,7 @@ impl Room {
                 is_furnished: room.is_furnished,
                 is_pet_friendly: room.is_pet_friendly,
                 description: room.description,
+                images: room.images,
                 created_at: Local::now().naive_local(),
                 updated_at: Local::now().naive_local(),
             })
@@ -69,6 +78,7 @@ impl IdConverter<RoomResource, Self> for Room {
             is_furnished: room.is_furnished,
             is_pet_friendly: room.is_pet_friendly,
             description: room.description,
+            images: room.images,
             created_at: room.created_at,
             updated_at: room.updated_at,
         }
@@ -86,6 +96,9 @@ mod tests {
     #[tokio::test]
     async fn test_create() {
         let db = TestDbMiddleware::setup_db().await;
+        let image = Image {
+            url: "url".to_string(),
+        };
         let params = CreateRoom {
             title: "title".to_string(),
             price: 10000,
@@ -93,6 +106,7 @@ mod tests {
             street: None,
             is_furnished: true,
             is_pet_friendly: false,
+            images: vec![image],
             description: "description".to_string(),
         };
 
@@ -103,12 +117,16 @@ mod tests {
         assert!(result.street.is_none());
         assert!(result.is_furnished);
         assert!(!result.is_pet_friendly);
+        assert_eq!(result.images[0].url, "url".to_string());
         assert_eq!(result.description, "description".to_string());
     }
 
     #[tokio::test]
     async fn test_get() {
         let db = TestDbMiddleware::setup_db().await;
+        let image = Image {
+            url: "url".to_string(),
+        };
         let params = RoomFactoryParams {
             id: None,
             title: Some("title".to_string()),
@@ -117,6 +135,7 @@ mod tests {
             street: None,
             is_furnished: Some(true),
             is_pet_friendly: Some(false),
+            images: Some(vec![image]),
             description: Some("description".to_string()),
         };
         let Room { id, .. } = RoomFactory::create(&db, params).await;
@@ -129,6 +148,7 @@ mod tests {
         assert!(result.street.is_none());
         assert!(result.is_furnished);
         assert!(!result.is_pet_friendly);
+        assert_eq!(result.images[0].url, "url".to_string());
         assert_eq!(result.description, "description".to_string());
         assert!(!result.created_at.to_string().is_empty());
         assert!(!result.updated_at.to_string().is_empty());

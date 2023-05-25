@@ -2,6 +2,8 @@ use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
+use self::model::Image;
+
 mod factory;
 pub mod model;
 
@@ -18,6 +20,7 @@ struct RoomResource {
     is_furnished: bool,
     is_pet_friendly: bool,
     description: String,
+    images: Vec<Image>,
     created_at: NaiveDateTime,
     updated_at: NaiveDateTime,
 }

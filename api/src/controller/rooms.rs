@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
-    model::room::model::{CreateRoom, Room},
+    model::room::model::{CreateRoom, Image, Room},
     view::room::GetRoom,
 };
 
@@ -15,7 +15,13 @@ pub struct PostRoom {
     pub street: Option<String>,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
+    pub images: Vec<PostImage>,
     pub description: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct PostImage {
+    pub url: String,
 }
 
 type DB = State<Surreal<Client>>;
@@ -48,6 +54,7 @@ pub async fn create(room: Json<PostRoom>, db: &DB) -> Result<Json<GetRoom>, Stat
         street,
         is_furnished,
         is_pet_friendly,
+        images,
         description,
     } = room.0;
     let create_room_params = CreateRoom {
@@ -57,6 +64,10 @@ pub async fn create(room: Json<PostRoom>, db: &DB) -> Result<Json<GetRoom>, Stat
         street,
         is_furnished,
         is_pet_friendly,
+        images: images
+            .into_iter()
+            .map(|image| Image { url: image.url })
+            .collect(),
         description,
     };
     match Room::create(db.inner(), create_room_params).await {
@@ -80,6 +91,9 @@ mod tests {
     #[test]
     fn test_create() {
         let client = create_client(routes![create]);
+        let image = PostImage {
+            url: "url".to_string(),
+        };
         let body = PostRoom {
             title: "title".to_string(),
             price: 10000,
@@ -87,6 +101,7 @@ mod tests {
             street: None,
             is_furnished: true,
             is_pet_friendly: false,
+            images: vec![image],
             description: "description".to_string(),
         };
         let uri = uri!(create);
@@ -99,7 +114,9 @@ mod tests {
     #[test]
     fn test_show() {
         let client = create_client(routes![create, show]);
-
+        let image = PostImage {
+            url: "url".to_string(),
+        };
         let body = PostRoom {
             title: "title".to_string(),
             price: 10000,
@@ -107,6 +124,7 @@ mod tests {
             street: None,
             is_furnished: true,
             is_pet_friendly: false,
+            images: vec![image],
             description: "description".to_string(),
         };
         let uri = uri!(create);

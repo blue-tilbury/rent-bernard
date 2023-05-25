@@ -13,8 +13,14 @@ pub struct GetRoom {
     is_furnished: bool,
     is_pet_friendly: bool,
     description: String,
+    images: Vec<GetImage>,
     created_at: String,
     updated_at: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct GetImage {
+    url: String,
 }
 
 impl GetRoom {
@@ -28,6 +34,7 @@ impl GetRoom {
             is_furnished,
             is_pet_friendly,
             description,
+            images,
             created_at,
             updated_at,
         } = room;
@@ -40,6 +47,10 @@ impl GetRoom {
             is_furnished,
             is_pet_friendly,
             description,
+            images: images
+                .into_iter()
+                .map(|image| GetImage { url: image.url })
+                .collect(),
             created_at: created_at.to_string(),
             updated_at: updated_at.to_string(),
         };
@@ -51,10 +62,15 @@ impl GetRoom {
 mod tests {
     use chrono::Local;
 
+    use crate::model::room::model::Image;
+
     use super::*;
 
     #[test]
     fn test_get_room() {
+        let image = Image {
+            url: "url".to_string(),
+        };
         let room = Room {
             id: "id".to_string(),
             title: "title".to_string(),
@@ -64,6 +80,7 @@ mod tests {
             is_furnished: true,
             is_pet_friendly: false,
             description: "description".to_string(),
+            images: vec![image],
             created_at: Local::now().naive_local(),
             updated_at: Local::now().naive_local(),
         };
@@ -75,6 +92,7 @@ mod tests {
         assert!(json.street.is_none());
         assert!(json.is_furnished);
         assert!(!json.is_pet_friendly);
+        assert_eq!(json.images[0].url, "url".to_string());
         assert_eq!(json.description, "description".to_string());
         assert!(!json.created_at.to_string().is_empty());
         assert!(!json.updated_at.to_string().is_empty());

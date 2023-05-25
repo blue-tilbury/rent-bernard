@@ -3,6 +3,7 @@ pub mod tests {
     use chrono::Local;
 
     use crate::fairing::db::DB;
+    use crate::model::room::model::Image;
     use crate::model::room::model::Room;
     use crate::model::room::RoomResource;
     use crate::model::room::TABLE_NAME;
@@ -17,6 +18,7 @@ pub mod tests {
         pub street: Option<String>,
         pub is_furnished: Option<bool>,
         pub is_pet_friendly: Option<bool>,
+        pub images: Option<Vec<Image>>,
         pub description: Option<String>,
     }
 
@@ -33,6 +35,7 @@ pub mod tests {
                 is_furnished: params.is_furnished.unwrap_or_default(),
                 is_pet_friendly: params.is_pet_friendly.unwrap_or_default(),
                 description: params.description.unwrap_or_default(),
+                images: params.images.unwrap_or_default(),
                 created_at: Local::now().naive_local(),
                 updated_at: Local::now().naive_local(),
             };

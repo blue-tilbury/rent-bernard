@@ -1,13 +1,13 @@
 [database]
-namespace = "todo"
-database = "todo"
+namespace = "rent-bernard"
+database = "rent-bernard"
 username = "root"
 password = "root"
 host = "surrealdb"
 port = "8000"
 
 [test_database]
-namespace = "todo"
+namespace = "rent-bernard"
 username = "root"
 password = "root"
 host = "test_surrealdb"

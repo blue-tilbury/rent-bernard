@@ -24,7 +24,7 @@ services:
       - 48000:8000
     volumes:
       - surrealdb:/db
-    command: start --log debug --user root --pass root file:/db/todo.db
+    command: start --log debug --user root --pass root file:/db/rent-bernard.db
   test_surrealdb:
     image: surrealdb/surrealdb:latest
     ports:

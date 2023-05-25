@@ -28,7 +28,7 @@ pub async fn show(id: String, db: &DB) -> Result<Json<GetRoom>, Status> {
                 let response = GetRoom::get_room(room);
                 Ok(response)
             } else {
-                println!("ToDo Not Found");
+                eprintln!("Room Not Found");
                 Err(Status::NotFound)
             }
         }

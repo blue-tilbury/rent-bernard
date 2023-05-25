@@ -6,6 +6,7 @@ pub mod tests {
     use crate::model::room::model::Room;
     use crate::model::room::RoomResource;
     use crate::model::room::TABLE_NAME;
+    use crate::model::IdConverter;
 
     #[derive(Default)]
     pub struct RoomFactoryParams {
@@ -36,23 +37,7 @@ pub mod tests {
                 updated_at: Local::now().naive_local(),
             };
             let room = db.create(TABLE_NAME).content(content).await.unwrap();
-            Self::to_raw_id(room)
-        }
-
-        fn to_raw_id(room: RoomResource) -> Room {
-            let id = room.id.clone().unwrap().id.to_raw();
-            Room {
-                id,
-                title: room.title,
-                price: room.price,
-                area: room.area,
-                street: room.street,
-                is_furnished: room.is_furnished,
-                is_pet_friendly: room.is_pet_friendly,
-                description: room.description,
-                created_at: room.created_at,
-                updated_at: room.updated_at,
-            }
+            Room::to_raw_id(room)
         }
     }
 }

@@ -1,6 +1,6 @@
 use chrono::{Local, NaiveDateTime};
 
-use crate::fairing::db::DB;
+use crate::{fairing::db::DB, model::IdConverter};
 
 use super::{RoomResource, TABLE_NAME};
 
@@ -55,8 +55,9 @@ impl Room {
             None => Ok(None),
         }
     }
+}
 
-    // TODO: define in trait
+impl IdConverter<RoomResource, Self> for Room {
     fn to_raw_id(room: RoomResource) -> Room {
         let id = room.id.clone().unwrap().id.to_raw();
         Room {

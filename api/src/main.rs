@@ -1,7 +1,7 @@
 #![warn(clippy::all, clippy::pedantic)]
 
 use controller::{cors_handler, rooms};
-use fairing::{cors::Cors, db::DbConn};
+use fairing::{cors::Cors, db::DbMiddleware};
 use rocket::{
     figment::providers::{Format, Toml},
     Config,
@@ -12,7 +12,6 @@ extern crate rocket;
 mod controller;
 mod fairing;
 mod model;
-mod schema;
 mod view;
 
 #[launch]
@@ -22,5 +21,5 @@ fn rocket() -> _ {
     rocket::custom(figment)
         .mount("/", apis)
         .attach(Cors)
-        .attach(DbConn::fairing())
+        .attach(DbMiddleware)
 }

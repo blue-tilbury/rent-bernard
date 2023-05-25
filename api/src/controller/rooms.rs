@@ -1,9 +1,9 @@
-use rocket::{http::Status, serde::json::Json};
+use rocket::{http::Status, serde::json::Json, State};
 use serde::Deserialize;
+use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
-    fairing::db::DbConn,
-    model::room::{CreateRoom, Room},
+    model::room::model::{CreateRoom, Room},
     view::room::GetRoom,
 };
 
@@ -18,22 +18,29 @@ pub struct PostRoom {
     pub description: String,
 }
 
+type DB = State<Surreal<Client>>;
+
 #[get("/rooms/<id>")]
-pub async fn show(id: String, db: DbConn) -> Result<Json<GetRoom>, Status> {
-    match db.run(|conn| Room::get(conn, id)).await {
-        Ok(room) => Ok(GetRoom::get_room(room)),
-        Err(e) => {
-            if let diesel::result::Error::NotFound = e {
-                return Err(Status::NotFound);
+pub async fn show(id: String, db: &DB) -> Result<Json<GetRoom>, Status> {
+    match Room::get(db, id).await {
+        Ok(room) => {
+            if let Some(room) = room {
+                let response = GetRoom::get_room(room);
+                Ok(response)
+            } else {
+                println!("ToDo Not Found");
+                Err(Status::NotFound)
             }
-            println!("{e}");
+        }
+        Err(err) => {
+            eprintln!("{err}");
             Err(Status::InternalServerError)
         }
     }
 }
 
 #[post("/rooms", data = "<room>")]
-pub async fn create(room: Json<PostRoom>, db: DbConn) -> Status {
+pub async fn create(room: Json<PostRoom>, db: &DB) -> Result<Json<GetRoom>, Status> {
     let PostRoom {
         title,
         price,
@@ -52,11 +59,14 @@ pub async fn create(room: Json<PostRoom>, db: DbConn) -> Status {
         is_pet_friendly,
         description,
     };
-    match db.run(|conn| Room::create(conn, create_room_params)).await {
-        Ok(_) => Status::Created,
-        Err(e) => {
-            println!("{e}");
-            Status::InternalServerError
+    match Room::create(db.inner(), create_room_params).await {
+        Ok(room) => {
+            let response = GetRoom::get_room(room);
+            Ok(response)
+        }
+        Err(err) => {
+            eprintln!("{err}");
+            Err(Status::InternalServerError)
         }
     }
 }

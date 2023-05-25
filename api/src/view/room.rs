@@ -1,7 +1,7 @@
 use rocket::serde::json::Json;
 use serde::Serialize;
 
-use crate::model::room::Room;
+use crate::model::room::model::Room;
 
 #[derive(Serialize)]
 pub struct GetRoom {

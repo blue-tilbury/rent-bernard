@@ -5,11 +5,11 @@ services:
     build: ./api
     volumes:
       - ./api:/app
-    environment:
-      DATABASE_URL: "mysql://root:root@mysql:3306/rent-bernard"
-      ROCKET_DATABASES: '{mysql={url="mysql://root:root@mysql:3306/rent-bernard"}}'
     ports:
       - 58000:8000
+    depends_on:
+      - surrealdb
+      - test_surrealdb
   frontend:
     build: ./frontend
     volumes:
@@ -18,14 +18,17 @@ services:
       - WDS_SOCKET_PORT=0
     ports:
       - 43000:3000
-  mysql:
-    image: mysql:8
+  surrealdb:
+    image: surrealdb/surrealdb:latest
     ports:
-      - 53306:3306
+      - 48000:8000
     volumes:
-      - mysql:/var/lib/mysql
-    environment:
-      MYSQL_DATABASE: "rent-bernard"
-      MYSQL_ROOT_PASSWORD: "root"
+      - surrealdb:/db
+    command: start --log debug --user root --pass root file:/db/todo.db
+  test_surrealdb:
+    image: surrealdb/surrealdb:latest
+    ports:
+      - 48001:8000
+    command: start --log debug --user root --pass root memory
 volumes:
-  mysql:
+  surrealdb:

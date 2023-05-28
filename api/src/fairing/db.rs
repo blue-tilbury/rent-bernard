@@ -16,7 +16,7 @@ use uuid::Uuid;
 
 pub type DB = Surreal<Client>;
 
-pub struct DbMiddleware;
+pub struct Connection;
 
 #[derive(Deserialize)]
 struct DbConfig {
@@ -29,10 +29,10 @@ struct DbConfig {
 }
 
 #[rocket::async_trait]
-impl Fairing for DbMiddleware {
+impl Fairing for Connection {
     fn info(&self) -> Info {
         Info {
-            name: "DB Middleware",
+            name: "DB Connection",
             kind: Kind::Ignite,
         }
     }
@@ -58,7 +58,7 @@ impl Fairing for DbMiddleware {
     }
 }
 
-pub struct TestDbMiddleware;
+pub struct TestConnection;
 
 #[derive(Deserialize)]
 struct TestDbConfig {
@@ -70,21 +70,21 @@ struct TestDbConfig {
 }
 
 #[rocket::async_trait]
-impl Fairing for TestDbMiddleware {
+impl Fairing for TestConnection {
     fn info(&self) -> Info {
         Info {
-            name: "DB Middleware For Testing",
+            name: "DB Connection For Testing",
             kind: Kind::Ignite,
         }
     }
 
     async fn on_ignite(&self, rocket: Rocket<Build>) -> Result {
-        let db = TestDbMiddleware::setup_db().await;
+        let db = TestConnection::setup_db().await;
         Ok(rocket.manage(db))
     }
 }
 
-impl TestDbMiddleware {
+impl TestConnection {
     pub async fn setup_db() -> DB {
         let figment = Figment::new().merge(Toml::file("App.toml").nested());
         let db_conf: TestDbConfig = figment.select("test_database").extract().unwrap();

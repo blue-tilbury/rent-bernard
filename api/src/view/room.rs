@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::model::room::model::Room;
 
 #[derive(Serialize, Deserialize)]
-pub struct GetRoom {
+pub struct Get {
     pub id: String,
     title: String,
     price: i64,
@@ -29,8 +29,8 @@ struct GetContactInformation {
     email: String,
 }
 
-impl GetRoom {
-    pub fn get_room(room: Room) -> Json<GetRoom> {
+impl Get {
+    pub fn generate(room: Room) -> Json<Get> {
         let Room {
             id,
             title,
@@ -45,7 +45,7 @@ impl GetRoom {
             created_at,
             updated_at,
         } = room;
-        let res = GetRoom {
+        let res = Get {
             id,
             title,
             price,
@@ -97,7 +97,7 @@ mod tests {
             created_at: Local::now().naive_local(),
             updated_at: Local::now().naive_local(),
         };
-        let json = GetRoom::get_room(room);
+        let json = Get::generate(room);
         assert_eq!(json.id, "id".to_string());
         assert_eq!(json.title, "title".to_string());
         assert_eq!(json.price, 10000);

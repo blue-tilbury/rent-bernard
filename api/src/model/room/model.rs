@@ -98,13 +98,13 @@ impl IdConverter<RoomResource, Self> for Room {
 mod tests {
     use super::*;
     use crate::{
-        fairing::db::TestDbMiddleware,
+        fairing::db,
         model::room::factory::tests::{RoomFactory, RoomFactoryParams},
     };
 
     #[tokio::test]
     async fn test_create() {
-        let db = TestDbMiddleware::setup_db().await;
+        let db = db::TestConnection::setup_db().await;
         let image = Image {
             url: "url".to_string(),
         };
@@ -136,7 +136,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get() {
-        let db = TestDbMiddleware::setup_db().await;
+        let db = db::TestConnection::setup_db().await;
         let image = Image {
             url: "url".to_string(),
         };

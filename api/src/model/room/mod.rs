@@ -7,7 +7,7 @@ use self::model::{ContactInformation, Image};
 mod factory;
 pub mod model;
 
-const TABLE_NAME: &'static str = "rooms";
+const TABLE_NAME: &str = "rooms";
 
 /// Raw data returned by DB
 #[derive(Serialize, Deserialize)]

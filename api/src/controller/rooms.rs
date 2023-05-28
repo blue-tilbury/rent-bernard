@@ -4,7 +4,7 @@ use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
     model::room::model::{ContactInformation, CreateRoom, Image, Room},
-    view::room::GetRoom,
+    view,
 };
 
 #[derive(Serialize, Deserialize)]
@@ -33,11 +33,11 @@ pub struct PostContactInformation {
 type DB = State<Surreal<Client>>;
 
 #[get("/rooms/<id>")]
-pub async fn show(id: String, db: &DB) -> Result<Json<GetRoom>, Status> {
+pub async fn show(id: String, db: &DB) -> Result<Json<view::room::Get>, Status> {
     match Room::get(db, id).await {
         Ok(room) => {
             if let Some(room) = room {
-                let response = GetRoom::get_room(room);
+                let response = view::room::Get::generate(room);
                 Ok(response)
             } else {
                 eprintln!("Room Not Found");
@@ -52,7 +52,7 @@ pub async fn show(id: String, db: &DB) -> Result<Json<GetRoom>, Status> {
 }
 
 #[post("/rooms", data = "<room>")]
-pub async fn create(room: Json<PostRoom>, db: &DB) -> Result<Json<GetRoom>, Status> {
+pub async fn create(room: Json<PostRoom>, db: &DB) -> Result<Json<view::room::Get>, Status> {
     let PostRoom {
         title,
         price,
@@ -82,7 +82,7 @@ pub async fn create(room: Json<PostRoom>, db: &DB) -> Result<Json<GetRoom>, Stat
     };
     match Room::create(db.inner(), create_room_params).await {
         Ok(room) => {
-            let response = GetRoom::get_room(room);
+            let response = view::room::Get::generate(room);
             Ok(response)
         }
         Err(err) => {
@@ -94,7 +94,7 @@ pub async fn create(room: Json<PostRoom>, db: &DB) -> Result<Json<GetRoom>, Stat
 
 #[cfg(test)]
 mod tests {
-    use crate::controller::tests::create_client;
+    use crate::{controller::tests::create_client, view};
 
     use super::*;
 
@@ -121,7 +121,7 @@ mod tests {
         let response = client.post(uri).json(&body).dispatch();
         assert_eq!(response.status(), Status::Ok);
         let json: String = response.into_string().unwrap();
-        assert!(!json.is_empty())
+        assert!(!json.is_empty());
     }
 
     #[test]
@@ -146,7 +146,7 @@ mod tests {
         let uri = uri!(create);
         let response = client.post(uri).json(&body).dispatch();
 
-        let GetRoom { id, .. } = response.into_json().unwrap();
+        let view::room::Get { id, .. } = response.into_json().unwrap();
         let uri = uri!(show(id));
 
         let response = client.get(uri).dispatch();

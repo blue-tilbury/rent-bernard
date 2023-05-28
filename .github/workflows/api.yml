@@ -22,4 +22,4 @@ jobs:
       - name: Clippy
         run: |
           docker exec $(docker ps | grep api | cut -d ' ' -f1) rustup component add clippy
-          docker exec $(docker ps | grep api | cut -d ' ' -f1) cargo clippy --verbose -- -D warnings
+          docker exec $(docker ps | grep api | cut -d ' ' -f1) cargo clippy

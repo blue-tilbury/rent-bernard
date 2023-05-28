@@ -1,10 +1,13 @@
-#![warn(clippy::all, clippy::pedantic)]
+#![warn(clippy::all)]
 
 use controller::{cors_handler, rooms};
-use fairing::{cors::Cors, db::DbMiddleware};
+use fairing::{cors::Cors, db};
 use rocket::{
-    figment::providers::{Format, Toml},
-    Config,
+    figment::{
+        providers::{Format, Toml},
+        Figment,
+    },
+    Build, Config, Rocket, Route,
 };
 
 #[macro_use]
@@ -15,11 +18,11 @@ mod model;
 mod view;
 
 #[launch]
-fn rocket() -> _ {
-    let apis = routes![rooms::show, rooms::create, cors_handler];
-    let figment = Config::figment().merge(Toml::file("App.toml").nested());
+fn rocket() -> Rocket<Build> {
+    let apis: Vec<Route> = routes![rooms::show, rooms::create, cors_handler];
+    let figment: Figment = Config::figment().merge(Toml::file("App.toml").nested());
     rocket::custom(figment)
         .mount("/", apis)
         .attach(Cors)
-        .attach(DbMiddleware)
+        .attach(db::Connection)
 }

@@ -1,4 +1,4 @@
-name: test
+name: api
 
 on:
   push:
@@ -15,7 +15,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
       - name: Run tests
         run: |
           docker compose up -d api test_surrealdb
           docker exec $(docker ps | grep api | cut -d ' ' -f1) cargo test
+      - name: Audit
+        run: cargo audit

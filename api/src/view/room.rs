@@ -29,8 +29,17 @@ struct GetContactInformation {
     email: String,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct List {
+    rooms: Vec<Get>,
+}
+
 impl Get {
     pub fn generate(room: Room) -> Json<Get> {
+        Json(Self::to_get(room))
+    }
+
+    fn to_get(room: Room) -> Get {
         let Room {
             id,
             title,
@@ -45,7 +54,7 @@ impl Get {
             created_at,
             updated_at,
         } = room;
-        let res = Get {
+        Get {
             id,
             title,
             price,
@@ -63,8 +72,14 @@ impl Get {
             },
             created_at: created_at.to_string(),
             updated_at: updated_at.to_string(),
-        };
-        Json(res)
+        }
+    }
+}
+
+impl List {
+    pub fn generate(rooms: Vec<Room>) -> Json<List> {
+        let res: Vec<Get> = rooms.into_iter().map(Get::to_get).collect();
+        Json(List { rooms: res })
     }
 }
 
@@ -110,5 +125,30 @@ mod tests {
         assert_eq!(json.description, "description".to_string());
         assert!(!json.created_at.to_string().is_empty());
         assert!(!json.updated_at.to_string().is_empty());
+    }
+
+    #[test]
+    fn test_list_rooms() {
+        let image = Image {
+            url: "url".to_string(),
+        };
+        let room = Room {
+            id: "id".to_string(),
+            title: "title".to_string(),
+            price: 10000,
+            area: "area".to_string(),
+            street: None,
+            is_furnished: true,
+            is_pet_friendly: false,
+            description: "description".to_string(),
+            images: vec![image],
+            contact_information: ContactInformation {
+                email: "email".to_string(),
+            },
+            created_at: Local::now().naive_local(),
+            updated_at: Local::now().naive_local(),
+        };
+        let json = List::generate(vec![room]);
+        assert_eq!(json.rooms.len(), 1);
     }
 }

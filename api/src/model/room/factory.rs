@@ -10,7 +10,7 @@ pub mod tests {
     use crate::model::room::TABLE_NAME;
     use crate::model::IdConverter;
 
-    #[derive(Default)]
+    #[derive(Default, Clone)]
     pub struct RoomFactoryParams {
         pub id: Option<String>,
         pub title: Option<String>,
@@ -44,6 +44,15 @@ pub mod tests {
             };
             let room = db.create(TABLE_NAME).content(content).await.unwrap();
             Room::to_raw_id(room)
+        }
+
+        pub async fn create_many(db: &DB, params: RoomFactoryParams, number: usize) -> Vec<Room> {
+            let mut rooms: Vec<Room> = Vec::new();
+            for _ in 0..number {
+                let room = Self::create(db, params.clone()).await;
+                rooms.push(room)
+            }
+            rooms
         }
     }
 }

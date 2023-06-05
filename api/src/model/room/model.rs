@@ -33,12 +33,12 @@ pub struct CreateRoom {
     pub contact_information: ContactInformation,
 }
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Default, Serialize, Deserialize, Clone)]
 pub struct Image {
     pub url: String,
 }
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Default, Serialize, Deserialize, Clone)]
 pub struct ContactInformation {
     pub email: String,
 }
@@ -71,6 +71,10 @@ impl Room {
             Some(room) => Ok(Some(Self::to_raw_id(room))),
             None => Ok(None),
         }
+    }
+    pub async fn list(db: &DB) -> Result<Vec<Room>, surrealdb::Error> {
+        let rooms: Vec<RoomResource> = db.select(TABLE_NAME).await?;
+        Ok(rooms.into_iter().map(Self::to_raw_id).collect())
     }
 }
 
@@ -169,5 +173,31 @@ mod tests {
         assert_eq!(result.contact_information.email, "email".to_string());
         assert!(!result.created_at.to_string().is_empty());
         assert!(!result.updated_at.to_string().is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_list() {
+        let db = db::TestConnection::setup_db().await;
+        let image = Image {
+            url: "url".to_string(),
+        };
+        let params = RoomFactoryParams {
+            id: None,
+            title: Some("title".to_string()),
+            price: Some(10000),
+            area: Some("area".to_string()),
+            street: None,
+            is_furnished: Some(true),
+            is_pet_friendly: Some(false),
+            images: Some(vec![image]),
+            contact_information: Some(ContactInformation {
+                email: "email".to_string(),
+            }),
+            description: Some("description".to_string()),
+        };
+        RoomFactory::create_many(&db, params, 3).await;
+
+        let result = Room::list(&db).await.unwrap();
+        assert_eq!(result.len(), 3);
     }
 }

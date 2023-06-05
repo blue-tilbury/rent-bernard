@@ -51,6 +51,17 @@ pub async fn show(id: String, db: &DB) -> Result<Json<view::room::Get>, Status> 
     }
 }
 
+#[get("/rooms")]
+pub async fn index(db: &DB) -> Result<Json<view::room::List>, Status> {
+    match Room::list(db).await {
+        Ok(rooms) => Ok(view::room::List::generate(rooms)),
+        Err(err) => {
+            eprintln!("{err}");
+            Err(Status::InternalServerError)
+        }
+    }
+}
+
 #[post("/rooms", data = "<room>")]
 pub async fn create(room: Json<PostRoom>, db: &DB) -> Result<Json<view::room::Get>, Status> {
     let PostRoom {
@@ -148,6 +159,36 @@ mod tests {
 
         let view::room::Get { id, .. } = response.into_json().unwrap();
         let uri = uri!(show(id));
+
+        let response = client.get(uri).dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        let json = response.into_string().unwrap();
+        assert!(!json.is_empty());
+    }
+
+    #[test]
+    fn test_index() {
+        let client = create_client(routes![create, index]);
+        let image = PostImage {
+            url: "url".to_string(),
+        };
+        let body = PostRoom {
+            title: "title".to_string(),
+            price: 10000,
+            area: "area".to_string(),
+            street: None,
+            is_furnished: true,
+            is_pet_friendly: false,
+            images: vec![image],
+            contact_information: PostContactInformation {
+                email: "email".to_string(),
+            },
+            description: "description".to_string(),
+        };
+        let uri = uri!(create);
+        client.post(uri).json(&body).dispatch();
+
+        let uri = uri!(index);
 
         let response = client.get(uri).dispatch();
         assert_eq!(response.status(), Status::Ok);

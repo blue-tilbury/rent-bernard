@@ -25,3 +25,17 @@ struct RoomResource {
     created_at: NaiveDateTime,
     updated_at: NaiveDateTime,
 }
+
+#[derive(Serialize)]
+struct UpdateRoomResource {
+    title: String,
+    price: i64,
+    area: String,
+    street: Option<String>,
+    is_furnished: bool,
+    is_pet_friendly: bool,
+    description: String,
+    images: Vec<Image>,
+    contact_information: ContactInformation,
+	updated_at: NaiveDateTime,
+}

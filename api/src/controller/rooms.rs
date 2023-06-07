@@ -256,11 +256,27 @@ mod tests {
 		};
         let uri = uri!(create);
         let response = client.post(uri).json(&body).dispatch();
-
 		let view::room::Get { id, .. } = response.into_json().unwrap();
-        let uri = uri!(update(id));
+		let uri = uri!(update(id));
 
-		let response = client.put(uri).json(&body).dispatch();
+		let new_image = PostImage {
+			url: "new_url".to_string(),
+		};
+		let new_body = RoomParams {
+			title: "title".to_string(),
+            price: 10000,
+            area: "area".to_string(),
+            street: None,
+            is_furnished: true,
+            is_pet_friendly: false,
+            images: vec![new_image],
+            contact_information: PostContactInformation {
+                email: "email".to_string(),
+            },
+            description: "description".to_string(),
+		};
+		let response = client.put(uri).json(&new_body).dispatch();
+
 		assert_eq!(response.status(), Status::Ok);
 		let json = response.into_string().unwrap();
 		assert!(!json.is_empty());

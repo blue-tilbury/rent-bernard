@@ -15,10 +15,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Containers
+        run: docker compose up -d api test_surrealdb
       - name: Run tests
+        run: docker exec $(docker ps | grep api | cut -d ' ' -f1) cargo test
+      - name: Format
         run: |
-          docker compose up -d api test_surrealdb
-          docker exec $(docker ps | grep api | cut -d ' ' -f1) cargo test
+          docker exec $(docker ps | grep api | cut -d ' ' -f1) rustup component add rustfmt
+          docker exec $(docker ps | grep api | cut -d ' ' -f1) cargo fmt --all -- --check
       - name: Clippy
         run: |
           docker exec $(docker ps | grep api | cut -d ' ' -f1) rustup component add clippy

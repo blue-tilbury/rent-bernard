@@ -64,7 +64,7 @@ pub async fn index(db: &DB) -> Result<Json<view::room::List>, Status> {
 
 #[put("/room/<id>", data = "<room>")]
 pub async fn update(id: String, room: Json<RoomParams>, db: &DB) -> Result<Json<view::room::Get>, Status> {
-	let RoomParams {
+    let RoomParams {
         title,
         price,
         area,
@@ -76,7 +76,7 @@ pub async fn update(id: String, room: Json<RoomParams>, db: &DB) -> Result<Json<
         description,
     } = room.0;
     let update_room_params = UpdateRoom {
-		id,
+        id,
         title,
         price,
         area,
@@ -92,13 +92,13 @@ pub async fn update(id: String, room: Json<RoomParams>, db: &DB) -> Result<Json<
         },
         description,
     };
-	match Room::update(db, update_room_params).await {
-		Ok(room) => Ok(view::room::Get::generate(room)),
-		Err(err) => {
-			eprintln!("{err}");
+    match Room::update(db, update_room_params).await {
+        Ok(room) => Ok(view::room::Get::generate(room)),
+        Err(err) => {
+            eprintln!("{err}");
             Err(Status::InternalServerError)
-		}
-	}
+        }
+    }
 }
 
 #[post("/rooms", data = "<room>")]
@@ -235,14 +235,14 @@ mod tests {
         assert!(!json.is_empty());
     }
 
-	#[test]
-	fn test_update() {
-		let client = create_client(routes![create, update]);
-		let image = PostImage {
-			url: "url".to_string(),
-		};
-		let body = RoomParams {
-			title: "title".to_string(),
+    #[test]
+    fn test_update() {
+        let client = create_client(routes![create, update]);
+        let image = PostImage {
+            url: "url".to_string(),
+        };
+        let body = RoomParams {
+            title: "title".to_string(),
             price: 10000,
             area: "area".to_string(),
             street: None,
@@ -253,17 +253,17 @@ mod tests {
                 email: "email".to_string(),
             },
             description: "description".to_string(),
-		};
+        };
         let uri = uri!(create);
         let response = client.post(uri).json(&body).dispatch();
-		let view::room::Get { id, .. } = response.into_json().unwrap();
-		let uri = uri!(update(id));
+        let view::room::Get { id, .. } = response.into_json().unwrap();
+        let uri = uri!(update(id));
 
-		let new_image = PostImage {
-			url: "new_url".to_string(),
-		};
-		let new_body = RoomParams {
-			title: "title".to_string(),
+        let new_image = PostImage {
+            url: "new_url".to_string(),
+        };
+        let new_body = RoomParams {
+            title: "title".to_string(),
             price: 10000,
             area: "area".to_string(),
             street: None,
@@ -274,11 +274,11 @@ mod tests {
                 email: "email".to_string(),
             },
             description: "description".to_string(),
-		};
-		let response = client.put(uri).json(&new_body).dispatch();
+        };
+        let response = client.put(uri).json(&new_body).dispatch();
 
-		assert_eq!(response.status(), Status::Ok);
-		let json = response.into_string().unwrap();
-		assert!(!json.is_empty());
-	}
+        assert_eq!(response.status(), Status::Ok);
+        let json = response.into_string().unwrap();
+        assert!(!json.is_empty());
+    }
 }

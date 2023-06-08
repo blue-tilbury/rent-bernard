@@ -36,7 +36,7 @@ pub struct CreateRoom {
 
 #[derive(Default)]
 pub struct UpdateRoom {
-	pub id: String,
+    pub id: String,
     pub title: String,
     pub price: i64,
     pub area: String,
@@ -92,24 +92,24 @@ impl Room {
         Ok(rooms.into_iter().map(Self::to_raw_id).collect())
     }
 
-	pub async fn update(db: &DB, room: UpdateRoom) -> Result<Room, surrealdb::Error> {
-		let updated_room: RoomResource = db
-			.update((TABLE_NAME, room.id))
-			.merge(UpdateRoomResource {
-				title: room.title,
-				price: room.price,
-				area: room.area,
-				street: room.street,
-				is_furnished: room.is_furnished,
-				is_pet_friendly: room.is_pet_friendly,
-				description: room.description,
-				images: room.images,
-				contact_information: room.contact_information,
-				updated_at: Local::now().naive_local(),
-			})
-			.await?;
-		Ok(Self::to_raw_id(updated_room))
-	}
+    pub async fn update(db: &DB, room: UpdateRoom) -> Result<Room, surrealdb::Error> {
+        let updated_room: RoomResource = db
+            .update((TABLE_NAME, room.id))
+            .merge(UpdateRoomResource {
+                title: room.title,
+                price: room.price,
+                area: room.area,
+                street: room.street,
+                is_furnished: room.is_furnished,
+                is_pet_friendly: room.is_pet_friendly,
+                description: room.description,
+                images: room.images,
+                contact_information: room.contact_information,
+                updated_at: Local::now().naive_local(),
+            })
+            .await?;
+        Ok(Self::to_raw_id(updated_room))
+    }
 }
 
 impl IdConverter<RoomResource, Self> for Room {
@@ -236,37 +236,37 @@ mod tests {
     }
 
     #[tokio::test]
-	async fn test_update() {
-		let db = db::TestConnection::setup_db().await;
-		let image = Image {
+    async fn test_update() {
+        let db = db::TestConnection::setup_db().await;
+        let image = Image {
             url: "url".to_string(),
-		};
-		let params = RoomFactoryParams {
+        };
+        let params = RoomFactoryParams {
             title: Some("title".to_string()),
             images: Some(vec![image]),
             contact_information: Some(ContactInformation {
                 email: "email".to_string(),
             }),
-			..Default::default()
+            ..Default::default()
         };
         let room = RoomFactory::create(&db, params).await;
 
-		let new_image = Image {
+        let new_image = Image {
             url: "new_url".to_string(),
-		};
-		let new_params = UpdateRoom {
-			id: room.id,
+        };
+        let new_params = UpdateRoom {
+            id: room.id,
             title: "new_title".to_string(),
             images: vec![new_image],
             contact_information: ContactInformation {
                 email: "new_email".to_string(),
             },
-			..Default::default()
+            ..Default::default()
         };
         let result = Room::update(&db, new_params).await.unwrap();
-		assert_eq!(result.title, "new_title".to_string());
-		assert_eq!(result.images[0].url, "new_url".to_string());
-		assert_eq!(result.images.len(), 1);
-		assert_eq!(result.contact_information.email, "new_email".to_string());
-	}
+        assert_eq!(result.title, "new_title".to_string());
+        assert_eq!(result.images[0].url, "new_url".to_string());
+        assert_eq!(result.images.len(), 1);
+        assert_eq!(result.contact_information.email, "new_email".to_string());
+    }
 }

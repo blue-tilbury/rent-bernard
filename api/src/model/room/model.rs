@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{fairing::db::DB, model::IdConverter};
 
-use super::{UpdateRoomResource, RoomResource, TABLE_NAME};
+use super::{RoomResource, UpdateRoomResource, TABLE_NAME};
 
 #[derive(Deserialize)]
 pub struct Room {

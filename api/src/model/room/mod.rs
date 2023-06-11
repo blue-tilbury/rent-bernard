@@ -37,5 +37,5 @@ struct UpdateRoomResource {
     description: String,
     images: Vec<Image>,
     contact_information: ContactInformation,
-	updated_at: NaiveDateTime,
+    updated_at: NaiveDateTime,
 }

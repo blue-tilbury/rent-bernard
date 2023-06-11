@@ -63,7 +63,11 @@ pub async fn index(db: &DB) -> Result<Json<view::room::List>, Status> {
 }
 
 #[put("/room/<id>", data = "<room>")]
-pub async fn update(id: String, room: Json<RoomParams>, db: &DB) -> Result<Json<view::room::Get>, Status> {
+pub async fn update(
+    id: String,
+    room: Json<RoomParams>,
+    db: &DB)
+    -> Result<Json<view::room::Get>, Status> {
     let RoomParams {
         title,
         price,

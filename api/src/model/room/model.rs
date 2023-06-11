@@ -3,8 +3,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::{fairing::db::DB, model::IdConverter};
 
-use super::{RoomResource, TABLE_NAME};
+use super::{RoomResource, UpdateRoomResource, TABLE_NAME};
 
+#[derive(Deserialize)]
 pub struct Room {
     pub id: String,
     pub title: String,
@@ -22,6 +23,20 @@ pub struct Room {
 
 #[derive(Default)]
 pub struct CreateRoom {
+    pub title: String,
+    pub price: i64,
+    pub area: String,
+    pub street: Option<String>,
+    pub is_furnished: bool,
+    pub is_pet_friendly: bool,
+    pub description: String,
+    pub images: Vec<Image>,
+    pub contact_information: ContactInformation,
+}
+
+#[derive(Default)]
+pub struct UpdateRoom {
+    pub id: String,
     pub title: String,
     pub price: i64,
     pub area: String,
@@ -75,6 +90,25 @@ impl Room {
     pub async fn list(db: &DB) -> Result<Vec<Room>, surrealdb::Error> {
         let rooms: Vec<RoomResource> = db.select(TABLE_NAME).await?;
         Ok(rooms.into_iter().map(Self::to_raw_id).collect())
+    }
+
+    pub async fn update(db: &DB, room: UpdateRoom) -> Result<Room, surrealdb::Error> {
+        let updated_room: RoomResource = db
+            .update((TABLE_NAME, room.id))
+            .merge(UpdateRoomResource {
+                title: room.title,
+                price: room.price,
+                area: room.area,
+                street: room.street,
+                is_furnished: room.is_furnished,
+                is_pet_friendly: room.is_pet_friendly,
+                description: room.description,
+                images: room.images,
+                contact_information: room.contact_information,
+                updated_at: Local::now().naive_local(),
+            })
+            .await?;
+        Ok(Self::to_raw_id(updated_room))
     }
 }
 
@@ -199,5 +233,40 @@ mod tests {
 
         let result = Room::list(&db).await.unwrap();
         assert_eq!(result.len(), 3);
+    }
+
+    #[tokio::test]
+    async fn test_update() {
+        let db = db::TestConnection::setup_db().await;
+        let image = Image {
+            url: "url".to_string(),
+        };
+        let params = RoomFactoryParams {
+            title: Some("title".to_string()),
+            images: Some(vec![image]),
+            contact_information: Some(ContactInformation {
+                email: "email".to_string(),
+            }),
+            ..Default::default()
+        };
+        let room = RoomFactory::create(&db, params).await;
+
+        let new_image = Image {
+            url: "new_url".to_string(),
+        };
+        let new_params = UpdateRoom {
+            id: room.id,
+            title: "new_title".to_string(),
+            images: vec![new_image],
+            contact_information: ContactInformation {
+                email: "new_email".to_string(),
+            },
+            ..Default::default()
+        };
+        let result = Room::update(&db, new_params).await.unwrap();
+        assert_eq!(result.title, "new_title".to_string());
+        assert_eq!(result.images[0].url, "new_url".to_string());
+        assert_eq!(result.images.len(), 1);
+        assert_eq!(result.contact_information.email, "new_email".to_string());
     }
 }

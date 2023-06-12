@@ -105,6 +105,17 @@ pub async fn update(
     }
 }
 
+#[delete("/room/<id>")]
+pub async fn delete(id: String, db: &DB) -> Result<Json<view::room::Get>, Status> {
+    match Room::delete(db, id).await {
+        Ok(room) => Ok(view::room::Get::generate(room)),
+        Err(err) => {
+            eprintln!("{err}");
+            Err(Status::InternalServerError)
+        }
+    }
+}
+
 #[post("/rooms", data = "<room>")]
 pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::room::Get>, Status> {
     let RoomParams {

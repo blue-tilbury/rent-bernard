@@ -110,6 +110,11 @@ impl Room {
             .await?;
         Ok(Self::to_raw_id(updated_room))
     }
+
+    pub async fn delete(db: &DB, id: String) -> Result<Room, surrealdb::Error> {
+        let room: RoomResource = db.delete((TABLE_NAME, id)).await?;
+        Ok(Self::to_raw_id(room))
+    }
 }
 
 impl IdConverter<RoomResource, Self> for Room {

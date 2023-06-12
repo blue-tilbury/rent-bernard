@@ -24,6 +24,7 @@ fn rocket() -> Rocket<Build> {
         rooms::create,
         rooms::index,
         rooms::update,
+        rooms::delete,
         cors_handler
     ];
     let figment: Figment = Config::figment().merge(Toml::file("App.toml").nested());

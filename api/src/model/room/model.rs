@@ -111,9 +111,9 @@ impl Room {
         Ok(Self::to_raw_id(updated_room))
     }
 
-    pub async fn delete(db: &DB, id: String) -> Result<Room, surrealdb::Error> {
-        let room: RoomResource = db.delete((TABLE_NAME, id)).await?;
-        Ok(Self::to_raw_id(room))
+    pub async fn delete(db: &DB, id: String) -> Result<(), surrealdb::Error> {
+        let _: RoomResource = db.delete((TABLE_NAME, id)).await?;
+        Ok(())
     }
 }
 
@@ -273,5 +273,24 @@ mod tests {
         assert_eq!(result.images[0].url, "new_url".to_string());
         assert_eq!(result.images.len(), 1);
         assert_eq!(result.contact_information.email, "new_email".to_string());
+    }
+
+    #[tokio::test]
+    async fn test_delete() {
+        let db = db::TestConnection::setup_db().await;
+        let image = Image {
+            url: "url".to_string(),
+        };
+        let params = RoomFactoryParams {
+            title: Some("title".to_string()),
+            images: Some(vec![image]),
+            contact_information: Some(ContactInformation {
+                email: "email".to_string(),
+            }),
+            ..Default::default()
+        };
+        let Room { id, .. } = RoomFactory::create(&db, params).await;
+        let result = Room::delete(&db, id).await;
+        assert!(result.is_ok());
     }
 }

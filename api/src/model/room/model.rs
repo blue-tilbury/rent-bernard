@@ -92,8 +92,8 @@ impl Room {
         Ok(rooms.into_iter().map(Self::to_raw_id).collect())
     }
 
-    pub async fn update(db: &DB, room: UpdateRoom) -> Result<Room, surrealdb::Error> {
-        let updated_room: RoomResource = db
+    pub async fn update(db: &DB, room: UpdateRoom) -> Result<Option<Room>, surrealdb::Error> {
+        let updated_room: Option<RoomResource> = db
             .update((TABLE_NAME, room.id))
             .merge(UpdateRoomResource {
                 title: room.title,
@@ -108,7 +108,11 @@ impl Room {
                 updated_at: Local::now().naive_local(),
             })
             .await?;
-        Ok(Self::to_raw_id(updated_room))
+        let updated_room = match updated_room {
+            Some(room) => Some(Self::to_raw_id(room)),
+            None => None,
+        };
+        Ok(updated_room)
     }
 
     pub async fn delete(db: &DB, id: String) -> Result<Option<()>, surrealdb::Error> {

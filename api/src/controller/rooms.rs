@@ -115,7 +115,7 @@ pub async fn delete(id: String, db: &DB) -> Status {
                 eprintln!("Room Not Found");
                 Status::NotFound
             }
-        },
+        }
         Err(err) => {
             eprintln!("{err}");
             Status::InternalServerError

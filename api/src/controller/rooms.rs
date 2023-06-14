@@ -105,6 +105,24 @@ pub async fn update(
     }
 }
 
+#[delete("/room/<id>")]
+pub async fn delete(id: String, db: &DB) -> Status {
+    match Room::delete(db, id).await {
+        Ok(option) => {
+            if let Some(_) = option {
+                Status::NoContent
+            } else {
+                eprintln!("Room Not Found");
+                Status::NotFound
+            }
+        }
+        Err(err) => {
+            eprintln!("{err}");
+            Status::InternalServerError
+        }
+    }
+}
+
 #[post("/rooms", data = "<room>")]
 pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::room::Get>, Status> {
     let RoomParams {
@@ -284,5 +302,41 @@ mod tests {
         assert_eq!(response.status(), Status::Ok);
         let json = response.into_string().unwrap();
         assert!(!json.is_empty());
+    }
+
+    #[test]
+    fn test_delete() {
+        let client = create_client(routes![create, delete]);
+        let image = PostImage {
+            url: "url".to_string(),
+        };
+        let body = RoomParams {
+            title: "title".to_string(),
+            price: 10000,
+            area: "area".to_string(),
+            street: None,
+            is_furnished: true,
+            is_pet_friendly: false,
+            images: vec![image],
+            contact_information: PostContactInformation {
+                email: "email".to_string(),
+            },
+            description: "description".to_string(),
+        };
+        let uri = uri!(create);
+        let response = client.post(uri).json(&body).dispatch();
+        let view::room::Get { id, .. } = response.into_json().unwrap();
+        let uri = uri!(delete(id));
+        let response = client.delete(uri).dispatch();
+        assert_eq!(response.status(), Status::NoContent);
+    }
+
+    #[test]
+    fn test_delete_not_found() {
+        let client = create_client(routes![delete]);
+        let id = "invalid_id";
+        let uri = uri!(delete(id));
+        let response = client.delete(uri).dispatch();
+        assert_eq!(response.status(), Status::NotFound);
     }
 }

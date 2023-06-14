@@ -111,9 +111,12 @@ impl Room {
         Ok(Self::to_raw_id(updated_room))
     }
 
-    pub async fn delete(db: &DB, id: String) -> Result<(), surrealdb::Error> {
-        let _: RoomResource = db.delete((TABLE_NAME, id)).await?;
-        Ok(())
+    pub async fn delete(db: &DB, id: String) -> Result<Option<()>, surrealdb::Error> {
+        let room: Option<RoomResource> = db.delete((TABLE_NAME, id)).await?;
+        match room {
+            Some(_) => Ok(Some(())),
+            None => Ok(None),
+        }
     }
 }
 
@@ -290,7 +293,14 @@ mod tests {
             ..Default::default()
         };
         let Room { id, .. } = RoomFactory::create(&db, params).await;
-        let result = Room::delete(&db, id).await;
-        assert!(result.is_ok());
+        let result = Room::delete(&db, id).await.unwrap();
+        assert!(result.is_some());
+    }
+
+    #[tokio::test]
+    async fn test_delete_not_found() {
+        let db = db::TestConnection::setup_db().await;
+        let result = Room::delete(&db, "invalid_id".to_string()).await.unwrap();
+        assert!(result.is_none());
     }
 }

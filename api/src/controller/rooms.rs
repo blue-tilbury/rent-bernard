@@ -108,7 +108,14 @@ pub async fn update(
 #[delete("/room/<id>")]
 pub async fn delete(id: String, db: &DB) -> Status {
     match Room::delete(db, id).await {
-        Ok(_) => Status::NoContent,
+        Ok(option) => {
+            if let Some(_) = option {
+                Status::NoContent
+            } else {
+                eprintln!("Room Not Found");
+                Status::NotFound
+            }
+        },
         Err(err) => {
             eprintln!("{err}");
             Status::InternalServerError
@@ -322,5 +329,14 @@ mod tests {
         let uri = uri!(delete(id));
         let response = client.delete(uri).dispatch();
         assert_eq!(response.status(), Status::NoContent);
+    }
+
+    #[test]
+    fn test_delete_not_found() {
+        let client = create_client(routes![delete]);
+        let id = "invalid_id";
+        let uri = uri!(delete(id));
+        let response = client.delete(uri).dispatch();
+        assert_eq!(response.status(), Status::NotFound);
     }
 }

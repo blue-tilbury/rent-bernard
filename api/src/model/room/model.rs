@@ -210,6 +210,14 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_get_not_found() {
+        let db = db::TestConnection::setup_db().await;
+        let id = "random_id".to_string();
+        let result = Room::get(&db, id).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    #[tokio::test]
     async fn test_list() {
         let db = db::TestConnection::setup_db().await;
         let image = Image {

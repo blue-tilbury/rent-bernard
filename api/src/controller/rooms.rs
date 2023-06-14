@@ -34,13 +34,13 @@ type DB = State<Surreal<Client>>;
 
 #[get("/rooms/<id>")]
 pub async fn show(id: String, db: &DB) -> Result<Json<view::room::Get>, Status> {
-    match Room::get(db, id).await {
+    match Room::get(db, id.clone()).await {
         Ok(room) => {
             if let Some(room) = room {
                 let response = view::room::Get::generate(room);
                 Ok(response)
             } else {
-                eprintln!("Room Not Found");
+                eprintln!("Room Not Found(id: {id})");
                 Err(Status::NotFound)
             }
         }
@@ -207,6 +207,17 @@ mod tests {
         assert_eq!(response.status(), Status::Ok);
         let json = response.into_string().unwrap();
         assert!(!json.is_empty());
+    }
+
+    #[test]
+    fn test_show_not_found() {
+        let client = create_client(routes![create, show]);
+
+        let id = "random_id".to_string();
+        let uri = uri!(show(id));
+
+        let response = client.get(uri).dispatch();
+        assert_eq!(response.status(), Status::NotFound);
     }
 
     #[test]

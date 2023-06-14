@@ -93,7 +93,10 @@ impl Room {
     }
 
     pub async fn update(db: &DB, room: UpdateRoom) -> Result<Option<Room>, surrealdb::Error> {
-        let updated_room: Option<RoomResource> = db
+        if Self::get(db, room.id.clone()).await?.is_none() {
+            return Ok(None);
+        }
+        let updated_room: RoomResource = db
             .update((TABLE_NAME, room.id))
             .merge(UpdateRoomResource {
                 title: room.title,
@@ -108,11 +111,7 @@ impl Room {
                 updated_at: Local::now().naive_local(),
             })
             .await?;
-        let updated_room = match updated_room {
-            Some(room) => Some(Self::to_raw_id(room)),
-            None => None,
-        };
-        Ok(updated_room)
+        Ok(Some(Self::to_raw_id(updated_room)))
     }
 
     pub async fn delete(db: &DB, id: String) -> Result<Option<()>, surrealdb::Error> {
@@ -283,11 +282,29 @@ mod tests {
             },
             ..Default::default()
         };
-        let result = Room::update(&db, new_params).await.unwrap();
+        let result = Room::update(&db, new_params).await.unwrap().unwrap();
         assert_eq!(result.title, "new_title".to_string());
         assert_eq!(result.images[0].url, "new_url".to_string());
         assert_eq!(result.images.len(), 1);
         assert_eq!(result.contact_information.email, "new_email".to_string());
+    }
+
+    #[tokio::test]
+    async fn test_update_not_found() {
+        let db = db::TestConnection::setup_db().await;
+        let image = Image {
+            url: "url".to_string(),
+        };
+        let params = UpdateRoom {
+            title: "title".to_string(),
+            images: vec![image],
+            contact_information: ContactInformation {
+                email: "email".to_string(),
+            },
+            ..Default::default()
+        };
+        let result = Room::update(&db, params).await.unwrap();
+        assert!(result.is_none());
     }
 
     #[tokio::test]

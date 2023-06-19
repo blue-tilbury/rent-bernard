@@ -97,7 +97,14 @@ pub async fn update(
         description,
     };
     match Room::update(db, update_room_params).await {
-        Ok(room) => Ok(view::room::Get::generate(room)),
+        Ok(room) => {
+            if let Some(room) = room {
+                Ok(view::room::Get::generate(room))
+            } else {
+                eprintln!("Room Not Found");
+                Err(Status::NotFound)
+            }
+        }
         Err(err) => {
             eprintln!("{err}");
             Err(Status::InternalServerError)
@@ -313,6 +320,30 @@ mod tests {
         assert_eq!(response.status(), Status::Ok);
         let json = response.into_string().unwrap();
         assert!(!json.is_empty());
+    }
+
+    #[test]
+    fn test_update_not_found() {
+        let client = create_client(routes![update]);
+        let image = PostImage {
+            url: "url".to_string(),
+        };
+        let body = RoomParams {
+            title: "title".to_string(),
+            price: 10000,
+            area: "area".to_string(),
+            street: None,
+            is_furnished: true,
+            is_pet_friendly: false,
+            images: vec![image],
+            contact_information: PostContactInformation {
+                email: "email".to_string(),
+            },
+            description: "description".to_string(),
+        };
+        let uri = uri!(update("invalid_id"));
+        let response = client.put(uri).json(&body).dispatch();
+        assert_eq!(response.status(), Status::NotFound);
     }
 
     #[test]

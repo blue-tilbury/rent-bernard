@@ -4,7 +4,7 @@ import { Footer } from "./layouts/footer";
 
 export default function App() {
   return (
-    <div className="bg-rent-background-gray">
+    <div className="h-screen bg-rent-background-gray">
       <Navbar />
       <Search />
       <Footer />

@@ -1,14 +1,13 @@
-import React from 'react';
-import './App.css';
+import { Navbar } from "./layouts/navbar";
+import { Search } from "./pages/Search";
+import { Footer } from "./layouts/footer";
 
-function App() {
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-		<p>Hello</p>
-      </header>
+    <div className="bg-rent-background-gray">
+      <Navbar />
+      <Search />
+      <Footer />
     </div>
   );
 }
-
-export default App;

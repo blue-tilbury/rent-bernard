@@ -1,7 +1,8 @@
-import { Routes, Route } from "react-router-dom";
-import { Search } from "./pages/Search";
-import { Posting } from "./pages/Posting";
+import { Route, Routes } from "react-router-dom";
+
 import { Layout } from "./layouts/index";
+import { Posting } from "./pages/Posting";
+import { Search } from "./pages/Search";
 import { Wishlist } from "./pages/Wishlist";
 
 export default function App() {

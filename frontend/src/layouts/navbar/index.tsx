@@ -1,12 +1,13 @@
-import { useState } from "react";
 import {
-  MagnifyingGlassIcon,
-  HeartIcon,
   Bars3Icon,
+  HeartIcon,
+  MagnifyingGlassIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import useMediaQuery from "../../hooks/useMediaQuery";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+
+import useMediaQuery from "../../hooks/useMediaQuery";
 
 export const Navbar = () => {
   const isAboveMediumScreen = useMediaQuery("(min-width: 768px)");

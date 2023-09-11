@@ -9,11 +9,16 @@ module.exports = {
         "1/3": "0 1 33.333333%",
       },
       colors: {
-        "rent-blue": "#AAF0FF",
+        "rent-very-light-blue": "#4edcff",
+        "rent-light-blue": "#00CCFF",
+        "rent-blue": "#0080FF",
+        "rent-dark-blue": "#00274e",
         "rent-green": "#90FF7E",
-        "rent-dark-gray": "#D9D9D9",
-        "rent-light-gray": "#F9F8F8",
+        "rent-dark-green": "#1dcc00",
         "rent-background-gray": "#F5F7F7",
+        "rent-input-gray": "#d7d7dc",
+        "rent-light-gray": "#adafb7",
+        "rent-gray": "#6f727f",
       },
     },
     fontFamily: {
@@ -29,5 +34,9 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require("@tailwindcss/forms")({
+      strategy: "base",
+    }),
+  ],
 };

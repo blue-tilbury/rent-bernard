@@ -45,23 +45,23 @@ export const Images = ({ register, error }: InputProps) => {
 };
 
 const ImagesPreview = ({ files, deleteImage }: ImagesPreviewProps) => {
+  const imageListing = files.map((file, i) => (
+    <div key={i} className="group/item relative w-40 h-40 border rounded">
+      <MinusCircleIcon
+        onClick={() => deleteImage(i)}
+        className="invisible group-hover/item:visible h-8 w-8 absolute end-2 top-2 z-10 text-rent-light-blue"
+      />
+      <img
+        src={URL.createObjectURL(file)}
+        alt={file.name}
+        className="object-contain h-40 w-40 "
+      />
+    </div>
+  ));
+
   return (
     <div className="relative top-10">
-      <div className="flex flex-wrap">
-        {files.map((file, i) => (
-          <div key={i} className="group/item relative w-40 h-40 border rounded">
-            <MinusCircleIcon
-              onClick={() => deleteImage(i)}
-              className="invisible group-hover/item:visible h-8 w-8 absolute end-2 top-2 z-10 text-rent-light-blue"
-            />
-            <img
-              src={URL.createObjectURL(file)}
-              alt={file.name}
-              className="object-contain h-40 w-40 "
-            />
-          </div>
-        ))}
-      </div>
+      <div className="flex flex-wrap">{imageListing}</div>
     </div>
   );
 };

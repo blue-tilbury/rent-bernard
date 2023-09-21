@@ -11,7 +11,7 @@ use crate::{
 pub struct RoomParams {
     pub title: String,
     pub price: i64,
-    pub area: String,
+    pub city: String,
     pub street: Option<String>,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
@@ -71,7 +71,7 @@ pub async fn update(
     let RoomParams {
         title,
         price,
-        area,
+        city,
         street,
         is_furnished,
         is_pet_friendly,
@@ -83,7 +83,7 @@ pub async fn update(
         id,
         title,
         price,
-        area,
+        city,
         street,
         is_furnished,
         is_pet_friendly,
@@ -116,7 +116,7 @@ pub async fn update(
 pub async fn delete(id: String, db: &DB) -> Status {
     match Room::delete(db, id).await {
         Ok(option) => {
-            if let Some(_) = option {
+            if option.is_some() {
                 Status::NoContent
             } else {
                 eprintln!("Room Not Found");
@@ -135,7 +135,7 @@ pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::room::
     let RoomParams {
         title,
         price,
-        area,
+        city,
         street,
         is_furnished,
         is_pet_friendly,
@@ -146,7 +146,7 @@ pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::room::
     let create_room_params = CreateRoom {
         title,
         price,
-        area,
+        city,
         street,
         is_furnished,
         is_pet_friendly,
@@ -186,7 +186,7 @@ mod tests {
         let body = RoomParams {
             title: "title".to_string(),
             price: 10000,
-            area: "area".to_string(),
+            city: "city".to_string(),
             street: None,
             is_furnished: true,
             is_pet_friendly: false,
@@ -212,7 +212,7 @@ mod tests {
         let body = RoomParams {
             title: "title".to_string(),
             price: 10000,
-            area: "area".to_string(),
+            city: "city".to_string(),
             street: None,
             is_furnished: true,
             is_pet_friendly: false,
@@ -254,7 +254,7 @@ mod tests {
         let body = RoomParams {
             title: "title".to_string(),
             price: 10000,
-            area: "area".to_string(),
+            city: "city".to_string(),
             street: None,
             is_furnished: true,
             is_pet_friendly: false,
@@ -284,7 +284,7 @@ mod tests {
         let body = RoomParams {
             title: "title".to_string(),
             price: 10000,
-            area: "area".to_string(),
+            city: "city".to_string(),
             street: None,
             is_furnished: true,
             is_pet_friendly: false,
@@ -305,7 +305,7 @@ mod tests {
         let new_body = RoomParams {
             title: "title".to_string(),
             price: 10000,
-            area: "area".to_string(),
+            city: "city".to_string(),
             street: None,
             is_furnished: true,
             is_pet_friendly: false,
@@ -331,7 +331,7 @@ mod tests {
         let body = RoomParams {
             title: "title".to_string(),
             price: 10000,
-            area: "area".to_string(),
+            city: "city".to_string(),
             street: None,
             is_furnished: true,
             is_pet_friendly: false,
@@ -355,7 +355,7 @@ mod tests {
         let body = RoomParams {
             title: "title".to_string(),
             price: 10000,
-            area: "area".to_string(),
+            city: "city".to_string(),
             street: None,
             is_furnished: true,
             is_pet_friendly: false,

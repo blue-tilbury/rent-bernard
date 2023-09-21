@@ -20,7 +20,7 @@ export type ControlledInputProps = UseControllerProps<Room> & {
 };
 
 export type RegisterName =
-  | "area"
+  | "city"
   | "title"
   | "price"
   | "street"

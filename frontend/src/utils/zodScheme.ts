@@ -11,7 +11,7 @@ export const scheme = z.object({
     .number({ invalid_type_error: "Number is required." })
     .positive({ message: "Price must be positive number." })
     .int({ message: "Price must be integer." }),
-  area: z.string().nonempty({ message: "City is required." }),
+  city: z.string().nonempty({ message: "City is required." }),
   street: z.string(),
   description: z.string().nonempty({ message: "Description is required." }),
   images: z

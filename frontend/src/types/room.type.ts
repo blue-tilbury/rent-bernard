@@ -2,7 +2,7 @@
 export type Room = {
   title: string;
   price: number;
-  area: string;
+  city: string;
   street?: string;
   is_furnished: boolean;
   is_pet_friendly: boolean;

@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "../components/Button";
 import {
@@ -17,6 +18,7 @@ import { Room } from "../types/room.type";
 import { scheme } from "../utils/zodScheme";
 
 export const Posting = () => {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -28,6 +30,7 @@ export const Posting = () => {
 
   const handleSave = (formValues: object) => {
     console.log(formValues);
+    navigate("/thankyou");
   };
 
   return (

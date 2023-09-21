@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { Layout } from "./layouts/index";
 import { Posting } from "./pages/Posting";
 import { Search } from "./pages/Search";
+import { ThankYou } from "./pages/ThankYou";
 import { Wishlist } from "./pages/Wishlist";
 
 export default function App() {
@@ -10,8 +11,9 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Search />} />
-        <Route path="/posting" element={<Posting />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/posting" element={<Posting />} />
+        <Route path="/thankyou" element={<ThankYou />} />
       </Route>
     </Routes>
   );

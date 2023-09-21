@@ -8,7 +8,7 @@ pub struct Get {
     pub id: String,
     title: String,
     price: i64,
-    area: String,
+    city: String,
     street: Option<String>,
     is_furnished: bool,
     is_pet_friendly: bool,
@@ -44,7 +44,7 @@ impl Get {
             id,
             title,
             price,
-            area,
+            city,
             street,
             is_furnished,
             is_pet_friendly,
@@ -58,7 +58,7 @@ impl Get {
             id,
             title,
             price,
-            area,
+            city,
             street,
             is_furnished,
             is_pet_friendly,
@@ -100,7 +100,7 @@ mod tests {
             id: "id".to_string(),
             title: "title".to_string(),
             price: 10000,
-            area: "area".to_string(),
+            city: "city".to_string(),
             street: None,
             is_furnished: true,
             is_pet_friendly: false,
@@ -116,7 +116,7 @@ mod tests {
         assert_eq!(json.id, "id".to_string());
         assert_eq!(json.title, "title".to_string());
         assert_eq!(json.price, 10000);
-        assert_eq!(json.area, "area".to_string());
+        assert_eq!(json.city, "city".to_string());
         assert!(json.street.is_none());
         assert!(json.is_furnished);
         assert!(!json.is_pet_friendly);
@@ -136,7 +136,7 @@ mod tests {
             id: "id".to_string(),
             title: "title".to_string(),
             price: 10000,
-            area: "area".to_string(),
+            city: "city".to_string(),
             street: None,
             is_furnished: true,
             is_pet_friendly: false,

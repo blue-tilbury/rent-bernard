@@ -15,7 +15,7 @@ struct RoomResource {
     id: Option<Thing>,
     title: String,
     price: i64,
-    area: String,
+    city: String,
     street: Option<String>,
     is_furnished: bool,
     is_pet_friendly: bool,
@@ -30,7 +30,7 @@ struct RoomResource {
 struct UpdateRoomResource {
     title: String,
     price: i64,
-    area: String,
+    city: String,
     street: Option<String>,
     is_furnished: bool,
     is_pet_friendly: bool,

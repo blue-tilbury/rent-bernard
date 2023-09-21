@@ -1,0 +1,12 @@
+import { Label } from "../../components/form/Label";
+import { NumberInput } from "../../components/form/NumberInput";
+import { InputProps } from "../../types/register.type";
+
+export const Price = ({ register, error }: InputProps) => {
+  return (
+    <label className="flex items-baseline">
+      <Label name="Price" required={true} />
+      <NumberInput register={register} name="price" error={error} />
+    </label>
+  );
+};

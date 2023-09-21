@@ -1,14 +1,20 @@
-import React from 'react';
-import './App.css';
+import { Route, Routes } from "react-router-dom";
 
-function App() {
+import { Layout } from "./layouts/index";
+import { Posting } from "./pages/Posting";
+import { Search } from "./pages/Search";
+import { ThankYou } from "./pages/ThankYou";
+import { Wishlist } from "./pages/Wishlist";
+
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-		<p>Hello</p>
-      </header>
-    </div>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<Search />} />
+        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/posting" element={<Posting />} />
+        <Route path="/thankyou" element={<ThankYou />} />
+      </Route>
+    </Routes>
   );
 }
-
-export default App;

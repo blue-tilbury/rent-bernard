@@ -9,7 +9,7 @@ export const Location = ({ register, error }: InputProps) => {
       <div className="basis-4/6">
         <TextInput
           register={register}
-          name="area"
+          name="city"
           error={error}
           style="rounded border-rent-input-gray"
         />

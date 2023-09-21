@@ -2,7 +2,7 @@ import { RawInputProps } from "../../types/register.type";
 
 export const TextInput = ({ register, name, style, error }: RawInputProps) => {
   let placeholderName = "";
-  if (name === "area") {
+  if (name === "city") {
     placeholderName = name[0].toUpperCase() + name.slice(1);
   } else if (name === "street") {
     placeholderName = name[0].toUpperCase() + name.slice(1) + " (optional)";

@@ -46,7 +46,7 @@ export const Posting = () => {
             name="is_pet_friendly"
           />
           <Price register={register} error={errors.price} />
-          <Location register={register} error={errors.area} />
+          <Location register={register} error={errors.city} />
           <Description register={register} error={errors.description} />
           <Images register={register} error={errors.images?.[0]} />
         </div>

@@ -10,7 +10,7 @@ pub struct Room {
     pub id: String,
     pub title: String,
     pub price: i64,
-    pub city: String,
+    pub area: String,
     pub street: Option<String>,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
@@ -25,7 +25,7 @@ pub struct Room {
 pub struct CreateRoom {
     pub title: String,
     pub price: i64,
-    pub city: String,
+    pub area: String,
     pub street: Option<String>,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
@@ -39,7 +39,7 @@ pub struct UpdateRoom {
     pub id: String,
     pub title: String,
     pub price: i64,
-    pub city: String,
+    pub area: String,
     pub street: Option<String>,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
@@ -66,7 +66,7 @@ impl Room {
                 id: None,
                 title: room.title,
                 price: room.price,
-                city: room.city,
+                area: room.area,
                 street: room.street,
                 is_furnished: room.is_furnished,
                 is_pet_friendly: room.is_pet_friendly,
@@ -101,7 +101,7 @@ impl Room {
             .merge(UpdateRoomResource {
                 title: room.title,
                 price: room.price,
-                city: room.city,
+                area: room.area,
                 street: room.street,
                 is_furnished: room.is_furnished,
                 is_pet_friendly: room.is_pet_friendly,
@@ -130,7 +130,7 @@ impl IdConverter<RoomResource, Self> for Room {
             id,
             title: room.title,
             price: room.price,
-            city: room.city,
+            area: room.area,
             street: room.street,
             is_furnished: room.is_furnished,
             is_pet_friendly: room.is_pet_friendly,
@@ -160,7 +160,7 @@ mod tests {
         let params = CreateRoom {
             title: "title".to_string(),
             price: 10000,
-            city: "city".to_string(),
+            area: "area".to_string(),
             street: None,
             is_furnished: true,
             is_pet_friendly: false,
@@ -174,7 +174,7 @@ mod tests {
         let result = Room::create(&db, params).await.unwrap();
         assert_eq!(result.title, "title".to_string());
         assert_eq!(result.price, 10000);
-        assert_eq!(result.city, "city".to_string());
+        assert_eq!(result.area, "area".to_string());
         assert!(result.street.is_none());
         assert!(result.is_furnished);
         assert!(!result.is_pet_friendly);
@@ -193,7 +193,7 @@ mod tests {
             id: None,
             title: Some("title".to_string()),
             price: Some(10000),
-            city: Some("city".to_string()),
+            area: Some("area".to_string()),
             street: None,
             is_furnished: Some(true),
             is_pet_friendly: Some(false),
@@ -209,7 +209,7 @@ mod tests {
         assert!(!result.id.is_empty());
         assert_eq!(result.title, "title".to_string());
         assert_eq!(result.price, 10000);
-        assert_eq!(result.city, "city".to_string());
+        assert_eq!(result.area, "area".to_string());
         assert!(result.street.is_none());
         assert!(result.is_furnished);
         assert!(!result.is_pet_friendly);
@@ -238,7 +238,7 @@ mod tests {
             id: None,
             title: Some("title".to_string()),
             price: Some(10000),
-            city: Some("city".to_string()),
+            area: Some("area".to_string()),
             street: None,
             is_furnished: Some(true),
             is_pet_friendly: Some(false),

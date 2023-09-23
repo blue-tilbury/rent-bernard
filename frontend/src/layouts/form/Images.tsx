@@ -28,9 +28,9 @@ export const Images = ({ register, error }: InputProps) => {
   };
 
   return (
-    <div className="flex">
+    <div className="flex gap-3">
       <Label name="Images" required={true} />
-      <div className="flex flex-col basis-5/6 pl-3">
+      <div className="flex flex-col basis-5/6">
         <button className="border rounded absolute border-dashed border-rent-gray text-rent-gray text-sm py-1 px-8">
           Add Images
           <ImageInput onFilesChange={updateFiles} register={register} />

@@ -4,7 +4,7 @@ import { InputProps } from "../../types/register.type";
 
 export const Title = ({ register, error }: InputProps) => {
   return (
-    <label className="flex items-baseline">
+    <label className="flex items-baseline gap-3">
       <Label name="Title" required={true} />
       <TextInput
         register={register}

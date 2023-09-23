@@ -2,7 +2,7 @@ import { RawInputProps } from "../../types/register.type";
 
 export const NumberInput = ({ register, name, error }: RawInputProps) => {
   return (
-    <div className="flex flex-col pl-3">
+    <div className="flex flex-col">
       <div className="flex items-center">
         <span className="px-3">$</span>
         <input

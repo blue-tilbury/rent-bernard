@@ -28,6 +28,8 @@ export const Posting = () => {
     resolver: zodResolver(scheme),
   });
 
+  // TODO: upload images using a presigned url
+  // https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html
   const handleSave = (formValues: object) => {
     console.log(formValues);
     navigate("/thankyou");

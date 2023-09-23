@@ -1,5 +1,6 @@
 use rocket::http::Status;
 
+pub mod photos;
 pub mod rooms;
 
 #[options("/<_..>")]

@@ -1,0 +1,12 @@
+{
+  "name": "rent-bernard",
+  "version": "1.0.0",
+  "description": "WIP",
+  "scripts": {
+    "s3": "serverless offline"
+  },
+  "devDependencies": {
+    "serverless-offline": "^13.0.0",
+    "serverless-s3-local": "^0.7.2"
+  }
+}

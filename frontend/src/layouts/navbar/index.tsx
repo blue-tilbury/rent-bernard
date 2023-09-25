@@ -32,6 +32,12 @@ export const Navbar = () => {
               >
                 POST AD
               </Link>
+              <Link
+                to="login"
+                className="p-2 text-sm font-bold text-rent-gray hover:text-rent-dark-blue"
+              >
+                LOGIN
+              </Link>
             </div>
           ) : (
             <button onClick={() => setIsToggled(true)}>
@@ -43,21 +49,25 @@ export const Navbar = () => {
 
       {/* menu modal */}
       {!isAboveMediumScreen && isToggled && (
-        <div className="container fixed top-0 flex h-full w-full flex-col bg-rent-background-gray drop-shadow-xl">
+        <div className="container fixed top-0 flex h-full w-full flex-col bg-rent-background-gray drop-shadow-xl z-20">
           <div className="flex justify-end py-6">
-            <button
-              onClick={() => {
-                setIsToggled(false);
-              }}
-            >
+            <button onClick={() => setIsToggled(false)}>
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
-          <div className="flex flex-col gap-4 text-2xl font-medium">
-            <Link to="/">Home</Link>
-            <Link to="wishlist">Wishlist</Link>
-            <Link to="posting">Posting</Link>
-            <Link to="edit">Edit</Link>
+          <div className="flex flex-col gap-4 text-2xl font-medium items-start">
+            <Link to="/" onClick={() => setIsToggled(false)}>
+              Home
+            </Link>
+            <Link to="wishlist" onClick={() => setIsToggled(false)}>
+              Wishlist
+            </Link>
+            <Link to="posting" onClick={() => setIsToggled(false)}>
+              Post Ad
+            </Link>
+            <Link to="login" onClick={() => setIsToggled(false)}>
+              Login
+            </Link>
           </div>
         </div>
       )}

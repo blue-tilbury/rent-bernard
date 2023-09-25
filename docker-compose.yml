@@ -7,9 +7,16 @@ services:
       - ./api:/app
     ports:
       - 58000:8000
+    environment:
+      - AWS_REGION=local
+      - AWS_ACCESS_KEY_ID=S3RVER
+      - AWS_SECRET_ACCESS_KEY=S3RVER
+      - S3_ENDPOINT=http://localhost:44569
+      - ROOMS_BUCKET=rooms-bucket
     depends_on:
       - surrealdb
       - test_surrealdb
+      - s3
   frontend:
     build: ./frontend
     volumes:
@@ -30,5 +37,14 @@ services:
     ports:
       - 48001:8000
     command: start --log debug --user root --pass root memory
+  s3:
+    build: ./docker/s3
+    ports:
+      - 44569:4569
+    volumes:
+      - s3:/app/buckets
+      - ./docker/s3/serverless.yml:/app/serverless.yml
+      - ./docker/s3/cors.xml:/app/cors.xml
 volumes:
   surrealdb:
+  s3:

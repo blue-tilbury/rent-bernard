@@ -1,6 +1,6 @@
 #![warn(clippy::all)]
 
-use controller::{cors_handler, rooms};
+use controller::{cors_handler, photos, rooms};
 use fairing::{cors::Cors, db};
 use rocket::{
     figment::{
@@ -25,6 +25,7 @@ fn rocket() -> Rocket<Build> {
         rooms::index,
         rooms::update,
         rooms::delete,
+        photos::upload,
         cors_handler
     ];
     let figment: Figment = Config::figment().merge(Toml::file("App.toml").nested());

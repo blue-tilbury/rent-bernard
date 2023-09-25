@@ -1,0 +1,35 @@
+service: rent-bernard-serverless
+
+plugins:
+  - serverless-s3-local
+  - serverless-offline
+
+provider:
+  name: aws
+  stage: local
+
+custom:
+  s3:
+    host: 0.0.0.0
+    address: 0.0.0.0
+    directory: ./buckets
+    cors: ./cors.xml
+
+resources:
+  Resources:
+    RoomsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: rooms-bucket
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders:
+                - "*"
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              AllowedOrigins:
+                - "*"

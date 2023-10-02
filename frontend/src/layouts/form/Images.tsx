@@ -28,17 +28,17 @@ export const Images = ({ register, error }: InputProps) => {
   };
 
   return (
-    <div className="flex">
+    <div className="flex gap-3">
       <Label name="Images" required={true} />
-      <div className="flex flex-col basis-5/6 pl-3">
-        <button className="border rounded absolute border-dashed border-rent-gray text-rent-gray text-sm py-1 px-8">
+      <div className="flex basis-5/6 flex-col">
+        <button className="absolute rounded border border-dashed border-rent-gray px-8 py-1 text-sm text-rent-gray">
           Add Images
           <ImageInput onFilesChange={updateFiles} register={register} />
         </button>
         <ImagesPreview files={files} deleteImage={deleteImage} />
       </div>
       {error?.message && (
-        <p className="text-red-600 text-sm pl-1 pt-1">{error.message}</p>
+        <p className="pl-1 pt-1 text-sm text-red-600">{error.message}</p>
       )}
     </div>
   );
@@ -46,15 +46,15 @@ export const Images = ({ register, error }: InputProps) => {
 
 const ImagesPreview = ({ files, deleteImage }: ImagesPreviewProps) => {
   const imageListing = files.map((file, i) => (
-    <div key={i} className="group/item relative w-40 h-40 border rounded">
+    <div key={i} className="group/item relative h-40 w-40 rounded border">
       <MinusCircleIcon
         onClick={() => deleteImage(i)}
-        className="invisible group-hover/item:visible h-8 w-8 absolute end-2 top-2 z-10 text-rent-light-blue"
+        className="invisible absolute end-2 top-2 z-10 h-8 w-8 text-rent-light-blue group-hover/item:visible"
       />
       <img
         src={URL.createObjectURL(file)}
         alt={file.name}
-        className="object-contain h-40 w-40 "
+        className="h-40 w-40 object-contain "
       />
     </div>
   ));

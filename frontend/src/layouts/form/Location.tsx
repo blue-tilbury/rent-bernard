@@ -4,7 +4,7 @@ import { InputProps } from "../../types/register.type";
 
 export const Location = ({ register, error }: InputProps) => {
   return (
-    <div className="flex items-baseline">
+    <div className="flex items-baseline gap-3">
       <Label name="Location" required={true} />
       <div className="basis-4/6">
         <TextInput

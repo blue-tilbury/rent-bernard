@@ -7,8 +7,8 @@ axios.defaults.baseURL = "http://localhost:5580";
 
 export const useAxios = (formValues: object) => {
   const [response, setResponse] = useState<Room[]>();
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const fetchData = () => {
     axios

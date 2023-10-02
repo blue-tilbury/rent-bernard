@@ -12,7 +12,7 @@ module.exports = {
         "rent-very-light-blue": "#4edcff",
         "rent-light-blue": "#00CCFF",
         "rent-blue": "#0080FF",
-        "rent-dark-blue": "#00274e",
+        "rent-dark-blue": "#283C63",
         "rent-green": "#90FF7E",
         "rent-dark-green": "#1dcc00",
         "rent-background-gray": "#F5F7F7",

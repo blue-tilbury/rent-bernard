@@ -9,10 +9,10 @@ export const TextInput = ({ register, name, style, error }: RawInputProps) => {
   }
 
   return (
-    <div className="flex flex-col pl-3 basis-4/6">
+    <div className="flex basis-4/6 flex-col">
       <input {...register(name)} className={style} placeholder={placeholderName} />
       {error?.message && (
-        <p className="text-red-600 text-sm pl-1 pt-1">{error.message}</p>
+        <p className="pl-1 pt-1 text-sm text-red-600">{error.message}</p>
       )}
     </div>
   );

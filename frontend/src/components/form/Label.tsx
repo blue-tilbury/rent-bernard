@@ -5,7 +5,7 @@ type labelProps = {
 
 export const Label = ({ name, required }: labelProps) => {
   return (
-    <p className={"text-end capitalize basis-1/6"}>
+    <p className={"basis-1/6 text-end capitalize"}>
       {name}
       {required && <span className="text-red-600">*</span>}
     </p>

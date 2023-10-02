@@ -20,7 +20,7 @@ export const ImageInput = ({ onFilesChange, register }: ImageProps) => {
       style={{ opacity: 0 }}
       multiple
       {...register("images", { onChange: handleChange })}
-      className="absolute top-0 left-0 w-full h-full"
+      className="absolute left-0 top-0 h-full w-full"
     />
   );
 };

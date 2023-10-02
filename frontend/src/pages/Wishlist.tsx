@@ -29,7 +29,7 @@ export const Wishlist = () => {
   return (
     <section className="wishlist container py-6">
       <h2 className="p-2 text-sm">Showing 1-2 of 2 results</h2>
-      <ul className="flex flex-col list-none">{wishlistListing}</ul>
+      <ul className="flex list-none flex-col">{wishlistListing}</ul>
     </section>
   );
 };

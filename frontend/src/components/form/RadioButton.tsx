@@ -30,7 +30,7 @@ export const RadioButton = (props: ControlledInputProps) => {
         </label>
       </div>
       {props.error?.message && (
-        <p className="text-red-600 text-sm pl-1 pt-1">{props.error?.message}</p>
+        <p className="pl-1 pt-1 text-sm text-red-600">{props.error?.message}</p>
       )}
     </div>
   );

@@ -55,6 +55,9 @@ module.exports = {
         project: "./tsconfig.json",
       },
     },
+    react: {
+      version: "detect",
+    },
   },
   ignorePatterns: ["src/**/*.test.tsx"],
 };

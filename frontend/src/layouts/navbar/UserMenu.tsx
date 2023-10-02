@@ -1,12 +1,6 @@
-import {
-  ArrowRightOnRectangleIcon,
-  ChatBubbleLeftRightIcon,
-  HomeIcon,
-} from "@heroicons/react/24/solid";
-import { useSetAtom } from "jotai";
-import { useNavigate } from "react-router-dom";
+import { ChatBubbleLeftRightIcon, HomeIcon } from "@heroicons/react/24/solid";
 
-import { userAtom } from "../../pages/Login";
+import { SignOut } from "./SignOut";
 import { User } from "../../types/user.type";
 
 type UserMenuProps = {
@@ -15,13 +9,6 @@ type UserMenuProps = {
 };
 
 export const UserMenu = ({ user, isUserMenuOpen }: UserMenuProps) => {
-  const navigate = useNavigate();
-  const setUser = useSetAtom(userAtom);
-  const handleSignOut = () => {
-    setUser({} as User);
-    navigate("/");
-  };
-
   return (
     <div
       className={`${
@@ -43,10 +30,7 @@ export const UserMenu = ({ user, isUserMenuOpen }: UserMenuProps) => {
           <ChatBubbleLeftRightIcon className="h-4 w-4" />
           <p>Your reviews</p>
         </li>
-        <li onClick={handleSignOut} className="flex items-center gap-3 py-2">
-          <ArrowRightOnRectangleIcon className="h-4 w-4" />
-          <p>Sign out</p>
-        </li>
+        <SignOut />
       </ul>
     </div>
   );

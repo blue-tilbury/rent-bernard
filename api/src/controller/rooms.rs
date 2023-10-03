@@ -1,9 +1,12 @@
+use std::env;
+
 use rocket::{http::Status, serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
-    model::room::model::{ContactInformation, CreateRoom, Image, Room, UpdateRoom},
+    model::room::model::{ContactInformation, CreateRoom, Room, UpdateRoom},
+    utils::s3::S3Client,
     view,
 };
 
@@ -15,14 +18,9 @@ pub struct RoomParams {
     pub street: Option<String>,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
-    pub images: Vec<PostImage>,
+    pub s3_keys: Vec<String>,
     pub contact_information: PostContactInformation,
     pub description: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct PostImage {
-    pub url: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -34,21 +32,29 @@ type DB = State<Surreal<Client>>;
 
 #[get("/rooms/<id>")]
 pub async fn show(id: String, db: &DB) -> Result<Json<view::room::Get>, Status> {
-    match Room::get(db, id.clone()).await {
-        Ok(room) => {
-            if let Some(room) = room {
-                let response = view::room::Get::generate(room);
-                Ok(response)
-            } else {
+    let room = match Room::get(db, id.clone()).await {
+        Ok(option_room) => match option_room {
+            Some(room) => room,
+            None => {
                 eprintln!("Room Not Found(id: {id})");
-                Err(Status::NotFound)
+                return Err(Status::NotFound);
             }
-        }
+        },
         Err(err) => {
             eprintln!("{err}");
-            Err(Status::InternalServerError)
+            return Err(Status::InternalServerError);
         }
-    }
+    };
+    let bucket_name = match env::var("ROOMS_BUCKET") {
+        Ok(name) => name,
+        Err(err) => {
+            eprintln!("{err}");
+            return Err(Status::InternalServerError);
+        }
+    };
+    let client = S3Client::new(bucket_name).await?;
+    let response = view::room::Get::generate(room, client).await?;
+    Ok(response)
 }
 
 #[get("/rooms")]
@@ -75,7 +81,7 @@ pub async fn update(
         street,
         is_furnished,
         is_pet_friendly,
-        images,
+        s3_keys,
         contact_information,
         description,
     } = room.0;
@@ -87,29 +93,34 @@ pub async fn update(
         street,
         is_furnished,
         is_pet_friendly,
-        images: images
-            .into_iter()
-            .map(|image| Image { url: image.url })
-            .collect(),
+        s3_keys,
         contact_information: ContactInformation {
             email: contact_information.email,
         },
         description,
     };
-    match Room::update(db, update_room_params).await {
-        Ok(room) => {
-            if let Some(room) = room {
-                Ok(view::room::Get::generate(room))
-            } else {
+    let room = match Room::update(db, update_room_params).await {
+        Ok(option_room) => match option_room {
+            Some(room) => room,
+            None => {
                 eprintln!("Room Not Found");
-                Err(Status::NotFound)
+                return Err(Status::NotFound);
             }
-        }
+        },
         Err(err) => {
             eprintln!("{err}");
-            Err(Status::InternalServerError)
+            return Err(Status::InternalServerError);
         }
-    }
+    };
+    let bucket_name = match env::var("ROOMS_BUCKET") {
+        Ok(name) => name,
+        Err(err) => {
+            eprintln!("{err}");
+            return Err(Status::InternalServerError);
+        }
+    };
+    let client = S3Client::new(bucket_name).await?;
+    view::room::Get::generate(room, client).await
 }
 
 #[delete("/room/<id>")]
@@ -139,7 +150,7 @@ pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::room::
         street,
         is_furnished,
         is_pet_friendly,
-        images,
+        s3_keys,
         contact_information,
         description,
     } = room.0;
@@ -150,10 +161,7 @@ pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::room::
         street,
         is_furnished,
         is_pet_friendly,
-        images: images
-            .into_iter()
-            .map(|image| Image { url: image.url })
-            .collect(),
+        s3_keys,
         contact_information: ContactInformation {
             email: contact_information.email,
         },
@@ -161,224 +169,20 @@ pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::room::
     };
     match Room::create(db.inner(), create_room_params).await {
         Ok(room) => {
-            let response = view::room::Get::generate(room);
+            let bucket_name = match env::var("ROOMS_BUCKET") {
+                Ok(name) => name,
+                Err(err) => {
+                    eprintln!("{err}");
+                    return Err(Status::InternalServerError);
+                }
+            };
+            let client = S3Client::new(bucket_name).await?;
+            let response = view::room::Get::generate(room, client).await?;
             Ok(response)
         }
         Err(err) => {
             eprintln!("{err}");
             Err(Status::InternalServerError)
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::{controller::tests::create_client, view};
-
-    use super::*;
-
-    #[test]
-    fn test_create() {
-        let client = create_client(routes![create]);
-        let image = PostImage {
-            url: "url".to_string(),
-        };
-        let body = RoomParams {
-            title: "title".to_string(),
-            price: 10000,
-            city: "city".to_string(),
-            street: None,
-            is_furnished: true,
-            is_pet_friendly: false,
-            images: vec![image],
-            contact_information: PostContactInformation {
-                email: "email".to_string(),
-            },
-            description: "description".to_string(),
-        };
-        let uri = uri!(create);
-        let response = client.post(uri).json(&body).dispatch();
-        assert_eq!(response.status(), Status::Ok);
-        let json: String = response.into_string().unwrap();
-        assert!(!json.is_empty());
-    }
-
-    #[test]
-    fn test_show() {
-        let client = create_client(routes![create, show]);
-        let image = PostImage {
-            url: "url".to_string(),
-        };
-        let body = RoomParams {
-            title: "title".to_string(),
-            price: 10000,
-            city: "city".to_string(),
-            street: None,
-            is_furnished: true,
-            is_pet_friendly: false,
-            images: vec![image],
-            contact_information: PostContactInformation {
-                email: "email".to_string(),
-            },
-            description: "description".to_string(),
-        };
-        let uri = uri!(create);
-        let response = client.post(uri).json(&body).dispatch();
-
-        let view::room::Get { id, .. } = response.into_json().unwrap();
-        let uri = uri!(show(id));
-
-        let response = client.get(uri).dispatch();
-        assert_eq!(response.status(), Status::Ok);
-        let json = response.into_string().unwrap();
-        assert!(!json.is_empty());
-    }
-
-    #[test]
-    fn test_show_not_found() {
-        let client = create_client(routes![create, show]);
-
-        let id = "random_id".to_string();
-        let uri = uri!(show(id));
-
-        let response = client.get(uri).dispatch();
-        assert_eq!(response.status(), Status::NotFound);
-    }
-
-    #[test]
-    fn test_index() {
-        let client = create_client(routes![create, index]);
-        let image = PostImage {
-            url: "url".to_string(),
-        };
-        let body = RoomParams {
-            title: "title".to_string(),
-            price: 10000,
-            city: "city".to_string(),
-            street: None,
-            is_furnished: true,
-            is_pet_friendly: false,
-            images: vec![image],
-            contact_information: PostContactInformation {
-                email: "email".to_string(),
-            },
-            description: "description".to_string(),
-        };
-        let uri = uri!(create);
-        client.post(uri).json(&body).dispatch();
-
-        let uri = uri!(index);
-
-        let response = client.get(uri).dispatch();
-        assert_eq!(response.status(), Status::Ok);
-        let json = response.into_string().unwrap();
-        assert!(!json.is_empty());
-    }
-
-    #[test]
-    fn test_update() {
-        let client = create_client(routes![create, update]);
-        let image = PostImage {
-            url: "url".to_string(),
-        };
-        let body = RoomParams {
-            title: "title".to_string(),
-            price: 10000,
-            city: "city".to_string(),
-            street: None,
-            is_furnished: true,
-            is_pet_friendly: false,
-            images: vec![image],
-            contact_information: PostContactInformation {
-                email: "email".to_string(),
-            },
-            description: "description".to_string(),
-        };
-        let uri = uri!(create);
-        let response = client.post(uri).json(&body).dispatch();
-        let view::room::Get { id, .. } = response.into_json().unwrap();
-        let uri = uri!(update(id));
-
-        let new_image = PostImage {
-            url: "new_url".to_string(),
-        };
-        let new_body = RoomParams {
-            title: "title".to_string(),
-            price: 10000,
-            city: "city".to_string(),
-            street: None,
-            is_furnished: true,
-            is_pet_friendly: false,
-            images: vec![new_image],
-            contact_information: PostContactInformation {
-                email: "email".to_string(),
-            },
-            description: "description".to_string(),
-        };
-        let response = client.put(uri).json(&new_body).dispatch();
-
-        assert_eq!(response.status(), Status::Ok);
-        let json = response.into_string().unwrap();
-        assert!(!json.is_empty());
-    }
-
-    #[test]
-    fn test_update_not_found() {
-        let client = create_client(routes![update]);
-        let image = PostImage {
-            url: "url".to_string(),
-        };
-        let body = RoomParams {
-            title: "title".to_string(),
-            price: 10000,
-            city: "city".to_string(),
-            street: None,
-            is_furnished: true,
-            is_pet_friendly: false,
-            images: vec![image],
-            contact_information: PostContactInformation {
-                email: "email".to_string(),
-            },
-            description: "description".to_string(),
-        };
-        let uri = uri!(update("invalid_id"));
-        let response = client.put(uri).json(&body).dispatch();
-        assert_eq!(response.status(), Status::NotFound);
-    }
-
-    #[test]
-    fn test_delete() {
-        let client = create_client(routes![create, delete]);
-        let image = PostImage {
-            url: "url".to_string(),
-        };
-        let body = RoomParams {
-            title: "title".to_string(),
-            price: 10000,
-            city: "city".to_string(),
-            street: None,
-            is_furnished: true,
-            is_pet_friendly: false,
-            images: vec![image],
-            contact_information: PostContactInformation {
-                email: "email".to_string(),
-            },
-            description: "description".to_string(),
-        };
-        let uri = uri!(create);
-        let response = client.post(uri).json(&body).dispatch();
-        let view::room::Get { id, .. } = response.into_json().unwrap();
-        let uri = uri!(delete(id));
-        let response = client.delete(uri).dispatch();
-        assert_eq!(response.status(), Status::NoContent);
-    }
-
-    #[test]
-    fn test_delete_not_found() {
-        let client = create_client(routes![delete]);
-        let id = "invalid_id";
-        let uri = uri!(delete(id));
-        let response = client.delete(uri).dispatch();
-        assert_eq!(response.status(), Status::NotFound);
     }
 }

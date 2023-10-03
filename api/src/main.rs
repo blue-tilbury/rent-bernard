@@ -15,6 +15,7 @@ extern crate rocket;
 mod controller;
 mod fairing;
 mod model;
+mod utils;
 mod view;
 
 #[launch]

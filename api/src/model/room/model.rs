@@ -15,7 +15,7 @@ pub struct Room {
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
-    pub images: Vec<Image>,
+    pub s3_keys: Vec<String>,
     pub contact_information: ContactInformation,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
@@ -30,7 +30,7 @@ pub struct CreateRoom {
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
-    pub images: Vec<Image>,
+    pub s3_keys: Vec<String>,
     pub contact_information: ContactInformation,
 }
 
@@ -44,13 +44,8 @@ pub struct UpdateRoom {
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
-    pub images: Vec<Image>,
+    pub s3_keys: Vec<String>,
     pub contact_information: ContactInformation,
-}
-
-#[derive(Default, Serialize, Deserialize, Clone)]
-pub struct Image {
-    pub url: String,
 }
 
 #[derive(Default, Serialize, Deserialize, Clone)]
@@ -71,7 +66,7 @@ impl Room {
                 is_furnished: room.is_furnished,
                 is_pet_friendly: room.is_pet_friendly,
                 description: room.description,
-                images: room.images,
+                s3_keys: room.s3_keys,
                 contact_information: room.contact_information,
                 created_at: Local::now().naive_local(),
                 updated_at: Local::now().naive_local(),
@@ -106,7 +101,7 @@ impl Room {
                 is_furnished: room.is_furnished,
                 is_pet_friendly: room.is_pet_friendly,
                 description: room.description,
-                images: room.images,
+                s3_keys: room.s3_keys,
                 contact_information: room.contact_information,
                 updated_at: Local::now().naive_local(),
             })
@@ -135,7 +130,7 @@ impl IdConverter<RoomResource, Self> for Room {
             is_furnished: room.is_furnished,
             is_pet_friendly: room.is_pet_friendly,
             description: room.description,
-            images: room.images,
+            s3_keys: room.s3_keys,
             contact_information: room.contact_information,
             created_at: room.created_at,
             updated_at: room.updated_at,
@@ -154,9 +149,6 @@ mod tests {
     #[tokio::test]
     async fn test_create() {
         let db = db::TestConnection::setup_db().await;
-        let image = Image {
-            url: "url".to_string(),
-        };
         let params = CreateRoom {
             title: "title".to_string(),
             price: 10000,
@@ -164,7 +156,7 @@ mod tests {
             street: None,
             is_furnished: true,
             is_pet_friendly: false,
-            images: vec![image],
+            s3_keys: vec!["key".to_string()],
             contact_information: ContactInformation {
                 email: "email".to_string(),
             },
@@ -178,7 +170,7 @@ mod tests {
         assert!(result.street.is_none());
         assert!(result.is_furnished);
         assert!(!result.is_pet_friendly);
-        assert_eq!(result.images[0].url, "url".to_string());
+        assert_eq!(result.s3_keys[0], "key".to_string());
         assert_eq!(result.contact_information.email, "email".to_string());
         assert_eq!(result.description, "description".to_string());
     }
@@ -186,9 +178,6 @@ mod tests {
     #[tokio::test]
     async fn test_get() {
         let db = db::TestConnection::setup_db().await;
-        let image = Image {
-            url: "url".to_string(),
-        };
         let params = RoomFactoryParams {
             id: None,
             title: Some("title".to_string()),
@@ -197,7 +186,7 @@ mod tests {
             street: None,
             is_furnished: Some(true),
             is_pet_friendly: Some(false),
-            images: Some(vec![image]),
+            s3_keys: Some(vec!["key".to_string()]),
             contact_information: Some(ContactInformation {
                 email: "email".to_string(),
             }),
@@ -213,7 +202,7 @@ mod tests {
         assert!(result.street.is_none());
         assert!(result.is_furnished);
         assert!(!result.is_pet_friendly);
-        assert_eq!(result.images[0].url, "url".to_string());
+        assert_eq!(result.s3_keys[0], "key".to_string());
         assert_eq!(result.description, "description".to_string());
         assert_eq!(result.contact_information.email, "email".to_string());
         assert!(!result.created_at.to_string().is_empty());
@@ -231,9 +220,6 @@ mod tests {
     #[tokio::test]
     async fn test_list() {
         let db = db::TestConnection::setup_db().await;
-        let image = Image {
-            url: "url".to_string(),
-        };
         let params = RoomFactoryParams {
             id: None,
             title: Some("title".to_string()),
@@ -242,7 +228,7 @@ mod tests {
             street: None,
             is_furnished: Some(true),
             is_pet_friendly: Some(false),
-            images: Some(vec![image]),
+            s3_keys: Some(vec!["key".to_string()]),
             contact_information: Some(ContactInformation {
                 email: "email".to_string(),
             }),
@@ -257,12 +243,9 @@ mod tests {
     #[tokio::test]
     async fn test_update() {
         let db = db::TestConnection::setup_db().await;
-        let image = Image {
-            url: "url".to_string(),
-        };
         let params = RoomFactoryParams {
             title: Some("title".to_string()),
-            images: Some(vec![image]),
+            s3_keys: Some(vec!["key".to_string()]),
             contact_information: Some(ContactInformation {
                 email: "email".to_string(),
             }),
@@ -270,13 +253,10 @@ mod tests {
         };
         let room = RoomFactory::create(&db, params).await;
 
-        let new_image = Image {
-            url: "new_url".to_string(),
-        };
         let new_params = UpdateRoom {
             id: room.id,
             title: "new_title".to_string(),
-            images: vec![new_image],
+            s3_keys: vec!["new_key".to_string()],
             contact_information: ContactInformation {
                 email: "new_email".to_string(),
             },
@@ -284,20 +264,17 @@ mod tests {
         };
         let result = Room::update(&db, new_params).await.unwrap().unwrap();
         assert_eq!(result.title, "new_title".to_string());
-        assert_eq!(result.images[0].url, "new_url".to_string());
-        assert_eq!(result.images.len(), 1);
+        assert_eq!(result.s3_keys[0], "new_key".to_string());
+        assert_eq!(result.s3_keys.len(), 1);
         assert_eq!(result.contact_information.email, "new_email".to_string());
     }
 
     #[tokio::test]
     async fn test_update_not_found() {
         let db = db::TestConnection::setup_db().await;
-        let image = Image {
-            url: "url".to_string(),
-        };
         let params = UpdateRoom {
             title: "title".to_string(),
-            images: vec![image],
+            s3_keys: vec!["key".to_string()],
             contact_information: ContactInformation {
                 email: "email".to_string(),
             },
@@ -310,12 +287,9 @@ mod tests {
     #[tokio::test]
     async fn test_delete() {
         let db = db::TestConnection::setup_db().await;
-        let image = Image {
-            url: "url".to_string(),
-        };
         let params = RoomFactoryParams {
             title: Some("title".to_string()),
-            images: Some(vec![image]),
+            s3_keys: Some(vec!["key".to_string()]),
             contact_information: Some(ContactInformation {
                 email: "email".to_string(),
             }),

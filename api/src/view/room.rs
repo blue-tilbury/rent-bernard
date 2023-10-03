@@ -1,7 +1,7 @@
-use rocket::serde::json::Json;
+use rocket::{http::Status, serde::json::Json};
 use serde::{Deserialize, Serialize};
 
-use crate::model::room::model::Room;
+use crate::{model::room::model::Room, utils::s3::S3Operation};
 
 #[derive(Serialize, Deserialize)]
 pub struct Get {
@@ -13,7 +13,7 @@ pub struct Get {
     is_furnished: bool,
     is_pet_friendly: bool,
     description: String,
-    images: Vec<GetImage>,
+    image_urls: Vec<String>,
     contact_information: GetContactInformation,
     created_at: String,
     updated_at: String,
@@ -31,15 +31,31 @@ struct GetContactInformation {
 
 #[derive(Serialize, Deserialize)]
 pub struct List {
-    rooms: Vec<Get>,
+    rooms: Vec<ListItem>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ListItem {
+    id: String,
+    title: String,
+    price: i64,
+    city: String,
+    street: Option<String>,
+    is_furnished: bool,
+    is_pet_friendly: bool,
+    description: String,
+    contact_information: GetContactInformation,
+    created_at: String,
+    updated_at: String,
 }
 
 impl Get {
-    pub fn generate(room: Room) -> Json<Get> {
-        Json(Self::to_get(room))
+    pub async fn generate(room: Room, client: impl S3Operation) -> Result<Json<Get>, Status> {
+        let json = Json(Self::to_get(room, client).await?);
+        Ok(json)
     }
 
-    fn to_get(room: Room) -> Get {
+    async fn to_get(room: Room, client: impl S3Operation) -> Result<Get, Status> {
         let Room {
             id,
             title,
@@ -49,12 +65,16 @@ impl Get {
             is_furnished,
             is_pet_friendly,
             description,
-            images,
             contact_information,
             created_at,
             updated_at,
+            s3_keys,
         } = room;
-        Get {
+        let mut image_urls: Vec<String> = vec![];
+        for key in s3_keys.clone() {
+            image_urls.push(client.get_object(key).await?);
+        }
+        Ok(Get {
             id,
             title,
             price,
@@ -63,23 +83,42 @@ impl Get {
             is_furnished,
             is_pet_friendly,
             description,
-            images: images
-                .into_iter()
-                .map(|image| GetImage { url: image.url })
-                .collect(),
+            image_urls,
             contact_information: GetContactInformation {
                 email: contact_information.email,
             },
             created_at: created_at.to_string(),
             updated_at: updated_at.to_string(),
-        }
+        })
     }
 }
 
 impl List {
     pub fn generate(rooms: Vec<Room>) -> Json<List> {
-        let res: Vec<Get> = rooms.into_iter().map(Get::to_get).collect();
-        Json(List { rooms: res })
+        Json(Self::to_list(rooms))
+    }
+
+    fn to_list(rooms: Vec<Room>) -> List {
+        List {
+            rooms: rooms
+                .into_iter()
+                .map(|room| ListItem {
+                    id: room.id,
+                    title: room.title,
+                    price: room.price,
+                    city: room.city,
+                    street: room.street,
+                    is_furnished: room.is_furnished,
+                    is_pet_friendly: room.is_pet_friendly,
+                    description: room.description,
+                    contact_information: GetContactInformation {
+                        email: room.contact_information.email,
+                    },
+                    created_at: room.created_at.to_string(),
+                    updated_at: room.updated_at.to_string(),
+                })
+                .collect(),
+        }
     }
 }
 
@@ -87,15 +126,25 @@ impl List {
 mod tests {
     use chrono::Local;
 
-    use crate::model::room::model::{ContactInformation, Image};
+    use crate::model::room::model::ContactInformation;
 
     use super::*;
 
-    #[test]
-    fn test_get_room() {
-        let image = Image {
-            url: "url".to_string(),
-        };
+    struct MockS3Client;
+
+    #[rocket::async_trait]
+    impl S3Operation for MockS3Client {
+        async fn get_object(&self, _key: String) -> Result<String, Status> {
+            Ok("object".to_string())
+        }
+
+        async fn get_presigned_upload_url(&self, _key: String) -> Result<String, Status> {
+            Ok("url".to_string())
+        }
+    }
+
+    #[tokio::test]
+    async fn test_get_room() {
         let room = Room {
             id: "id".to_string(),
             title: "title".to_string(),
@@ -105,14 +154,14 @@ mod tests {
             is_furnished: true,
             is_pet_friendly: false,
             description: "description".to_string(),
-            images: vec![image],
+            s3_keys: vec!["key".to_string()],
             contact_information: ContactInformation {
                 email: "email".to_string(),
             },
             created_at: Local::now().naive_local(),
             updated_at: Local::now().naive_local(),
         };
-        let json = Get::generate(room);
+        let json = Get::generate(room, MockS3Client {}).await.unwrap();
         assert_eq!(json.id, "id".to_string());
         assert_eq!(json.title, "title".to_string());
         assert_eq!(json.price, 10000);
@@ -120,7 +169,7 @@ mod tests {
         assert!(json.street.is_none());
         assert!(json.is_furnished);
         assert!(!json.is_pet_friendly);
-        assert_eq!(json.images[0].url, "url".to_string());
+        assert_eq!(json.image_urls[0], "object".to_string());
         assert_eq!(json.contact_information.email, "email".to_string());
         assert_eq!(json.description, "description".to_string());
         assert!(!json.created_at.to_string().is_empty());
@@ -129,9 +178,6 @@ mod tests {
 
     #[test]
     fn test_list_rooms() {
-        let image = Image {
-            url: "url".to_string(),
-        };
         let room = Room {
             id: "id".to_string(),
             title: "title".to_string(),
@@ -141,7 +187,7 @@ mod tests {
             is_furnished: true,
             is_pet_friendly: false,
             description: "description".to_string(),
-            images: vec![image],
+            s3_keys: vec!["key".to_string()],
             contact_information: ContactInformation {
                 email: "email".to_string(),
             },

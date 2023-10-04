@@ -1,7 +1,7 @@
 import roomImg from "../assets/sample.jpeg";
 import { Thumb } from "../layouts/listing/Thumb";
 
-const rooms = [
+const ads = [
   {
     id: 0,
     title: "Room 1",
@@ -20,13 +20,13 @@ const rooms = [
   },
 ];
 
-export const Wishlist = () => {
-  const thumbs = rooms.map((room) => <Thumb key={room.id} {...room} />);
+export const YourAds = () => {
+  const thumbs = ads.map((ad) => <Thumb key={ad.id} {...ad} />);
 
   return (
     <section className="container pb-16 pt-8">
-      <h2 className="pb-4 pl-2 text-sm">Showing 1-2 of 2 results</h2>
-      <ul className="flex list-none flex-col space-y-4">{thumbs}</ul>
+      <h1 className="pb-4 pl-2 text-lg font-medium">Your Ads</h1>
+      <ul className="flex flex-col space-y-4">{thumbs}</ul>
     </section>
   );
 };

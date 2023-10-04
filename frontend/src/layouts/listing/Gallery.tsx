@@ -1,6 +1,6 @@
 import { MapPinIcon } from "@heroicons/react/24/solid";
 
-type RoomListingProps = {
+type GalleryProps = {
   title: string;
   price: number;
   location: string;
@@ -8,9 +8,9 @@ type RoomListingProps = {
   updated_at: string;
 };
 
-export const RoomListing = (props: RoomListingProps) => {
+export const Gallery = (props: GalleryProps) => {
   return (
-    <div className="room-listing m-2 rounded-md bg-white p-6 shadow-sm hover:shadow-lg">
+    <div className="flex flex-1 flex-col rounded-md bg-white p-6 shadow-sm hover:shadow-lg sm:flex-1/3">
       <img className="rounded-lg" src={props.img} />
       <div className="flex flex-col px-2 pt-4">
         <h2 className="text-lg font-medium text-rent-blue">{props.title}</h2>

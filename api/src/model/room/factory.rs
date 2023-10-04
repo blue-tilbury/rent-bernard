@@ -2,7 +2,7 @@
 pub mod tests {
     use chrono::Local;
 
-    use crate::fairing::db::DB;
+    use crate::fairing::db::DBClient;
     use crate::model::room::model::ContactInformation;
     use crate::model::room::model::Room;
     use crate::model::room::RoomResource;
@@ -26,7 +26,7 @@ pub mod tests {
     pub struct RoomFactory {}
 
     impl RoomFactory {
-        pub async fn create(db: &DB, params: RoomFactoryParams) -> Room {
+        pub async fn create(db: &DBClient, params: RoomFactoryParams) -> Room {
             let content = RoomResource {
                 id: None,
                 title: params.title.unwrap_or_default(),
@@ -45,7 +45,11 @@ pub mod tests {
             Room::to_raw_id(room)
         }
 
-        pub async fn create_many(db: &DB, params: RoomFactoryParams, number: usize) -> Vec<Room> {
+        pub async fn create_many(
+            db: &DBClient,
+            params: RoomFactoryParams,
+            number: usize,
+        ) -> Vec<Room> {
             let mut rooms: Vec<Room> = Vec::new();
             for _ in 0..number {
                 let room = Self::create(db, params.clone()).await;

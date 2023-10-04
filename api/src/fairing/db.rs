@@ -14,7 +14,7 @@ use surrealdb::{
 };
 use uuid::Uuid;
 
-pub type DB = Surreal<Client>;
+pub type DBClient = Surreal<Client>;
 
 pub struct Connection;
 
@@ -85,7 +85,7 @@ impl Fairing for TestConnection {
 }
 
 impl TestConnection {
-    pub async fn setup_db() -> DB {
+    pub async fn setup_db() -> DBClient {
         let figment = Figment::new().merge(Toml::file("App.toml").nested());
         let db_conf: TestDbConfig = figment.select("test_database").extract().unwrap();
         let db = Surreal::new::<Ws>(format!("{}:{}", db_conf.host, db_conf.port))

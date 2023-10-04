@@ -2,9 +2,9 @@ use std::env;
 
 use rocket::{http::Status, serde::json::Json, State};
 use serde::{Deserialize, Serialize};
-use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
+    fairing::db::DBClient,
     model::room::model::{ContactInformation, CreateRoom, Room, UpdateRoom},
     utils::s3::S3Client,
     view,
@@ -28,7 +28,7 @@ pub struct PostContactInformation {
     pub email: String,
 }
 
-type DB = State<Surreal<Client>>;
+type DB = State<DBClient>;
 
 #[get("/rooms/<id>")]
 pub async fn show(id: String, db: &DB) -> Result<Json<view::room::Get>, Status> {

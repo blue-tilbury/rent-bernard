@@ -1,7 +1,7 @@
 use chrono::{Local, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 
-use crate::{fairing::db::DB, model::IdConverter};
+use crate::{fairing::db::DBClient, model::IdConverter};
 
 use super::{RoomResource, UpdateRoomResource, TABLE_NAME};
 
@@ -54,7 +54,7 @@ pub struct ContactInformation {
 }
 
 impl Room {
-    pub async fn create(db: &DB, room: CreateRoom) -> Result<Room, surrealdb::Error> {
+    pub async fn create(db: &DBClient, room: CreateRoom) -> Result<Room, surrealdb::Error> {
         let room = db
             .create(TABLE_NAME)
             .content(RoomResource {
@@ -75,19 +75,19 @@ impl Room {
         Ok(Self::to_raw_id(room))
     }
 
-    pub async fn get(db: &DB, id: String) -> Result<Option<Room>, surrealdb::Error> {
+    pub async fn get(db: &DBClient, id: String) -> Result<Option<Room>, surrealdb::Error> {
         let room: Option<RoomResource> = db.select((TABLE_NAME, id)).await?;
         match room {
             Some(room) => Ok(Some(Self::to_raw_id(room))),
             None => Ok(None),
         }
     }
-    pub async fn list(db: &DB) -> Result<Vec<Room>, surrealdb::Error> {
+    pub async fn list(db: &DBClient) -> Result<Vec<Room>, surrealdb::Error> {
         let rooms: Vec<RoomResource> = db.select(TABLE_NAME).await?;
         Ok(rooms.into_iter().map(Self::to_raw_id).collect())
     }
 
-    pub async fn update(db: &DB, room: UpdateRoom) -> Result<Option<Room>, surrealdb::Error> {
+    pub async fn update(db: &DBClient, room: UpdateRoom) -> Result<Option<Room>, surrealdb::Error> {
         if Self::get(db, room.id.clone()).await?.is_none() {
             return Ok(None);
         }
@@ -109,7 +109,7 @@ impl Room {
         Ok(Some(Self::to_raw_id(updated_room)))
     }
 
-    pub async fn delete(db: &DB, id: String) -> Result<Option<()>, surrealdb::Error> {
+    pub async fn delete(db: &DBClient, id: String) -> Result<Option<()>, surrealdb::Error> {
         let room: Option<RoomResource> = db.delete((TABLE_NAME, id)).await?;
         match room {
             Some(_) => Ok(Some(())),

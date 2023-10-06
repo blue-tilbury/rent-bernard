@@ -2,8 +2,8 @@ import { useController } from "react-hook-form";
 
 import { ControlledInputProps } from "../../types/register.type";
 
-export const RadioButton = (props: ControlledInputProps) => {
-  const { field } = useController(props);
+export const RadioButton = ({ control, name, error }: ControlledInputProps) => {
+  const { field } = useController({ control, name });
 
   return (
     <div className="flex flex-col pl-3">
@@ -29,8 +29,8 @@ export const RadioButton = (props: ControlledInputProps) => {
           No
         </label>
       </div>
-      {props.error?.message && (
-        <p className="pl-1 pt-1 text-sm text-red-600">{props.error?.message}</p>
+      {error?.message && (
+        <p className="pl-1 pt-1 text-sm text-red-600">{error?.message}</p>
       )}
     </div>
   );

@@ -6,7 +6,7 @@ export const PetFriendly = ({ control, error }: ControlledInputProps) => {
   return (
     <div className="flex">
       <Label name="Pet Friendly" required={true} />
-      <RadioButton control={control} error={error} name="is_pet_friendly" />
+      <RadioButton control={control} name="is_pet_friendly" error={error} />
     </div>
   );
 };

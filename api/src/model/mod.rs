@@ -1,6 +1,3 @@
 pub mod room;
+pub mod room_image;
 pub mod user;
-
-pub trait IdConverter<T, R> {
-    fn to_raw_id(resource: T) -> R;
-}

@@ -7,26 +7,16 @@ use crate::{model::room::model::Room, utils::s3::S3Operation};
 pub struct Get {
     pub id: String,
     title: String,
-    price: i64,
+    price: i32,
     city: String,
     street: Option<String>,
     is_furnished: bool,
     is_pet_friendly: bool,
     description: String,
     image_urls: Vec<String>,
-    contact_information: GetContactInformation,
+    email: String,
     created_at: String,
     updated_at: String,
-}
-
-#[derive(Serialize, Deserialize)]
-struct GetImage {
-    url: String,
-}
-
-#[derive(Serialize, Deserialize)]
-struct GetContactInformation {
-    email: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -38,13 +28,14 @@ pub struct List {
 pub struct ListItem {
     id: String,
     title: String,
-    price: i64,
+    price: i32,
     city: String,
     street: Option<String>,
     is_furnished: bool,
     is_pet_friendly: bool,
     description: String,
-    contact_information: GetContactInformation,
+    thumbnail_url: Option<String>,
+    email: String,
     created_at: String,
     updated_at: String,
 }
@@ -65,7 +56,7 @@ impl Get {
             is_furnished,
             is_pet_friendly,
             description,
-            contact_information,
+            email,
             created_at,
             updated_at,
             s3_keys,
@@ -75,7 +66,7 @@ impl Get {
             image_urls.push(client.get_object(key).await?);
         }
         Ok(Get {
-            id,
+            id: id.to_string(),
             title,
             price,
             city,
@@ -84,9 +75,7 @@ impl Get {
             is_pet_friendly,
             description,
             image_urls,
-            contact_information: GetContactInformation {
-                email: contact_information.email,
-            },
+            email,
             created_at: created_at.to_string(),
             updated_at: updated_at.to_string(),
         })
@@ -94,39 +83,46 @@ impl Get {
 }
 
 impl List {
-    pub fn generate(rooms: Vec<Room>) -> Json<List> {
-        Json(Self::to_list(rooms))
+    pub async fn generate(
+        rooms: Vec<Room>,
+        client: impl S3Operation,
+    ) -> Result<Json<List>, Status> {
+        let json = Json(Self::to_list(rooms, client).await?);
+        Ok(json)
     }
 
-    fn to_list(rooms: Vec<Room>) -> List {
-        List {
-            rooms: rooms
-                .into_iter()
-                .map(|room| ListItem {
-                    id: room.id,
-                    title: room.title,
-                    price: room.price,
-                    city: room.city,
-                    street: room.street,
-                    is_furnished: room.is_furnished,
-                    is_pet_friendly: room.is_pet_friendly,
-                    description: room.description,
-                    contact_information: GetContactInformation {
-                        email: room.contact_information.email,
-                    },
-                    created_at: room.created_at.to_string(),
-                    updated_at: room.updated_at.to_string(),
-                })
-                .collect(),
+    async fn to_list(rooms: Vec<Room>, client: impl S3Operation) -> Result<List, Status> {
+        let mut list_items: Vec<ListItem> = Vec::new();
+        for room in rooms {
+            let key = room.s3_keys.first().map(|key| key.to_string());
+            let thumbnail_url = match key {
+                Some(key) => Some(client.get_object(key).await?),
+                None => None,
+            };
+            let item = ListItem {
+                id: room.id.to_string(),
+                title: room.title,
+                price: room.price,
+                city: room.city,
+                street: room.street,
+                is_furnished: room.is_furnished,
+                is_pet_friendly: room.is_pet_friendly,
+                description: room.description,
+                email: room.email,
+                thumbnail_url,
+                created_at: room.created_at.to_string(),
+                updated_at: room.updated_at.to_string(),
+            };
+            list_items.push(item);
         }
+        Ok(List { rooms: list_items })
     }
 }
 
 #[cfg(test)]
 mod tests {
     use chrono::Local;
-
-    use crate::model::room::model::ContactInformation;
+    use uuid::Uuid;
 
     use super::*;
 
@@ -145,8 +141,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_room() {
+        let id = Uuid::new_v4();
         let room = Room {
-            id: "id".to_string(),
+            id,
             title: "title".to_string(),
             price: 10000,
             city: "city".to_string(),
@@ -155,14 +152,12 @@ mod tests {
             is_pet_friendly: false,
             description: "description".to_string(),
             s3_keys: vec!["key".to_string()],
-            contact_information: ContactInformation {
-                email: "email".to_string(),
-            },
+            email: "email".to_string(),
             created_at: Local::now().naive_local(),
             updated_at: Local::now().naive_local(),
         };
         let json = Get::generate(room, MockS3Client {}).await.unwrap();
-        assert_eq!(json.id, "id".to_string());
+        assert_eq!(json.id, id.to_string());
         assert_eq!(json.title, "title".to_string());
         assert_eq!(json.price, 10000);
         assert_eq!(json.city, "city".to_string());
@@ -170,16 +165,17 @@ mod tests {
         assert!(json.is_furnished);
         assert!(!json.is_pet_friendly);
         assert_eq!(json.image_urls[0], "object".to_string());
-        assert_eq!(json.contact_information.email, "email".to_string());
+        assert_eq!(json.email, "email".to_string());
         assert_eq!(json.description, "description".to_string());
         assert!(!json.created_at.to_string().is_empty());
         assert!(!json.updated_at.to_string().is_empty());
     }
 
-    #[test]
-    fn test_list_rooms() {
+    #[tokio::test]
+    async fn test_list_rooms() {
+        let id = Uuid::new_v4();
         let room = Room {
-            id: "id".to_string(),
+            id,
             title: "title".to_string(),
             price: 10000,
             city: "city".to_string(),
@@ -188,13 +184,25 @@ mod tests {
             is_pet_friendly: false,
             description: "description".to_string(),
             s3_keys: vec!["key".to_string()],
-            contact_information: ContactInformation {
-                email: "email".to_string(),
-            },
+            email: "email".to_string(),
             created_at: Local::now().naive_local(),
             updated_at: Local::now().naive_local(),
         };
-        let json = List::generate(vec![room]);
+        let json = List::generate(vec![room], MockS3Client {}).await.unwrap();
         assert_eq!(json.rooms.len(), 1);
+
+        let room = &json.rooms[0];
+        assert_eq!(room.id, id.to_string());
+        assert_eq!(room.title, "title".to_string());
+        assert_eq!(room.price, 10000);
+        assert_eq!(room.city, "city".to_string());
+        assert!(room.street.is_none());
+        assert!(room.is_furnished);
+        assert!(!room.is_pet_friendly);
+        assert_eq!(room.thumbnail_url.as_ref().unwrap(), "object");
+        assert_eq!(room.email, "email".to_string());
+        assert_eq!(room.description, "description".to_string());
+        assert!(!room.created_at.to_string().is_empty());
+        assert!(!room.updated_at.to_string().is_empty());
     }
 }

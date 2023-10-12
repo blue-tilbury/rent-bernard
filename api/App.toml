@@ -1,17 +1,2 @@
-[database]
-namespace = "rent-bernard"
-database = "rent-bernard"
-username = "root"
-password = "root"
-host = "surrealdb"
-port = "8000"
-
-[test_database]
-namespace = "rent-bernard"
-username = "root"
-password = "root"
-host = "test_surrealdb"
-port = "8000"
-
 [cors]
 origin = "http://localhost:43000"

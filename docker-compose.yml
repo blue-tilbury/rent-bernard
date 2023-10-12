@@ -7,16 +7,12 @@ services:
       - ./api:/app
     ports:
       - 58000:8000
-    environment:
-      - AWS_REGION=local
-      - AWS_ACCESS_KEY_ID=S3RVER
-      - AWS_SECRET_ACCESS_KEY=S3RVER
-      - S3_ENDPOINT=http://localhost:44569
-      - ROOMS_BUCKET=rooms-bucket
     depends_on:
-      - surrealdb
-      - test_surrealdb
+      - postgres
+      - test_postgres
       - s3
+    env_file:
+      - ./api/.env.docker
   frontend:
     build: ./frontend
     volumes:
@@ -25,18 +21,25 @@ services:
       - WDS_SOCKET_PORT=0
     ports:
       - 43000:3000
-  surrealdb:
-    image: surrealdb/surrealdb:latest
+  postgres:
+    image: postgres:16.0-alpine3.18
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: rent_bernard
     ports:
-      - 48000:8000
+      - 45432:5432
     volumes:
-      - surrealdb:/db
-    command: start --log debug --user root --pass root file:/db/rent-bernard.db
-  test_surrealdb:
-    image: surrealdb/surrealdb:latest
+      - postgres:/var/lib/postgresql/data
+  test_postgres:
+    image: postgres:16.0-alpine3.18
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - 48001:8000
-    command: start --log debug --user root --pass root memory
+      - 45433:5432
   s3:
     build: ./docker/s3
     ports:
@@ -46,5 +49,5 @@ services:
       - ./docker/s3/serverless.yml:/app/serverless.yml
       - ./docker/s3/cors.xml:/app/cors.xml
 volumes:
-  surrealdb:
+  postgres:
   s3:

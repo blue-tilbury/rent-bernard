@@ -1,0 +1,13 @@
+CREATE TABLE rooms (
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  price INTEGER NOT NULL,
+  city VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  street VARCHAR(255),
+  is_furnished BOOLEAN NOT NULL,
+  is_pet_friendly BOOLEAN NOT NULL,
+  description TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

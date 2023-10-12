@@ -1,22 +1,21 @@
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
-use rocket::{http::Status, serde::json::Json, State};
+use rocket::{http::Status, serde::json::Json};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    fairing::db::DBClient,
     model::user::model::{CreateUser, User},
     view,
 };
+
+use super::DB;
 
 #[derive(Serialize, Deserialize)]
 pub struct UserParams {
     pub token: String,
 }
 
-type DB = State<DBClient>;
-
 #[post("/users", data = "<params>")]
-pub async fn create(params: Json<UserParams>, db: &DB) -> Result<Json<view::user::Get>, Status> {
+pub async fn create(params: Json<UserParams>, db: &DB) -> Result<Json<view::Id>, Status> {
     let key = DecodingKey::from_secret(&[]);
     let mut validation = Validation::new(Algorithm::HS256);
     validation.insecure_disable_signature_validation();
@@ -29,14 +28,12 @@ pub async fn create(params: Json<UserParams>, db: &DB) -> Result<Json<view::user
         }
     };
     let user = decoded_token.claims;
-    match User::create(db.inner(), user).await {
-        Ok(room) => {
-            let response = view::user::Get::generate(room);
-            Ok(response)
-        }
+    let id = match User::create(db, user).await {
+        Ok(id) => id,
         Err(err) => {
             eprintln!("{err}");
-            Err(Status::InternalServerError)
+            return Err(Status::InternalServerError);
         }
-    }
+    };
+    Ok(view::Id::to_json(id.to_string()))
 }

@@ -1,61 +1,57 @@
 #[cfg(test)]
 pub mod tests {
-    use chrono::Local;
-
-    use crate::fairing::db::DBClient;
-    use crate::model::room::model::ContactInformation;
-    use crate::model::room::model::Room;
-    use crate::model::room::RoomResource;
-    use crate::model::room::TABLE_NAME;
-    use crate::model::IdConverter;
+    use sqlx::PgPool;
+    use uuid::Uuid;
 
     #[derive(Default, Clone)]
     pub struct RoomFactoryParams {
-        pub id: Option<String>,
-        pub title: Option<String>,
-        pub price: Option<i64>,
-        pub city: Option<String>,
+        pub title: String,
+        pub price: i32,
+        pub city: String,
         pub street: Option<String>,
-        pub is_furnished: Option<bool>,
-        pub is_pet_friendly: Option<bool>,
-        pub s3_keys: Option<Vec<String>>,
-        pub contact_information: Option<ContactInformation>,
-        pub description: Option<String>,
+        pub is_furnished: bool,
+        pub is_pet_friendly: bool,
+        pub email: String,
+        pub description: String,
     }
 
     pub struct RoomFactory {}
 
     impl RoomFactory {
-        pub async fn create(db: &DBClient, params: RoomFactoryParams) -> Room {
-            let content = RoomResource {
-                id: None,
-                title: params.title.unwrap_or_default(),
-                price: params.price.unwrap_or_default(),
-                city: params.city.unwrap_or_default(),
-                street: params.street,
-                is_furnished: params.is_furnished.unwrap_or_default(),
-                is_pet_friendly: params.is_pet_friendly.unwrap_or_default(),
-                description: params.description.unwrap_or_default(),
-                s3_keys: params.s3_keys.unwrap_or_default(),
-                contact_information: params.contact_information.unwrap_or_default(),
-                created_at: Local::now().naive_local(),
-                updated_at: Local::now().naive_local(),
-            };
-            let room = db.create(TABLE_NAME).content(content).await.unwrap();
-            Room::to_raw_id(room)
+        pub async fn create(db: &PgPool, params: RoomFactoryParams) -> Uuid {
+            let rec = sqlx::query!(
+                r#"
+                    INSERT INTO rooms (
+                        title, price, city, street, is_furnished, is_pet_friendly, description, email
+                    )
+                    VALUES ( $1, $2, $3, $4, $5, $6, $7, $8 )
+                    RETURNING id
+                "#,
+                params.title,
+                params.price,
+                params.city,
+                params.street,
+                params.is_furnished,
+                params.is_pet_friendly,
+                params.description,
+                params.email,
+            )
+            .fetch_one(db)
+            .await.unwrap();
+            rec.id
         }
 
         pub async fn create_many(
-            db: &DBClient,
+            db: &PgPool,
             params: RoomFactoryParams,
             number: usize,
-        ) -> Vec<Room> {
-            let mut rooms: Vec<Room> = Vec::new();
+        ) -> Vec<Uuid> {
+            let mut room_ids: Vec<Uuid> = Vec::new();
             for _ in 0..number {
-                let room = Self::create(db, params.clone()).await;
-                rooms.push(room)
+                let room_id = Self::create(db, params.clone()).await;
+                room_ids.push(room_id)
             }
-            rooms
+            room_ids
         }
     }
 }

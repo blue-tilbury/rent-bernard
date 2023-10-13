@@ -1,34 +1,32 @@
 use std::env;
 
-use rocket::{http::Status, serde::json::Json, State};
+use rocket::{http::Status, serde::json::Json};
 use serde::{Deserialize, Serialize};
-use surrealdb::{engine::remote::ws::Client, Surreal};
+use uuid::Uuid;
 
 use crate::{
-    model::room::model::{ContactInformation, CreateRoom, Room, UpdateRoom},
+    model::{
+        room::model::{CreateRoom, Room, UpdateRoom},
+        room_image::model::RoomImage,
+    },
     utils::s3::S3Client,
     view,
 };
 
+use super::DB;
+
 #[derive(Serialize, Deserialize)]
 pub struct RoomParams {
     pub title: String,
-    pub price: i64,
+    pub price: i32,
     pub city: String,
     pub street: Option<String>,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub s3_keys: Vec<String>,
-    pub contact_information: PostContactInformation,
+    pub email: String,
     pub description: String,
 }
-
-#[derive(Serialize, Deserialize)]
-pub struct PostContactInformation {
-    pub email: String,
-}
-
-type DB = State<Surreal<Client>>;
 
 #[get("/rooms/<id>")]
 pub async fn show(id: String, db: &DB) -> Result<Json<view::room::Get>, Status> {
@@ -57,61 +55,10 @@ pub async fn show(id: String, db: &DB) -> Result<Json<view::room::Get>, Status> 
     Ok(response)
 }
 
-#[get("/rooms")]
-pub async fn index(db: &DB) -> Result<Json<view::room::List>, Status> {
-    match Room::list(db).await {
-        Ok(rooms) => Ok(view::room::List::generate(rooms)),
-        Err(err) => {
-            eprintln!("{err}");
-            Err(Status::InternalServerError)
-        }
-    }
-}
-
-#[put("/room/<id>", data = "<room>")]
-pub async fn update(
-    id: String,
-    room: Json<RoomParams>,
-    db: &DB,
-) -> Result<Json<view::room::Get>, Status> {
-    let RoomParams {
-        title,
-        price,
-        city,
-        street,
-        is_furnished,
-        is_pet_friendly,
-        s3_keys,
-        contact_information,
-        description,
-    } = room.0;
-    let update_room_params = UpdateRoom {
-        id,
-        title,
-        price,
-        city,
-        street,
-        is_furnished,
-        is_pet_friendly,
-        s3_keys,
-        contact_information: ContactInformation {
-            email: contact_information.email,
-        },
-        description,
-    };
-    let room = match Room::update(db, update_room_params).await {
-        Ok(option_room) => match option_room {
-            Some(room) => room,
-            None => {
-                eprintln!("Room Not Found");
-                return Err(Status::NotFound);
-            }
-        },
-        Err(err) => {
-            eprintln!("{err}");
-            return Err(Status::InternalServerError);
-        }
-    };
+#[get("/rooms?<username>")]
+pub async fn index(username: Option<String>, db: &DB) -> Result<Json<view::room::List>, Status> {
+    // TODO: filter by username
+    println!("{}", username.unwrap_or("".to_string()));
     let bucket_name = match env::var("ROOMS_BUCKET") {
         Ok(name) => name,
         Err(err) => {
@@ -120,7 +67,63 @@ pub async fn update(
         }
     };
     let client = S3Client::new(bucket_name).await?;
-    view::room::Get::generate(room, client).await
+    match Room::list(db).await {
+        Ok(rooms) => Ok(view::room::List::generate(rooms, client).await?),
+        Err(err) => {
+            eprintln!("{err}");
+            Err(Status::InternalServerError)
+        }
+    }
+}
+
+#[put("/room/<id>", data = "<room>")]
+pub async fn update(id: String, room: Json<RoomParams>, db: &DB) -> Status {
+    let room_id = match Uuid::parse_str(&id) {
+        Ok(uuid) => uuid,
+        Err(_) => return Status::NotFound,
+    };
+    let RoomParams {
+        title,
+        price,
+        city,
+        street,
+        is_furnished,
+        is_pet_friendly,
+        s3_keys,
+        description,
+        email,
+    } = room.0;
+    let update_room_params = UpdateRoom {
+        id: room_id,
+        title,
+        price,
+        city,
+        street,
+        is_furnished,
+        is_pet_friendly,
+        email,
+        description,
+    };
+    // TODO: transaction
+    if RoomImage::delete_many(db, room_id).await.is_err() {
+        eprintln!("Failed to delete room images");
+        return Status::InternalServerError;
+    }
+    if RoomImage::create_many(db, room_id, s3_keys).await.is_err() {
+        eprintln!("Failed to create room images");
+        return Status::InternalServerError;
+    }
+    let option = match Room::update(db, update_room_params).await {
+        Ok(option) => option,
+        Err(err) => {
+            eprintln!("{err}");
+            return Status::InternalServerError;
+        }
+    };
+    match option {
+        Some(_) => Status::NoContent,
+        None => Status::NotFound,
+    }
 }
 
 #[delete("/room/<id>")]
@@ -142,7 +145,7 @@ pub async fn delete(id: String, db: &DB) -> Status {
 }
 
 #[post("/rooms", data = "<room>")]
-pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::room::Get>, Status> {
+pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::Id>, Status> {
     let RoomParams {
         title,
         price,
@@ -151,8 +154,8 @@ pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::room::
         is_furnished,
         is_pet_friendly,
         s3_keys,
-        contact_information,
         description,
+        email,
     } = room.0;
     let create_room_params = CreateRoom {
         title,
@@ -161,25 +164,18 @@ pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::room::
         street,
         is_furnished,
         is_pet_friendly,
-        s3_keys,
-        contact_information: ContactInformation {
-            email: contact_information.email,
-        },
         description,
+        email,
     };
-    match Room::create(db.inner(), create_room_params).await {
-        Ok(room) => {
-            let bucket_name = match env::var("ROOMS_BUCKET") {
-                Ok(name) => name,
-                Err(err) => {
-                    eprintln!("{err}");
-                    return Err(Status::InternalServerError);
-                }
-            };
-            let client = S3Client::new(bucket_name).await?;
-            let response = view::room::Get::generate(room, client).await?;
-            Ok(response)
+    let room_id = match Room::create(db, create_room_params).await {
+        Ok(id) => id,
+        Err(err) => {
+            eprintln!("{err}");
+            return Err(Status::InternalServerError);
         }
+    };
+    match RoomImage::create_many(db, room_id, s3_keys).await {
+        Ok(_) => Ok(view::Id::to_json(room_id.to_string())),
         Err(err) => {
             eprintln!("{err}");
             Err(Status::InternalServerError)

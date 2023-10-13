@@ -1,4 +1,5 @@
 import { ChatBubbleLeftRightIcon, HomeIcon } from "@heroicons/react/24/solid";
+import { Link } from "react-router-dom";
 
 import { SignOut } from "./SignOut";
 import { User } from "../../types/user.type";
@@ -22,10 +23,10 @@ export const UserMenu = ({ user, isUserMenuOpen }: UserMenuProps) => {
         <p className="font-medium">{user.name}</p>
       </div>
       <ul className="divide-y rounded-md bg-white px-2">
-        <li className="flex items-center gap-3 py-2">
+        <Link to="/your-ads" className="flex items-center gap-3 py-2">
           <HomeIcon className="h-4 w-4" />
           <p>Your ads</p>
-        </li>
+        </Link>
         <li className="flex items-center gap-3 py-2">
           <ChatBubbleLeftRightIcon className="h-4 w-4" />
           <p>Your reviews</p>

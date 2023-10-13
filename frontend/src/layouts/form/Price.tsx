@@ -1,6 +1,6 @@
 import { Label } from "../../components/form/Label";
 import { NumberInput } from "../../components/form/NumberInput";
-import { InputProps } from "../../types/register.type";
+import { InputProps } from "../../types/form.type";
 
 export const Price = ({ register, error }: InputProps) => {
   return (

@@ -1,6 +1,6 @@
 import { Label } from "../../components/form/Label";
 import { TextInput } from "../../components/form/TextInput";
-import { InputProps } from "../../types/register.type";
+import { InputProps } from "../../types/form.type";
 
 export const Location = ({ register, error }: InputProps) => {
   return (

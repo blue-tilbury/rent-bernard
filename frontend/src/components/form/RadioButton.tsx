@@ -1,6 +1,6 @@
 import { useController } from "react-hook-form";
 
-import { ControlledInputProps } from "../../types/register.type";
+import { ControlledInputProps } from "../../types/form.type";
 
 export const RadioButton = ({ control, name, error }: ControlledInputProps) => {
   const { field } = useController({ control, name });

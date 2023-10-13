@@ -1,5 +1,5 @@
 import { Label } from "../../components/form/Label";
-import { InputProps } from "../../types/register.type";
+import { InputProps } from "../../types/form.type";
 
 export const Description = ({ register, error }: InputProps) => {
   return (

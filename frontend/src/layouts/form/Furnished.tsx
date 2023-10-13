@@ -1,6 +1,6 @@
 import { Label } from "../../components/form/Label";
 import { RadioButton } from "../../components/form/RadioButton";
-import { ControlledInputProps } from "../../types/register.type";
+import { ControlledInputProps } from "../../types/form.type";
 
 export const Furnished = ({ control, error }: ControlledInputProps) => {
   return (

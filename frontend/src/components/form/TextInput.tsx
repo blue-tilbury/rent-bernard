@@ -1,4 +1,4 @@
-import { RawInputProps } from "../../types/register.type";
+import { RawInputProps } from "../../types/form.type";
 
 export const TextInput = ({ register, name, style, error }: RawInputProps) => {
   let placeholderName = "";

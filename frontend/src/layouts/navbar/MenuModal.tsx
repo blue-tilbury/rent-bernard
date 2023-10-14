@@ -12,7 +12,7 @@ export const MenuModal = ({ handleMenuOpen, hidden }: MenuModalProps) => {
       className={`${
         hidden
           ? "hidden"
-          : "container fixed top-0 z-20 flex h-full w-full flex-col bg-rent-background-gray drop-shadow-xl"
+          : "container fixed top-0 z-20 flex h-full w-full flex-col bg-rent-bg-gray drop-shadow-xl"
       }`}
     >
       <div className="flex justify-end py-6">

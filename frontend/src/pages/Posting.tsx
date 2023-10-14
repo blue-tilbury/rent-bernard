@@ -89,9 +89,11 @@ export const Posting = () => {
         <div className="py-6">
           <Email register={register} error={errors.email} />
         </div>
-        <div className="pb-12 text-center">
-          <Button name="Submit" type="submit" />
-        </div>
+      </div>
+      <div className="pb-12 text-center">
+        <Button size="lg" color="primary" type="submit">
+          Submit
+        </Button>
       </div>
     </form>
   );

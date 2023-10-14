@@ -10,7 +10,9 @@ export const ThankYou = () => {
       <h2 className="pb-3 pt-6 text-3xl font-bold">Thank you!</h2>
       <p className="pb-16">Your submission has been sent.</p>
       <Link to="/">
-        <Button name="Go back home" type="button" />
+        <Button size="lg" color="primary" type="button">
+          Go back home
+        </Button>
       </Link>
     </section>
   );

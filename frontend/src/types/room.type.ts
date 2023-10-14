@@ -38,7 +38,7 @@ export type ListItem = {
   is_furnished: boolean;
   is_pet_friendly: boolean;
   description: string;
-  thumbnail_url?: string,
+  thumbnail_url?: string;
   email: string;
   created_at: string;
   updated_at: string;

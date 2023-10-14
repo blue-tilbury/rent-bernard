@@ -1,4 +1,10 @@
-import { FieldError, Merge, UseControllerProps, UseFormRegister, UseFormSetValue } from "react-hook-form";
+import {
+  FieldError,
+  Merge,
+  UseControllerProps,
+  UseFormRegister,
+  UseFormSetValue,
+} from "react-hook-form";
 
 import { Room } from "./room.type";
 
@@ -32,8 +38,8 @@ export type ControlledInputProps = UseControllerProps<Room> & {
 };
 
 export type ImageInputProps = UseControllerProps<Room> & {
-  error?:  Merge<FieldError, (FieldError | undefined)[]>;
+  error?: Merge<FieldError, (FieldError | undefined)[]>;
   files: File[];
-  handleFiles(value: File[], type: 'update' | 'delete'): void;
+  handleFiles(value: File[], type: "update" | "delete"): void;
   setValue: UseFormSetValue<Room>;
 };

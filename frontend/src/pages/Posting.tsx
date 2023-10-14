@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 import { S3API } from "../apis/s3API";
 import { Button } from "../components/Button";
-import { useGetPhoto, useCreateRoom } from "../hooks/useAxios";
+import { useCreateRoom, useGetPhoto } from "../hooks/useAxios";
 import {
   Description,
   Email,

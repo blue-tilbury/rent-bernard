@@ -1,5 +1,5 @@
-export const defineCancelApiObj = (apiObj: Record<string, any>) => {
-  const cancelApiObj: Record<string, any> = {};
+export const defineCancelApiObj = <T>(apiObj: Record<string, T>) => {
+  const cancelApiObj: Record<string, { handleRequestCancel: () => AbortController }> = {};
 
   Object.getOwnPropertyNames(apiObj).forEach((name) => {
     const cancelControllerObj = {

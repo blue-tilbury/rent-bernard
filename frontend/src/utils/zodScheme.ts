@@ -15,10 +15,8 @@ export const scheme = z.object({
     .string({ required_error: "Image is required." })
     .array()
     .nonempty({ message: "Image is required." }),
-  contact_information: z.object({
-    email: z
-      .string()
-      .nonempty({ message: "Email is required." })
-      .email({ message: "Invalid email address." }),
-  }),
+  email: z
+    .string()
+    .nonempty({ message: "Email is required." })
+    .email({ message: "Invalid email address." }),
 });

@@ -8,7 +8,7 @@ export const Email = ({ register, error }: InputProps) => {
       <Label name="Email" required={true} />
       <TextInput
         register={register}
-        name="contact_information.email"
+        name="email"
         style="rounded border-rent-input-gray"
         error={error}
       />

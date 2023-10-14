@@ -1,10 +1,14 @@
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
-use rocket::{http::Status, serde::json::Json};
+use rocket::{
+    http::{Cookie, CookieJar, Status},
+    serde::json::Json,
+};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::{
     model::user::model::{CreateUser, User},
-    view,
+    utils::redis::RedisClient,
 };
 
 use super::DB;
@@ -14,8 +18,8 @@ pub struct UserParams {
     pub token: String,
 }
 
-#[post("/users", data = "<params>")]
-pub async fn create(params: Json<UserParams>, db: &DB) -> Result<Json<view::Id>, Status> {
+#[post("/login", data = "<params>")]
+pub async fn login(params: Json<UserParams>, db: &DB, cookies: &CookieJar<'_>) -> Status {
     let key = DecodingKey::from_secret(&[]);
     let mut validation = Validation::new(Algorithm::HS256);
     validation.insecure_disable_signature_validation();
@@ -24,16 +28,41 @@ pub async fn create(params: Json<UserParams>, db: &DB) -> Result<Json<view::Id>,
         Ok(user) => user,
         Err(err) => {
             eprintln!("{err}");
-            return Err(Status::InternalServerError);
+            return Status::InternalServerError;
         }
     };
     let user = decoded_token.claims;
-    let id = match User::create(db, user).await {
-        Ok(id) => id,
+    let user_exists = match User::find_by_email(db, user.clone().email).await {
+        Ok(option) => option,
         Err(err) => {
             eprintln!("{err}");
-            return Err(Status::InternalServerError);
+            return Status::InternalServerError;
         }
     };
-    Ok(view::Id::to_json(id.to_string()))
+    let user_id = match user_exists {
+        Some(user) => user.id,
+        None => match User::create(db, user).await {
+            Ok(id) => id,
+            Err(err) => {
+                eprintln!("{err}");
+                return Status::InternalServerError;
+            }
+        },
+    };
+    let mut client = RedisClient::new().await;
+    if client
+        .set("user_id", user_id.to_string().as_str())
+        .await
+        .is_err()
+    {
+        eprintln!("Failed to set user_id in redis");
+        return Status::InternalServerError;
+    }
+    let session_id = Uuid::new_v4().to_string();
+    if client.set("session_id", session_id.as_str()).await.is_err() {
+        eprintln!("Failed to set session_id in redis");
+        return Status::InternalServerError;
+    }
+    cookies.add_private(Cookie::new("session_id", session_id));
+    Status::Ok
 }

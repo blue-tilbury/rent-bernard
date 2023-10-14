@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use chrono::NaiveDateTime;
-use sqlx::{FromRow, PgPool};
+use sqlx::{FromRow, PgPool, Row};
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -46,7 +46,7 @@ pub struct UpdateRoom {
 }
 
 #[derive(FromRow, Clone)]
-struct Row {
+struct RoomRow {
     id: Uuid,
     title: String,
     price: i32,
@@ -63,7 +63,7 @@ struct Row {
 
 impl Room {
     pub async fn create(db: &PgPool, room: CreateRoom) -> Result<Uuid, sqlx::Error> {
-        let rec = sqlx::query!(
+        let rec = sqlx::query(
             r#"
                 INSERT INTO rooms (
                     title, price, city, street, is_furnished, is_pet_friendly, description, email
@@ -71,18 +71,18 @@ impl Room {
                 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8 )
                 RETURNING id
             "#,
-            room.title,
-            room.price,
-            room.city,
-            room.street,
-            room.is_furnished,
-            room.is_pet_friendly,
-            room.description,
-            room.email
         )
+        .bind(room.title)
+        .bind(room.price)
+        .bind(room.city)
+        .bind(room.street)
+        .bind(room.is_furnished)
+        .bind(room.is_pet_friendly)
+        .bind(room.description)
+        .bind(room.email)
         .fetch_one(db)
         .await?;
-        Ok(rec.id)
+        rec.try_get("id")
     }
 
     pub async fn get(db: &PgPool, id: String) -> Result<Option<Room>, sqlx::Error> {
@@ -90,7 +90,7 @@ impl Room {
             Ok(uuid) => uuid,
             Err(_) => return Ok(None),
         };
-        let rec: Vec<Row> = sqlx::query_as(
+        let rec: Vec<RoomRow> = sqlx::query_as(
             r#"
                 SELECT r.*, ri.s3_key FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
@@ -104,7 +104,7 @@ impl Room {
     }
 
     pub async fn list(db: &PgPool) -> Result<Vec<Room>, sqlx::Error> {
-        let rec: Vec<Row> = sqlx::query_as(
+        let rec: Vec<RoomRow> = sqlx::query_as(
             r#"
                 SELECT r.*, ri.s3_key FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
@@ -116,21 +116,21 @@ impl Room {
     }
 
     pub async fn update(db: &PgPool, room: UpdateRoom) -> Result<Option<()>, sqlx::Error> {
-        let rec = sqlx::query!(
+        let rec = sqlx::query(
             r#"
                 UPDATE rooms
                 SET title = $1, price = $2, city = $3, street = $4, is_furnished = $5, is_pet_friendly = $6, description = $7
                 WHERE id = $8
-            "#,
-            room.title,
-            room.price,
-            room.city,
-            room.street,
-            room.is_furnished,
-            room.is_pet_friendly,
-            room.description,
-            room.id
+            "#
         )
+        .bind(room.title)
+        .bind(room.price)
+        .bind(room.city)
+        .bind(room.street)
+        .bind(room.is_furnished)
+        .bind(room.is_pet_friendly)
+        .bind(room.description)
+        .bind(room.id)
         .execute(db)
         .await?;
         match rec.rows_affected() {
@@ -144,7 +144,8 @@ impl Room {
             Ok(uuid) => uuid,
             Err(_) => return Ok(None),
         };
-        let rec = sqlx::query!(r#"DELETE FROM rooms WHERE id = $1"#, uuid)
+        let rec = sqlx::query(r#"DELETE FROM rooms WHERE id = $1"#)
+            .bind(uuid)
             .execute(db)
             .await?;
         match rec.rows_affected() {
@@ -153,7 +154,7 @@ impl Room {
         }
     }
 
-    fn rows_to_room(rows: Vec<Row>) -> Option<Room> {
+    fn rows_to_room(rows: Vec<RoomRow>) -> Option<Room> {
         rows.get(0).map(|row| Room {
             id: row.id,
             title: row.title.clone(),
@@ -170,8 +171,8 @@ impl Room {
         })
     }
 
-    fn rows_to_rooms(rows: Vec<Row>) -> Vec<Room> {
-        let mut hashmap = HashMap::<Uuid, Vec<Row>>::new();
+    fn rows_to_rooms(rows: Vec<RoomRow>) -> Vec<Room> {
+        let mut hashmap = HashMap::<Uuid, Vec<RoomRow>>::new();
         for row in rows {
             match hashmap.get_mut(&row.id) {
                 Some(v) => v.push(row),

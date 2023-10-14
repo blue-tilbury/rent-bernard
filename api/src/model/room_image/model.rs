@@ -29,7 +29,8 @@ impl RoomImage {
     }
 
     pub async fn delete_many(db: &PgPool, room_id: Uuid) -> Result<(), sqlx::Error> {
-        sqlx::query!(r#"DELETE FROM room_images WHERE room_id = $1"#, room_id)
+        sqlx::query(r#"DELETE FROM room_images WHERE room_id = $1"#)
+            .bind(room_id)
             .execute(db)
             .await?;
         Ok(())

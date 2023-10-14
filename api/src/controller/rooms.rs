@@ -55,10 +55,8 @@ pub async fn show(id: String, db: &DB) -> Result<Json<view::room::Get>, Status> 
     Ok(response)
 }
 
-#[get("/rooms?<username>")]
-pub async fn index(username: Option<String>, db: &DB) -> Result<Json<view::room::List>, Status> {
-    // TODO: filter by username
-    println!("{}", username.unwrap_or("".to_string()));
+#[get("/rooms")]
+pub async fn index(db: &DB) -> Result<Json<view::room::List>, Status> {
     let bucket_name = match env::var("ROOMS_BUCKET") {
         Ok(name) => name,
         Err(err) => {

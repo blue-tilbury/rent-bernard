@@ -5,7 +5,7 @@ import { Navbar } from "../layouts/navbar";
 
 export const Layout = () => {
   return (
-    <div className="bg-rent-background-gray">
+    <div className="bg-rent-bg-gray">
       <Navbar />
       <main>
         <Outlet />

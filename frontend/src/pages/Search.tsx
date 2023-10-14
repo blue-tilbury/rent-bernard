@@ -1,5 +1,6 @@
 import { Error } from "./Error";
 import { Loading } from "../components/Loading";
+import { Pagination } from "../components/Pagination";
 import { useRoom } from "../hooks/useAxios";
 import { Gallery } from "../layouts/listing/Gallery";
 import { ListItem } from "../types/room.type";
@@ -19,6 +20,7 @@ export const Search = () => {
     <section className="container py-6">
       <h2 className="p-2 text-sm">Showing 1-2 of 2 results</h2>
       <ul className="flex flex-col flex-wrap sm:flex-row">{galleries}</ul>
+      <Pagination />
     </section>
   );
 };

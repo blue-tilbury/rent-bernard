@@ -76,7 +76,7 @@ pub async fn index(username: Option<String>, db: &DB) -> Result<Json<view::room:
     }
 }
 
-#[put("/room/<id>", data = "<room>")]
+#[put("/rooms/<id>", data = "<room>")]
 pub async fn update(id: String, room: Json<RoomParams>, db: &DB) -> Status {
     let room_id = match Uuid::parse_str(&id) {
         Ok(uuid) => uuid,
@@ -126,7 +126,7 @@ pub async fn update(id: String, room: Json<RoomParams>, db: &DB) -> Status {
     }
 }
 
-#[delete("/room/<id>")]
+#[delete("/rooms/<id>")]
 pub async fn delete(id: String, db: &DB) -> Status {
     match Room::delete(db, id).await {
         Ok(option) => {

@@ -29,7 +29,7 @@ export const Button = ({ children, size, color, type, handleClick }: ButtonProps
       btnColor = "bg-rent-light-blue hover:bg-rent-very-light-blue text-white";
       break;
     case "secondary":
-      btnColor = "bg-white hover:bg-rent-background-gray border border-rent-dark-blue";
+      btnColor = "bg-white hover:bg-rent-bg-gray border border-rent-dark-blue";
       break;
     case "danger":
       btnColor = "bg-red-600 hover:bg-red-400 text-white";

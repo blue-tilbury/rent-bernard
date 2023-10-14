@@ -14,7 +14,7 @@ export const RadioButton = ({ control, name, error }: ControlledInputProps) => {
             {...field}
             value="Yes"
             onChange={() => field.onChange(true)}
-            className="mr-1 bg-rent-background-gray checked:text-rent-green focus:ring-rent-green"
+            className="mr-1 bg-rent-bg-gray checked:text-rent-green focus:ring-rent-green"
           />
           Yes
         </label>
@@ -24,7 +24,7 @@ export const RadioButton = ({ control, name, error }: ControlledInputProps) => {
             {...field}
             value="No"
             onChange={() => field.onChange(false)}
-            className="mr-1 bg-rent-background-gray checked:text-rent-green focus:ring-rent-green"
+            className="mr-1 bg-rent-bg-gray checked:text-rent-green focus:ring-rent-green"
           />
           No
         </label>

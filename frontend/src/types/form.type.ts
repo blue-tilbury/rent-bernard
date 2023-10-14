@@ -20,9 +20,9 @@ export type ControlledInputProps = UseControllerProps<Room> & {
 };
 
 export type ImageInputProps = UseControllerProps<Room> & {
+  error?:  Merge<FieldError, (FieldError | undefined)[]>;
   files: File[];
   handleFiles(value: File[], type: 'update' | 'delete'): void;
-  error?:  Merge<FieldError, (FieldError | undefined)[]>;
   setValue: UseFormSetValue<Room>;
 };
 

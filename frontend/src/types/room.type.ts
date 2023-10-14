@@ -29,7 +29,7 @@ export type ListRoom = {
   rooms: ListItem[];
 };
 
-type ListItem = {
+export type ListItem = {
   id: string;
   title: string;
   price: number;

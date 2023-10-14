@@ -12,7 +12,7 @@ export const useOutsideClick = (callback: (value: boolean) => void, value: boole
     document.body.addEventListener("mousedown", handleUserMenuOpen);
 
     return () => document.body.removeEventListener("mousedown", handleUserMenuOpen);
-  }, []);
+  }, [callback, value]);
 
   return ref;
 };

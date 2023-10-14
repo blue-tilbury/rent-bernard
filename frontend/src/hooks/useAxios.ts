@@ -1,32 +1,33 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { AxiosRequestConfig } from "axios";
+import useSWR from "swr";
+import useSWRMutation from "swr/mutation";
 
+import { api } from "../apis/axiosConfig";
+import { PhotoAPI } from "../apis/photoAPI";
+import { RoomAPI } from "../apis/roomAPI";
 import { Room } from "../types/room.type";
 
-axios.defaults.baseURL = "http://localhost:5580";
+const fetcher = <T>(url: string, params: AxiosRequestConfig<T>) =>
+  api.request({ url, params }).then((res) => res.data);
 
-export const useAxios = (formValues: object) => {
-  const [response, setResponse] = useState<Room[]>();
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+export const useRoom = <T>(params: AxiosRequestConfig<T>) => {
+  const { data, error, isLoading } = useSWR(["/rooms", params], ([url, params]) =>
+    fetcher(url, params),
+  );
+  return { data, isError: error, isLoading };
+};
 
-  const fetchData = () => {
-    axios
-      .post("/rooms", formValues)
-      .then((res) => {
-        console.log("Room created:", res.data);
-        setResponse(res.data);
-      })
-      .catch((error) => {
-        setError(error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+export const useCreateRoom = () => {
+  const { trigger: triggerRoom } = useSWRMutation(
+    "/rooms",
+    async (_url: string, { arg }: { arg: Room }) => RoomAPI.create(arg),
+  );
+  return { triggerRoom };
+};
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-  return { response, error, loading };
+export const useGetPhoto = () => {
+  const { trigger: triggerPhoto } = useSWRMutation("/photos/upload", async () =>
+    PhotoAPI.show(),
+  );
+  return { triggerPhoto };
 };

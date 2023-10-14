@@ -1,6 +1,7 @@
 import { api } from "./axiosConfig";
 import { defineCancelApiObj } from "./axiosUtils";
-import { GetRoom, Id, ListRoom, Room } from "../types/room.type";
+import { Id } from "../types/common.type";
+import { GetRoom, ListRoom, Room } from "../types/room.type";
 
 type RoomAPIType = {
   show: (id: string, cancel?: boolean) => Promise<GetRoom>;

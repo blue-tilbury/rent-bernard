@@ -44,10 +44,6 @@ export type ListItem = {
   updated_at: string;
 };
 
-export type Id = {
-  id: string;
-};
-
 export type UploadPhoto = {
   url: string;
   key: string;

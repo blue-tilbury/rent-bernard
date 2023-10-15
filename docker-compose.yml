@@ -11,8 +11,9 @@ services:
       - postgres
       - test_postgres
       - s3
+      - redis
     env_file:
-      - ./api/.env.docker
+      - ./api/.env
   frontend:
     build: ./frontend
     volumes:
@@ -48,6 +49,14 @@ services:
       - s3:/app/buckets
       - ./docker/s3/serverless.yml:/app/serverless.yml
       - ./docker/s3/cors.xml:/app/cors.xml
+  redis:
+    image: redis:7.2.1-alpine
+    restart: always
+    ports:
+      - 46379:6379
+    environment:
+      REDIS_DATABASES: 1
+    command: redis-server --bind 0.0.0.0
 volumes:
   postgres:
   s3:

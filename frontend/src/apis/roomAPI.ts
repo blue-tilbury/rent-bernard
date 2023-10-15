@@ -5,7 +5,7 @@ import { GetRoom, ListRoom, Room } from "../types/room.type";
 
 type RoomAPIType = {
   show: (id: string, cancel?: boolean) => Promise<GetRoom>;
-  index: (username?: string, cancel?: boolean) => Promise<ListRoom>;
+  index: (cancel?: boolean) => Promise<ListRoom>;
   update: (id: string, room: Room, cancel?: boolean) => Promise<void>;
   delete: (id: string, cancel?: boolean) => Promise<void>;
   create: (room: Room, cancel?: boolean) => Promise<Id>;
@@ -21,9 +21,9 @@ export const RoomAPI: RoomAPIType = {
 
     return response.data;
   },
-  index: async (username?: string, cancel = false) => {
+  index: async (cancel = false) => {
     const response = await api.request({
-      url: `/rooms?${username}`,
+      url: "/rooms",
       method: "GET",
       signal: cancel ? cancelApiObj["index"].handleRequestCancel().signal : undefined,
     });

@@ -1,4 +1,4 @@
-use redis::AsyncCommands;
+use redis::{AsyncCommands, FromRedisValue, ToRedisArgs};
 use std::env;
 
 pub struct RedisClient {
@@ -16,7 +16,15 @@ impl RedisClient {
         RedisClient { conn }
     }
 
-    pub async fn set(&mut self, key: &str, value: &str) -> redis::RedisResult<()> {
+    pub async fn get<T: FromRedisValue>(&mut self, key: &str) -> redis::RedisResult<T> {
+        self.conn.get(key).await
+    }
+
+    pub async fn set<T: ToRedisArgs + Send + Sync>(
+        &mut self,
+        key: &str,
+        value: T,
+    ) -> redis::RedisResult<()> {
         self.conn.set(key, value).await
     }
 }

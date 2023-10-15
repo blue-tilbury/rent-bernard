@@ -54,7 +54,10 @@ impl User {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::fairing::db::tests::TestConnection;
+    use crate::{
+        fairing::db::tests::TestConnection,
+        model::user::factory::tests::{UserFactory, UserFactoryParams},
+    };
 
     #[tokio::test]
     async fn test_create() {
@@ -66,5 +69,22 @@ mod tests {
         };
 
         assert!(User::create(&db.pool, params).await.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_find_by_email() {
+        let db = TestConnection::new().await;
+        let params = UserFactoryParams {
+            name: "name".to_string(),
+            email: "email".to_string(),
+            picture: "picture".to_string(),
+        };
+        let expected_id = UserFactory::create(&db.pool, params).await;
+        let user = User::find_by_email(&db.pool, "email".to_string())
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(user.id, expected_id);
     }
 }

@@ -8,6 +8,7 @@ use crate::{
     view,
 };
 
+// TODO: make this endpoint private
 #[get("/photos/upload")]
 pub async fn upload() -> Result<Json<view::photo::Upload>, Status> {
     let bucket_name = match env::var("ROOMS_BUCKET") {

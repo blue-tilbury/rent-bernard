@@ -1,14 +1,13 @@
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use rocket::{
-    http::{Cookie, CookieJar, Status},
+    http::{CookieJar, Status},
     serde::json::Json,
 };
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::{
     model::user::model::{CreateUser, User},
-    utils::redis::RedisClient,
+    utils::auth::Session,
 };
 
 use super::DB;
@@ -49,20 +48,9 @@ pub async fn login(params: Json<UserParams>, db: &DB, cookies: &CookieJar<'_>) -
             }
         },
     };
-    let mut client = RedisClient::new().await;
-    if client
-        .set("user_id", user_id.to_string().as_str())
-        .await
-        .is_err()
-    {
-        eprintln!("Failed to set user_id in redis");
+    if Session::set(user_id.to_string(), cookies).await.is_err() {
+        eprintln!("Failed to set session in redis");
         return Status::InternalServerError;
     }
-    let session_id = Uuid::new_v4().to_string();
-    if client.set("session_id", session_id.as_str()).await.is_err() {
-        eprintln!("Failed to set session_id in redis");
-        return Status::InternalServerError;
-    }
-    cookies.add_private(Cookie::new("session_id", session_id));
     Status::Ok
 }

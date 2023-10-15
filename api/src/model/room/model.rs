@@ -16,6 +16,7 @@ pub struct Room {
     pub description: String,
     pub s3_keys: Vec<String>,
     pub email: String,
+    pub user_id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -30,6 +31,7 @@ pub struct CreateRoom {
     pub is_pet_friendly: bool,
     pub description: String,
     pub email: String,
+    pub user_id: Uuid,
 }
 
 #[derive(Default)]
@@ -57,6 +59,7 @@ struct RoomRow {
     description: String,
     s3_key: Option<String>,
     email: String,
+    user_id: Uuid,
     created_at: NaiveDateTime,
     updated_at: NaiveDateTime,
 }
@@ -66,9 +69,9 @@ impl Room {
         let rec = sqlx::query(
             r#"
                 INSERT INTO rooms (
-                    title, price, city, street, is_furnished, is_pet_friendly, description, email
+                    title, price, city, street, is_furnished, is_pet_friendly, description, email, user_id
                 )
-                VALUES ( $1, $2, $3, $4, $5, $6, $7, $8 )
+                VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9 )
                 RETURNING id
             "#,
         )
@@ -80,6 +83,7 @@ impl Room {
         .bind(room.is_pet_friendly)
         .bind(room.description)
         .bind(room.email)
+        .bind(room.user_id)
         .fetch_one(db)
         .await?;
         rec.try_get("id")
@@ -166,6 +170,7 @@ impl Room {
             description: row.description.clone(),
             s3_keys: rows.iter().filter_map(|r| r.s3_key.clone()).collect(),
             email: row.email.clone(),
+            user_id: row.user_id,
             created_at: row.created_at,
             updated_at: row.updated_at,
         })
@@ -197,12 +202,14 @@ mod tests {
         model::{
             room::factory::tests::{RoomFactory, RoomFactoryParams},
             room_image::factory::tests::{RoomImageFactory, RoomImageFactoryParams},
+            user::factory::tests::{UserFactory, UserFactoryParams},
         },
     };
 
     #[tokio::test]
     async fn test_create() {
         let db = TestConnection::new().await;
+        let user_id = UserFactory::create(&db.pool, UserFactoryParams::default()).await;
         let params = CreateRoom {
             title: "title".to_string(),
             price: 10000,
@@ -212,6 +219,7 @@ mod tests {
             is_pet_friendly: false,
             email: "email".to_string(),
             description: "description".to_string(),
+            user_id,
         };
 
         assert!(Room::create(&db.pool, params).await.is_ok());
@@ -220,6 +228,7 @@ mod tests {
     #[tokio::test]
     async fn test_get() {
         let db = TestConnection::new().await;
+        let user_id = UserFactory::create(&db.pool, UserFactoryParams::default()).await;
         let params = RoomFactoryParams {
             title: "title".to_string(),
             price: 10000,
@@ -229,6 +238,7 @@ mod tests {
             is_pet_friendly: false,
             email: "email".to_string(),
             description: "description".to_string(),
+            user_id: Some(user_id),
         };
         let id = RoomFactory::create(&db.pool, params).await;
         RoomImageFactory::create_many(
@@ -251,6 +261,7 @@ mod tests {
         assert_eq!(result.s3_keys.len(), 2);
         assert_eq!(result.description, "description".to_string());
         assert_eq!(result.email, "email".to_string());
+        assert_eq!(result.user_id, user_id);
         assert!(!result.created_at.to_string().is_empty());
         assert!(!result.updated_at.to_string().is_empty());
     }
@@ -266,11 +277,36 @@ mod tests {
     #[tokio::test]
     async fn test_list() {
         let db = TestConnection::new().await;
-        let ids = RoomFactory::create_many(&db.pool, RoomFactoryParams::default(), 3).await;
+        let user_params1 = UserFactoryParams {
+            email: "user1".to_string(),
+            ..Default::default()
+        };
+        let user_id1 = UserFactory::create(&db.pool, user_params1).await;
+        let id1 = RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                user_id: Some(user_id1),
+                ..Default::default()
+            },
+        )
+        .await;
+        let user_params2 = UserFactoryParams {
+            email: "user2".to_string(),
+            ..Default::default()
+        };
+        let user_id2 = UserFactory::create(&db.pool, user_params2).await;
+        RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                user_id: Some(user_id2),
+                ..Default::default()
+            },
+        )
+        .await;
         RoomImageFactory::create_many(
             &db.pool,
             RoomImageFactoryParams {
-                room_id: ids[0],
+                room_id: id1,
                 ..Default::default()
             },
             2,
@@ -278,7 +314,7 @@ mod tests {
         .await;
 
         let result = Room::list(&db.pool).await.unwrap();
-        assert_eq!(result.len(), 3);
+        assert_eq!(result.len(), 2);
     }
 
     #[tokio::test]

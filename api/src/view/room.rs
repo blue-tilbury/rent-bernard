@@ -15,6 +15,7 @@ pub struct Get {
     description: String,
     image_urls: Vec<String>,
     email: String,
+    user_id: String,
     created_at: String,
     updated_at: String,
 }
@@ -36,6 +37,7 @@ pub struct ListItem {
     description: String,
     thumbnail_url: Option<String>,
     email: String,
+    user_id: String,
     created_at: String,
     updated_at: String,
 }
@@ -60,6 +62,7 @@ impl Get {
             created_at,
             updated_at,
             s3_keys,
+            user_id,
         } = room;
         let mut image_urls: Vec<String> = vec![];
         for key in s3_keys.clone() {
@@ -76,6 +79,7 @@ impl Get {
             description,
             image_urls,
             email,
+            user_id: user_id.to_string(),
             created_at: created_at.to_string(),
             updated_at: updated_at.to_string(),
         })
@@ -110,6 +114,7 @@ impl List {
                 description: room.description,
                 email: room.email,
                 thumbnail_url,
+                user_id: room.user_id.to_string(),
                 created_at: room.created_at.to_string(),
                 updated_at: room.updated_at.to_string(),
             };
@@ -142,6 +147,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_room() {
         let id = Uuid::new_v4();
+        let user_id = Uuid::new_v4();
         let room = Room {
             id,
             title: "title".to_string(),
@@ -153,6 +159,7 @@ mod tests {
             description: "description".to_string(),
             s3_keys: vec!["key".to_string()],
             email: "email".to_string(),
+            user_id,
             created_at: Local::now().naive_local(),
             updated_at: Local::now().naive_local(),
         };
@@ -167,6 +174,7 @@ mod tests {
         assert_eq!(json.image_urls[0], "object".to_string());
         assert_eq!(json.email, "email".to_string());
         assert_eq!(json.description, "description".to_string());
+        assert_eq!(json.user_id, user_id.to_string());
         assert!(!json.created_at.to_string().is_empty());
         assert!(!json.updated_at.to_string().is_empty());
     }
@@ -174,6 +182,7 @@ mod tests {
     #[tokio::test]
     async fn test_list_rooms() {
         let id = Uuid::new_v4();
+        let user_id = Uuid::new_v4();
         let room = Room {
             id,
             title: "title".to_string(),
@@ -185,6 +194,7 @@ mod tests {
             description: "description".to_string(),
             s3_keys: vec!["key".to_string()],
             email: "email".to_string(),
+            user_id,
             created_at: Local::now().naive_local(),
             updated_at: Local::now().naive_local(),
         };
@@ -202,6 +212,7 @@ mod tests {
         assert_eq!(room.thumbnail_url.as_ref().unwrap(), "object");
         assert_eq!(room.email, "email".to_string());
         assert_eq!(room.description, "description".to_string());
+        assert_eq!(room.user_id, user_id.to_string());
         assert!(!room.created_at.to_string().is_empty());
         assert!(!room.updated_at.to_string().is_empty());
     }

@@ -1,6 +1,9 @@
 use std::env;
 
-use rocket::{http::Status, serde::json::Json};
+use rocket::{
+    http::{CookieJar, Status},
+    serde::json::Json,
+};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -9,7 +12,7 @@ use crate::{
         room::model::{CreateRoom, Room, UpdateRoom},
         room_image::model::RoomImage,
     },
-    utils::s3::S3Client,
+    utils::{auth::Session, s3::S3Client},
     view,
 };
 
@@ -74,6 +77,7 @@ pub async fn index(db: &DB) -> Result<Json<view::room::List>, Status> {
     }
 }
 
+// TODO: make this endpoint private
 #[put("/rooms/<id>", data = "<room>")]
 pub async fn update(id: String, room: Json<RoomParams>, db: &DB) -> Status {
     let room_id = match Uuid::parse_str(&id) {
@@ -90,6 +94,7 @@ pub async fn update(id: String, room: Json<RoomParams>, db: &DB) -> Status {
         s3_keys,
         description,
         email,
+        ..
     } = room.0;
     let update_room_params = UpdateRoom {
         id: room_id,
@@ -124,6 +129,7 @@ pub async fn update(id: String, room: Json<RoomParams>, db: &DB) -> Status {
     }
 }
 
+// TODO: make this endpoint private
 #[delete("/rooms/<id>")]
 pub async fn delete(id: String, db: &DB) -> Status {
     match Room::delete(db, id).await {
@@ -142,8 +148,13 @@ pub async fn delete(id: String, db: &DB) -> Status {
     }
 }
 
+// TODO: make this endpoint private
 #[post("/rooms", data = "<room>")]
-pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::Id>, Status> {
+pub async fn create(
+    room: Json<RoomParams>,
+    db: &DB,
+    cookies: &CookieJar<'_>,
+) -> Result<Json<view::Id>, Status> {
     let RoomParams {
         title,
         price,
@@ -155,6 +166,12 @@ pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::Id>, S
         description,
         email,
     } = room.0;
+    let session = Session::get(cookies).await?;
+
+    let user_id = match Uuid::parse_str(&session.user_id) {
+        Ok(uuid) => uuid,
+        Err(_) => return Err(Status::Unauthorized),
+    };
     let create_room_params = CreateRoom {
         title,
         price,
@@ -164,6 +181,7 @@ pub async fn create(room: Json<RoomParams>, db: &DB) -> Result<Json<view::Id>, S
         is_pet_friendly,
         description,
         email,
+        user_id,
     };
     let room_id = match Room::create(db, create_room_params).await {
         Ok(id) => id,

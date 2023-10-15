@@ -1,25 +1,44 @@
-import { Route, Routes } from "react-router-dom";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
+import { ErrorPage } from "./pages/ErrorPage";
 import { Login } from "./pages/Login";
 import { Posting } from "./pages/Posting";
 import { Search } from "./pages/Search";
 import { ThankYou } from "./pages/ThankYou";
 import { Wishlist } from "./pages/Wishlist";
 import { YourAds } from "./pages/YourAds";
-import { Layout } from "./routes/Layout";
+import { Root } from "./routes/Root";
+
+const clientId =
+  "477582483733-fqk8g2caavivanck0tagmntvvkeikhvb.apps.googleusercontent.com";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Root />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        errorElement: <ErrorPage />,
+        children: [
+          { index: true, element: <Search /> },
+          { path: "wishlist", element: <Wishlist /> },
+          { path: "posting", element: <Posting /> },
+          { path: "thankyou", element: <ThankYou /> },
+          { path: "your-ads", element: <YourAds /> },
+          { path: "*", element: <ErrorPage /> },
+        ],
+      },
+    ],
+  },
+  { path: "login", element: <Login /> },
+]);
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route element={<Layout />}>
-        <Route index element={<Search />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/posting" element={<Posting />} />
-        <Route path="/thankyou" element={<ThankYou />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/your-ads" element={<YourAds />} />
-      </Route>
-    </Routes>
+    <GoogleOAuthProvider clientId={clientId}>
+      <RouterProvider router={router} />
+    </GoogleOAuthProvider>
   );
 }

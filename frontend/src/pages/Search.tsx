@@ -1,4 +1,4 @@
-import { Error } from "./Error";
+import { ErrorMsg } from "../components/ErrorMsg";
 import { Loading } from "../components/Loading";
 import { Pagination } from "../components/Pagination";
 import { useRoom } from "../hooks/useAxios";
@@ -6,13 +6,17 @@ import { Gallery } from "../layouts/listing/Gallery";
 import { ListItem } from "../types/room.type";
 
 export const Search = () => {
-  const { data, isLoading, isError } = useRoom({ method: "GET" });
+  const { data, isError, isLoading } = useRoom({ method: "GET" });
 
-  if (isError) return <Error msg="Sorry, something went wrong." />;
+  if (isError)
+    return (
+      <ErrorMsg msg="Sorry, something wrong with the connection." isReloadBtn={true} />
+    );
   if (isLoading) return <Loading />;
 
   const rooms: ListItem[] = data.rooms;
-  if (rooms.length === 0) return <Error msg="Sorry, no rooms found." />;
+  if (rooms.length === 0)
+    return <ErrorMsg msg="Sorry, no rooms found." isReloadBtn={false} />;
 
   const galleries = rooms.map((room) => <Gallery key={room.id} {...room} />);
 

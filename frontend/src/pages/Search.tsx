@@ -6,12 +6,17 @@ import { Gallery } from "../layouts/listing/Gallery";
 import { ListItem } from "../types/room.type";
 
 export const Search = () => {
-  const { data, isLoading } = useRoom({ method: "GET" });
+  const { data, isError, isLoading } = useRoom({ method: "GET" });
 
+  if (isError)
+    return (
+      <ErrorMsg msg="Sorry, something wrong with the connection." isReloadBtn={true} />
+    );
   if (isLoading) return <Loading />;
 
   const rooms: ListItem[] = data.rooms;
-  if (rooms.length === 0) return <ErrorMsg msg="Sorry, no rooms found." />;
+  if (rooms.length === 0)
+    return <ErrorMsg msg="Sorry, no rooms found." isReloadBtn={false} />;
 
   const galleries = rooms.map((room) => <Gallery key={room.id} {...room} />);
 

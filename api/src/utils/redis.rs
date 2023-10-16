@@ -24,7 +24,16 @@ impl RedisClient {
         &mut self,
         key: &str,
         value: T,
+        seconds: usize,
     ) -> redis::RedisResult<()> {
-        self.conn.set(key, value).await
+        self.conn.set_ex(key, value, seconds).await
+    }
+
+    pub async fn del(&mut self, key: &str) -> redis::RedisResult<()> {
+        self.conn.del(key).await
+    }
+
+    pub async fn exists(&mut self, key: &str) -> redis::RedisResult<bool> {
+        self.conn.exists(key).await
     }
 }

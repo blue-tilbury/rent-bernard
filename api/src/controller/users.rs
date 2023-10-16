@@ -48,8 +48,17 @@ pub async fn login(params: Json<UserParams>, db: &DB, cookies: &CookieJar<'_>) -
             }
         },
     };
-    if Session::set(user_id.to_string(), cookies).await.is_err() {
-        eprintln!("Failed to set session in redis");
+    if let Err(err) = Session::set(user_id.to_string(), cookies).await {
+        eprintln!("{err}");
+        return Status::InternalServerError;
+    }
+    Status::Ok
+}
+
+#[post("/logout")]
+pub async fn logout(cookies: &CookieJar<'_>) -> Status {
+    if let Err(err) = Session::delete(cookies).await {
+        eprintln!("{err}");
         return Status::InternalServerError;
     }
     Status::Ok

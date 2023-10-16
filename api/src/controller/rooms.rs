@@ -166,8 +166,16 @@ pub async fn create(
         description,
         email,
     } = room.0;
-    let session = Session::get(cookies).await?;
-
+    let session = match Session::get(cookies).await {
+        Ok(option) => match option {
+            Some(session) => session,
+            None => return Err(Status::Unauthorized),
+        },
+        Err(err) => {
+            eprintln!("{err}");
+            return Err(Status::InternalServerError);
+        }
+    };
     let user_id = match Uuid::parse_str(&session.user_id) {
         Ok(uuid) => uuid,
         Err(_) => return Err(Status::Unauthorized),

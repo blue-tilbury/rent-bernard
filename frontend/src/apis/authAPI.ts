@@ -1,12 +1,11 @@
 import { api } from "./axiosConfig";
 import { defineCancelApiObj } from "./axiosUtils";
-
-type AuthParams = {
-  token: string;
-};
+import { AuthParams, User } from "../types/user.type";
 
 type AuthAPIType = {
-  login: (data: AuthParams, cancel?: boolean) => Promise<void>;
+  login: (token: AuthParams, cancel?: boolean) => Promise<void>;
+  login_user: (cancel?: boolean) => Promise<User>;
+  logout: (cancel?: boolean) => Promise<void>;
 };
 
 export const AuthAPI: AuthAPIType = {
@@ -16,6 +15,24 @@ export const AuthAPI: AuthAPIType = {
       method: "POST",
       data: token,
       signal: cancel ? cancelApiObj["login"].handleRequestCancel().signal : undefined,
+    });
+  },
+  login_user: async (cancel = false) => {
+    const response = await api.request({
+      url: "/login_user",
+      method: "GET",
+      signal: cancel
+        ? cancelApiObj["login_user"].handleRequestCancel().signal
+        : undefined,
+    });
+
+    return response.data;
+  },
+  logout: async (cancel = false) => {
+    await api.request({
+      url: "/logout",
+      method: "POST",
+      signal: cancel ? cancelApiObj["logout"].handleRequestCancel().signal : undefined,
     });
   },
 };

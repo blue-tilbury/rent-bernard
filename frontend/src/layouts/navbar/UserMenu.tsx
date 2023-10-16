@@ -1,7 +1,7 @@
 import { ChatBubbleLeftRightIcon, HomeIcon } from "@heroicons/react/24/solid";
 import { Link } from "react-router-dom";
 
-import { SignOut } from "./SignOut";
+import { Logout } from "./Logout";
 import { User } from "../../types/user.type";
 
 type UserMenuProps = {
@@ -31,7 +31,7 @@ export const UserMenu = ({ user, isUserMenuOpen }: UserMenuProps) => {
           <ChatBubbleLeftRightIcon className="h-4 w-4" />
           <p>Your reviews</p>
         </li>
-        <SignOut />
+        <Logout />
       </ul>
     </div>
   );

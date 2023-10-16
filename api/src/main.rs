@@ -21,14 +21,15 @@ mod view;
 #[launch]
 fn rocket() -> Rocket<Build> {
     let apis: Vec<Route> = routes![
-        rooms::show,
-        rooms::create,
-        rooms::index,
-        rooms::update,
-        rooms::delete,
-        photos::upload,
+        rooms::public::show,
+        rooms::public::index,
+        rooms::private::create,
+        rooms::private::update,
+        rooms::private::delete,
+        photos::private::upload,
         users::login,
         users::logout,
+        users::private::login_user,
         cors_handler
     ];
     let figment: Figment = Config::figment().merge(Toml::file("App.toml").nested());

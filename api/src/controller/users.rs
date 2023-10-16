@@ -13,12 +13,12 @@ use crate::{
 use super::DB;
 
 #[derive(Serialize, Deserialize)]
-pub struct UserParams {
+pub struct LoginParams {
     pub token: String,
 }
 
 #[post("/login", data = "<params>")]
-pub async fn login(params: Json<UserParams>, db: &DB, cookies: &CookieJar<'_>) -> Status {
+pub async fn login(params: Json<LoginParams>, db: &DB, cookies: &CookieJar<'_>) -> Status {
     let key = DecodingKey::from_secret(&[]);
     let mut validation = Validation::new(Algorithm::HS256);
     validation.insecure_disable_signature_validation();
@@ -62,4 +62,22 @@ pub async fn logout(cookies: &CookieJar<'_>) -> Status {
         return Status::InternalServerError;
     }
     Status::Ok
+}
+
+pub mod private {
+    use rocket::{http::Status, serde::json::Json};
+
+    use crate::{controller::DB, model::user::model::User, utils::auth::LoginUser, view};
+
+    #[get("/login_user")]
+    pub async fn login_user(db: &DB, user: LoginUser) -> Result<Json<view::user::Get>, Status> {
+        let user = match User::find_by_id(db, user.user_id)
+            .await
+            .map_err(|_| Status::InternalServerError)?
+        {
+            Some(user) => user,
+            None => return Err(Status::Unauthorized),
+        };
+        Ok(view::user::Get::generate(user))
+    }
 }

@@ -4,6 +4,7 @@ use serde::Serialize;
 
 pub mod photo;
 pub mod room;
+pub mod user;
 
 #[derive(Serialize)]
 pub struct Id {

@@ -49,6 +49,19 @@ impl User {
         .await?;
         Ok(rec)
     }
+
+    pub async fn find_by_id(db: &PgPool, id: Uuid) -> Result<Option<User>, sqlx::Error> {
+        let rec = sqlx::query_as::<_, User>(
+            r#"
+                SELECT * FROM users
+                WHERE id = $1
+            "#,
+        )
+        .bind(id)
+        .fetch_optional(db)
+        .await?;
+        Ok(rec)
+    }
 }
 
 #[cfg(test)]
@@ -86,5 +99,17 @@ mod tests {
             .unwrap();
 
         assert_eq!(user.id, expected_id);
+    }
+
+    #[tokio::test]
+    async fn test_find_by_id() {
+        let db = TestConnection::new().await;
+        let params = UserFactoryParams {
+            name: "name".to_string(),
+            email: "email".to_string(),
+            picture: "picture".to_string(),
+        };
+        let id = UserFactory::create(&db.pool, params).await;
+        assert!(User::find_by_id(&db.pool, id).await.unwrap().is_some());
     }
 }

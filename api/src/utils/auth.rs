@@ -2,7 +2,8 @@ use std::time::Duration;
 
 use redis::RedisError;
 use rocket::{
-    http::{Cookie, CookieJar},
+    http::{Cookie, CookieJar, Status},
+    request::{FromRequest, Outcome, Request},
     time::OffsetDateTime,
 };
 use uuid::Uuid;
@@ -50,5 +51,42 @@ impl Session {
         client.del(session_id.as_str()).await?;
         cookies.remove_private(Cookie::named(SESSION_KEY));
         Ok(())
+    }
+}
+
+pub struct LoginUser {
+    pub user_id: Uuid,
+}
+
+#[derive(Debug)]
+pub enum LoginError {
+    Unauthorized,
+    UnexpectedError,
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for LoginUser {
+    type Error = LoginError;
+
+    async fn from_request(request: &'r Request<'_>) -> rocket::request::Outcome<Self, Self::Error> {
+        let cookies = request.cookies();
+        let session = match Session::get(cookies).await {
+            Ok(option) => match option {
+                Some(session) => session,
+                None => return Outcome::Failure((Status::Unauthorized, LoginError::Unauthorized)),
+            },
+            Err(err) => {
+                eprintln!("{err}");
+                return Outcome::Failure((
+                    Status::InternalServerError,
+                    LoginError::UnexpectedError,
+                ));
+            }
+        };
+        let user_id = match Uuid::parse_str(&session.user_id) {
+            Ok(uuid) => uuid,
+            Err(_) => return Outcome::Failure((Status::Unauthorized, LoginError::Unauthorized)),
+        };
+        Outcome::Success(Self { user_id })
     }
 }

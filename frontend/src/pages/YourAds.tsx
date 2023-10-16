@@ -21,7 +21,7 @@ const ads = [
 ];
 
 export const YourAds = () => {
-  const thumbs = ads.map((ad) => <Thumb key={ad.id} {...ad} />);
+  const thumbs = ads.map((ad) => <Thumb key={ad.id} room={ad} page="yourAds" />);
 
   return (
     <section className="container pb-16 pt-8">

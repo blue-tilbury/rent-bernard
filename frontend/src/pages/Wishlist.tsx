@@ -21,7 +21,7 @@ const rooms = [
 ];
 
 export const Wishlist = () => {
-  const thumbs = rooms.map((room) => <Thumb key={room.id} {...room} />);
+  const thumbs = rooms.map((room) => <Thumb key={room.id} room={room} page="wishlist" />);
 
   return (
     <section className="container pb-16 pt-8">

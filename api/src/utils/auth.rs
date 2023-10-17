@@ -25,6 +25,7 @@ impl Session {
         let mut cookie = Cookie::new(SESSION_KEY, session_id);
         let expires_at = OffsetDateTime::now_utc() + Duration::from_secs(EXPIRES_IN as u64);
         cookie.set_expires(expires_at);
+        cookie.set_secure(true);
         cookies.add_private(cookie);
         Ok(())
     }

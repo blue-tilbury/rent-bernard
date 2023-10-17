@@ -2,6 +2,7 @@ import axios from "axios";
 
 export const api = axios.create({
   baseURL: "http://localhost:58000",
+  withCredentials: true,
 });
 
 api.interceptors.request.use(

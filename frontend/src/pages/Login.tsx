@@ -1,24 +1,24 @@
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import { atom, useSetAtom } from "jotai";
-import jwt_decode, { JwtPayload } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 
 import Logo from "../assets/logo-no-background.png";
+import { useGetUser, useLoginUser } from "../hooks/useAxios";
 import { User } from "../types/user.type";
 
 export const userAtom = atom({} as User);
 
-// TODO: Send the raw JWT token to the back-end
 export const Login = () => {
-  const navigate = useNavigate();
   const setUser = useSetAtom(userAtom);
+  const { triggerLogin } = useLoginUser();
+  const { triggerGetUser } = useGetUser();
+  const navigate = useNavigate();
 
-  const handleResponse = (response: CredentialResponse) => {
+  const handleResponse = async (response: CredentialResponse) => {
     if (response.credential) {
-      const userObject = JSON.parse(
-        JSON.stringify(jwt_decode<JwtPayload>(response.credential)),
-      );
-      setUser(userObject);
+      await triggerLogin({ token: response.credential });
+      const user = await triggerGetUser();
+      setUser(user);
       navigate("/");
     }
   };

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { redirect } from "react-router-dom";
 
 export const api = axios.create({
   baseURL: "http://localhost:58000",
@@ -14,6 +15,7 @@ api.interceptors.request.use(
         return Promise.reject(error.response?.data);
       case 401:
         console.log("401 Unauthorized");
+        redirect("/login");
         return Promise.reject(error.response?.data);
       case 404:
         console.log("404 Not Found");

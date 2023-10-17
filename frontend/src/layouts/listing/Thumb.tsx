@@ -20,20 +20,8 @@ type ThumbProps = {
 };
 
 export const Thumb = ({ room, page }: ThumbProps) => {
-  const navigate = useNavigate();
-  const [isFav, setIsFav] = useState(true);
   const isWishlistPage = page === "wishlist";
   const isYourAdsPage = page === "yourAds";
-
-  // TODO: call delete api
-  const deleteFav = () => {
-    setIsFav(!isFav);
-  };
-
-  // TODO: call add api
-  const addFav = () => {
-    setIsFav(!isFav);
-  };
 
   return (
     <li className="flex justify-between rounded-md bg-white">
@@ -50,19 +38,40 @@ export const Thumb = ({ room, page }: ThumbProps) => {
         </div>
       </div>
       <div className="flex space-x-5 py-6 pr-14">
-        {isWishlistPage &&
-          (isFav ? (
-            <SolidHeartIcon onClick={deleteFav} className="h-6 w-6 text-pink-400" />
-          ) : (
-            <OutlinedHeartIcon onClick={addFav} className="h-6 w-6 text-pink-400" />
-          ))}
-        {isYourAdsPage && (
-          <>
-            <PencilIcon onClick={() => navigate("/posting")} className="h-6 w-6" />
-            <AlertDialog />
-          </>
-        )}
+        {isWishlistPage && <WishlistEditIcon />}
+        {isYourAdsPage && <YourAdsEditIcons />}
       </div>
     </li>
+  );
+};
+
+const WishlistEditIcon = () => {
+  const [isFav, setIsFav] = useState(true);
+
+  // TODO: call delete api
+  const deleteFav = async () => {
+    setIsFav(false);
+  };
+
+  // TODO: call add api
+  const addFav = () => {
+    setIsFav(true);
+  };
+
+  return isFav ? (
+    <SolidHeartIcon onClick={deleteFav} className="h-6 w-6 text-pink-400" />
+  ) : (
+    <OutlinedHeartIcon onClick={addFav} className="h-6 w-6 text-pink-400" />
+  );
+};
+
+const YourAdsEditIcons = () => {
+  const navigate = useNavigate();
+
+  return (
+    <>
+      <PencilIcon onClick={() => navigate("/posting")} className="h-6 w-6" />
+      <AlertDialog />
+    </>
   );
 };

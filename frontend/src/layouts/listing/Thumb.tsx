@@ -1,5 +1,7 @@
-import { PencilIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as OutlinedHeartIcon, PencilIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as SolidHeartIcon } from "@heroicons/react/24/solid";
 import Divider from "@mui/material/Divider";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AlertDialog from "../../components/AlertDialog";
@@ -19,23 +21,41 @@ type ThumbProps = {
 
 export const Thumb = ({ room, page }: ThumbProps) => {
   const navigate = useNavigate();
+  const [isFav, setIsFav] = useState(true);
+  const isWishlistPage = page === "wishlist";
   const isYourAdsPage = page === "yourAds";
+
+  // TODO: call delete api
+  const deleteFav = () => {
+    setIsFav(!isFav);
+  };
+
+  // TODO: call add api
+  const addFav = () => {
+    setIsFav(!isFav);
+  };
 
   return (
     <li className="flex justify-between rounded-md bg-white">
       <div className="flex">
         <img className="h-40 w-56 rounded-3xl object-cover p-4" src={room.image_urls} />
         <div className="flex flex-col p-8">
-          <p className="flex space-x-2 text-sm">
+          <div className="flex space-x-2 text-sm">
             <span>{room.city}</span>
             <Divider orientation="vertical" flexItem />
             <span>{room.updated_at} mins ago</span>
-          </p>
+          </div>
           <h2 className="pb-4 text-lg font-medium text-rent-blue">{room.title}</h2>
           <p className="text-rent-dark-green">$ {room.price}</p>
         </div>
       </div>
       <div className="flex space-x-5 py-6 pr-14">
+        {isWishlistPage &&
+          (isFav ? (
+            <SolidHeartIcon onClick={deleteFav} className="h-6 w-6 text-pink-400" />
+          ) : (
+            <OutlinedHeartIcon onClick={addFav} className="h-6 w-6 text-pink-400" />
+          ))}
         {isYourAdsPage && (
           <>
             <PencilIcon onClick={() => navigate("/posting")} className="h-6 w-6" />

@@ -1,5 +1,5 @@
-import { api } from "./axiosConfig";
-import { defineCancelApiObj } from "./axiosUtils";
+import { api } from "./config/axiosConfig";
+import { defineCancelApiObj } from "./config/axiosUtils";
 import { AuthParams, User } from "../types/user.type";
 
 type AuthAPIType = {

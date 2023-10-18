@@ -1,6 +1,12 @@
+import { useAtomValue } from "jotai";
+
 import { CustomLink } from "../../components/CustomLink";
+import { userAtom } from "../../shared/globalStateConfig";
 
 export const Footer = () => {
+  const user = useAtomValue(userAtom);
+  const isUserEmpty = Object.keys(user).length === 0;
+
   return (
     <footer className="w-full bg-rent-dark-blue">
       <div className="container py-10 text-white">
@@ -10,14 +16,22 @@ export const Footer = () => {
           </div>
           <div className="flex flex-2 flex-col gap-1 pb-8 text-sm font-light md:text-base">
             <CustomLink to="/" type="footer">
-              Room
+              Home
             </CustomLink>
-            <CustomLink to="wishlist" type="footer">
-              My Wishlist
-            </CustomLink>
-            <CustomLink to="posting" type="footer">
-              Post Ad
-            </CustomLink>
+            {isUserEmpty ? (
+              <CustomLink to="login" type="footer">
+                Login
+              </CustomLink>
+            ) : (
+              <>
+                <CustomLink to="wishlist" type="footer">
+                  My Wishlist
+                </CustomLink>
+                <CustomLink to="posting" type="footer">
+                  Post Ad
+                </CustomLink>
+              </>
+            )}
           </div>
         </div>
         <p className="text-center text-xs">

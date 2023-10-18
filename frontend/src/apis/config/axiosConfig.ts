@@ -24,6 +24,7 @@ api.interceptors.response.use(
         console.log("500 Internal Server Error");
         return Promise.reject(error.response?.data);
       default:
+        console.log(`Unknown Error! ${error}`);
         return Promise.reject(error.response?.data);
     }
   },

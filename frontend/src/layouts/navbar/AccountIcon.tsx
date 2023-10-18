@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { UserMenu } from "./UserMenu";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
-import { userAtom } from "../../utils/globalStateConfig";
+import { userAtom } from "../../shared/globalStateConfig";
 
 export const AccountIcon = () => {
   const user = useAtomValue(userAtom);

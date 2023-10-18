@@ -1,6 +1,7 @@
 import { ErrorMsg } from "../components/ErrorMsg";
 import { Loading } from "../components/Loading";
 import { Pagination } from "../components/Pagination";
+import { SelectBox } from "../components/SelectBox";
 import { useRoom } from "../hooks/useAxios";
 import { Gallery } from "../layouts/listing/Gallery";
 import { ListItem } from "../types/room.type";
@@ -22,7 +23,10 @@ export const Search = () => {
 
   return (
     <section className="container py-6">
-      <h2 className="p-2 text-sm">Showing 1-2 of 2 results</h2>
+      <div className="flex justify-between">
+        <h2 className="p-2 text-sm">Showing 1-2 of 2 results</h2>
+        <SelectBox />
+      </div>
       <ul className="flex flex-col flex-wrap sm:flex-row">{galleries}</ul>
       <Pagination />
     </section>

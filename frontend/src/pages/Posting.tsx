@@ -17,8 +17,8 @@ import {
   Price,
   Title,
 } from "../layouts/form";
+import { scheme } from "../shared/zodScheme";
 import { Room } from "../types/room.type";
-import { scheme } from "../utils/zodScheme";
 
 export const Posting = () => {
   const {

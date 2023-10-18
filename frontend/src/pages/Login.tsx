@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import Logo from "../assets/logo-no-background.png";
 import { useGetUser, useLoginUser } from "../hooks/useAxios";
-import { userAtom } from "../utils/globalStateConfig";
+import { userAtom } from "../shared/globalStateConfig";
 
 export const Login = () => {
   const setUser = useSetAtom(userAtom);

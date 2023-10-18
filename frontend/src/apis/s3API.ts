@@ -12,6 +12,7 @@ export const S3API: S3APIType = {
       method: "PUT",
       data: file,
       signal: cancel ? cancelApiObj["upload"].handleRequestCancel().signal : undefined,
+      withCredentials: false,
     });
   },
 };

@@ -26,6 +26,7 @@ fn rocket() -> Rocket<Build> {
         rooms::private::create,
         rooms::private::update,
         rooms::private::delete,
+        rooms::private::index,
         photos::private::upload,
         users::login,
         users::logout,

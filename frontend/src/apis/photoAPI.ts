@@ -9,7 +9,7 @@ type PhotoAPIType = {
 export const PhotoAPI: PhotoAPIType = {
   show: async (cancel = false) => {
     const response = await api.request({
-      url: "/photos/upload",
+      url: "/private/photos/upload",
       method: "GET",
       signal: cancel ? cancelApiObj["show"].handleRequestCancel().signal : undefined,
     });

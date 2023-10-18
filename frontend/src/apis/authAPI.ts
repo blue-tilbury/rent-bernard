@@ -19,7 +19,7 @@ export const AuthAPI: AuthAPIType = {
   },
   login_user: async (cancel = false) => {
     const response = await api.request({
-      url: "/login_user",
+      url: "/private/login_user",
       method: "GET",
       signal: cancel
         ? cancelApiObj["login_user"].handleRequestCancel().signal

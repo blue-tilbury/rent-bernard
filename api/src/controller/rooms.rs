@@ -54,6 +54,8 @@ pub mod public {
 
 pub mod private {
 
+    use std::env;
+
     use rocket::{http::Status, serde::json::Json};
     use serde::{Deserialize, Serialize};
     use uuid::Uuid;
@@ -64,7 +66,7 @@ pub mod private {
             room::model::{CreateRoom, Room, UpdateRoom},
             room_image::model::RoomImage,
         },
-        utils::auth::LoginUser,
+        utils::{auth::LoginUser, s3::S3Client},
         view,
     };
 
@@ -81,7 +83,7 @@ pub mod private {
         pub description: String,
     }
 
-    #[put("/rooms/<id>", data = "<room>")]
+    #[put("/private/rooms/<id>", data = "<room>")]
     pub async fn update(id: String, room: Json<RoomParams>, db: &DB, _user: LoginUser) -> Status {
         let room_id = match Uuid::parse_str(&id) {
             Ok(uuid) => uuid,
@@ -132,7 +134,7 @@ pub mod private {
         }
     }
 
-    #[delete("/rooms/<id>")]
+    #[delete("/private/rooms/<id>")]
     pub async fn delete(id: String, db: &DB, _user: LoginUser) -> Status {
         match Room::delete(db, id).await {
             Ok(option) => {
@@ -150,7 +152,7 @@ pub mod private {
         }
     }
 
-    #[post("/rooms", data = "<room>")]
+    #[post("/private/rooms", data = "<room>")]
     pub async fn create(
         room: Json<RoomParams>,
         db: &DB,
@@ -187,6 +189,25 @@ pub mod private {
         };
         match RoomImage::create_many(db, room_id, s3_keys).await {
             Ok(_) => Ok(view::Id::to_json(room_id.to_string())),
+            Err(err) => {
+                eprintln!("{err}");
+                Err(Status::InternalServerError)
+            }
+        }
+    }
+
+    #[get("/private/rooms")]
+    pub async fn index(db: &DB, user: LoginUser) -> Result<Json<view::room::List>, Status> {
+        let bucket_name = match env::var("ROOMS_BUCKET") {
+            Ok(name) => name,
+            Err(err) => {
+                eprintln!("{err}");
+                return Err(Status::InternalServerError);
+            }
+        };
+        let client = S3Client::new(bucket_name).await?;
+        match Room::filter_by_user(db, user.user_id).await {
+            Ok(rooms) => Ok(view::room::List::generate(rooms, client).await?),
             Err(err) => {
                 eprintln!("{err}");
                 Err(Status::InternalServerError)

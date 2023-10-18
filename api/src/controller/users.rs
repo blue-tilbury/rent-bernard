@@ -69,7 +69,7 @@ pub mod private {
 
     use crate::{controller::DB, model::user::model::User, utils::auth::LoginUser, view};
 
-    #[get("/login_user")]
+    #[get("/private/login_user")]
     pub async fn login_user(db: &DB, user: LoginUser) -> Result<Json<view::user::Get>, Status> {
         let user = match User::find_by_id(db, user.user_id)
             .await

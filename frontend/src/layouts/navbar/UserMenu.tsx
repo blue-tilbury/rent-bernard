@@ -15,7 +15,7 @@ export const UserMenu = ({ user, isUserMenuOpen }: UserMenuProps) => {
     <div
       className={`${
         isUserMenuOpen
-          ? "absolute right-0 top-14 w-80 space-y-4 rounded-md bg-slate-200 p-4"
+          ? "absolute right-0 top-14 z-10 w-80 space-y-4 rounded-md bg-slate-200 p-4"
           : "hidden"
       }`}
     >

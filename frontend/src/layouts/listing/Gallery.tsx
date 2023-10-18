@@ -1,10 +1,14 @@
 import { MapPinIcon } from "@heroicons/react/24/solid";
+import { useNavigate } from "react-router-dom";
 
 import { ListItem } from "../../types/room.type";
 
 export const Gallery = (props: ListItem) => {
+  const navigate = useNavigate();
+  const onClick = () => navigate(`/ads/${props.id}`);
+
   return (
-    <li className="flex flex-1 flex-col py-1 sm:flex-1/3 sm:px-1">
+    <li onClick={onClick} className="flex flex-1 flex-col py-1 sm:flex-1/3 sm:px-1">
       <div className="rounded-md bg-white p-6 shadow-sm hover:shadow-lg">
         <img className="rounded-lg" src={props.thumbnail_url} />
         <div className="flex flex-col px-2 pt-4">

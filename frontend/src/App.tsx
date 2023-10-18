@@ -11,6 +11,7 @@ import {
   YourAds,
   YourReviews,
 } from "./pages";
+import { Ad } from "./pages/Ad";
 import { Root } from "./routes/Root";
 
 const clientId =
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
         errorElement: <ErrorPage />,
         children: [
           { index: true, element: <Search /> },
+          { path: "ads/:id", element: <Ad /> },
           { path: "wishlist", element: <Wishlist /> },
           { path: "posting", element: <Posting /> },
           { path: "thankyou", element: <ThankYou /> },

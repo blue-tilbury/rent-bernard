@@ -14,15 +14,13 @@ export const SelectBox = () => {
   };
 
   return (
-    <div>
-      <FormControl sx={{ p: 1, minWidth: 192 }} size="small">
-        <Select value={sortBy} onChange={handleChange}>
-          <MenuItem value="new">Posted: newest</MenuItem>
-          <MenuItem value="old">Posted: oldest</MenuItem>
-          <MenuItem value="low">Price: lowest</MenuItem>
-          <MenuItem value="high">Price: highest</MenuItem>
-        </Select>
-      </FormControl>
-    </div>
+    <FormControl sx={{ p: 1, minWidth: 192 }} size="small">
+      <Select value={sortBy} onChange={handleChange}>
+        <MenuItem value="new">Posted: newest</MenuItem>
+        <MenuItem value="old">Posted: oldest</MenuItem>
+        <MenuItem value="low">Price: lowest</MenuItem>
+        <MenuItem value="high">Price: highest</MenuItem>
+      </Select>
+    </FormControl>
   );
 };

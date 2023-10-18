@@ -1,5 +1,9 @@
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import { Link } from "react-router-dom";
+import { useAtomValue } from "jotai";
+
+import { Logout } from "./Logout";
+import { MenuModalLink } from "./MenuModalLink";
+import { userAtom } from "../../utils/globalStateConfig";
 
 type MenuModalProps = {
   handleMenuOpen(): void;
@@ -7,6 +11,9 @@ type MenuModalProps = {
 };
 
 export const MenuModal = ({ handleMenuOpen, hidden }: MenuModalProps) => {
+  const user = useAtomValue(userAtom);
+  const isUserEmpty = Object.keys(user).length === 0;
+
   return (
     <div
       className={`${
@@ -16,23 +23,21 @@ export const MenuModal = ({ handleMenuOpen, hidden }: MenuModalProps) => {
       }`}
     >
       <div className="flex justify-end py-6">
-        <button onClick={handleMenuOpen}>
-          <XMarkIcon className="h-6 w-6" />
-        </button>
+        <XMarkIcon className="h-6 w-6" onClick={handleMenuOpen} />
       </div>
       <div className="flex flex-col items-start gap-4 text-2xl font-medium">
-        <Link to="/" onClick={handleMenuOpen}>
-          Home
-        </Link>
-        <Link to="wishlist" onClick={handleMenuOpen}>
-          Wishlist
-        </Link>
-        <Link to="posting" onClick={handleMenuOpen}>
-          Post Ad
-        </Link>
-        <Link to="login" onClick={handleMenuOpen}>
-          Login
-        </Link>
+        <MenuModalLink to="/" handleClick={handleMenuOpen} />
+        {isUserEmpty ? (
+          <MenuModalLink to="login" handleClick={handleMenuOpen} />
+        ) : (
+          <>
+            <MenuModalLink to="wishlist" handleClick={handleMenuOpen} />
+            <MenuModalLink to="posting" handleClick={handleMenuOpen} />
+            <MenuModalLink to="your-ads" handleClick={handleMenuOpen} />
+            <MenuModalLink to="your-reviews" handleClick={handleMenuOpen} />
+            <Logout type="menuModal" />
+          </>
+        )}
       </div>
     </div>
   );

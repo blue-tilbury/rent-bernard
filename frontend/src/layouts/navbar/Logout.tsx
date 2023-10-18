@@ -3,24 +3,36 @@ import { useSetAtom } from "jotai";
 import { useNavigate } from "react-router-dom";
 
 import { useLogoutUser } from "../../hooks/useAxios";
-import { userAtom } from "../../pages/Login";
 import { User } from "../../types/user.type";
+import { userAtom } from "../../utils/globalStateConfig";
 
-export const Logout = () => {
+type LogoutProps = {
+  type: "menuModal" | "userMenu";
+};
+
+export const Logout = ({ type }: LogoutProps) => {
   const setUser = useSetAtom(userAtom);
   const { triggerLogout } = useLogoutUser();
   const navigate = useNavigate();
+  const isMenuModal = type === "menuModal";
 
-  const handleSignOut = async () => {
+  const handleLogout = async () => {
     await triggerLogout();
     setUser({} as User);
     navigate("/");
   };
 
   return (
-    <li onClick={handleSignOut} className="flex items-center gap-3 py-2">
-      <ArrowRightOnRectangleIcon className="h-4 w-4" />
-      <p>Sign out</p>
+    <li
+      onClick={handleLogout}
+      className={
+        isMenuModal
+          ? "flex cursor-pointer items-center gap-3"
+          : "flex cursor-pointer list-none items-center gap-3 py-1 pl-2 hover:rounded-md hover:bg-rent-very-light-gray"
+      }
+    >
+      <ArrowRightOnRectangleIcon className={isMenuModal ? "h-6 w-6" : "h-4 w-4"} />
+      <p>Log out</p>
     </li>
   );
 };

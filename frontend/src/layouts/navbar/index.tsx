@@ -8,7 +8,7 @@ import { MenuModal } from "./MenuModal";
 import Logo from "../../assets/logo-no-background.png";
 import { CustomLink } from "../../components/CustomLink";
 import useMediaQuery from "../../hooks/useMediaQuery";
-import { userAtom } from "../../utils/globalStateConfig";
+import { userAtom } from "../../shared/globalStateConfig";
 
 export const Navbar = () => {
   const user = useAtomValue(userAtom);

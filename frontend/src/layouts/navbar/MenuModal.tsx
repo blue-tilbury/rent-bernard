@@ -3,7 +3,7 @@ import { useAtomValue } from "jotai";
 
 import { Logout } from "./Logout";
 import { MenuModalLink } from "./MenuModalLink";
-import { userAtom } from "../../utils/globalStateConfig";
+import { userAtom } from "../../shared/globalStateConfig";
 
 type MenuModalProps = {
   handleMenuOpen(): void;

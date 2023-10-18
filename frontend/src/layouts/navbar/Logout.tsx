@@ -3,8 +3,8 @@ import { useSetAtom } from "jotai";
 import { useNavigate } from "react-router-dom";
 
 import { useLogoutUser } from "../../hooks/useAxios";
+import { userAtom } from "../../shared/globalStateConfig";
 import { User } from "../../types/user.type";
-import { userAtom } from "../../utils/globalStateConfig";
 
 type LogoutProps = {
   type: "menuModal" | "userMenu";

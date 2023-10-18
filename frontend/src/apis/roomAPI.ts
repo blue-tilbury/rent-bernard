@@ -32,7 +32,7 @@ export const RoomAPI: RoomAPIType = {
   },
   update: async (id: string, room: Room, cancel = false) => {
     const response = await api.request({
-      url: `/rooms/${id}`,
+      url: `/private/rooms/${id}`,
       method: "PUT",
       data: room,
       signal: cancel ? cancelApiObj["update"].handleRequestCancel().signal : undefined,
@@ -42,14 +42,14 @@ export const RoomAPI: RoomAPIType = {
   },
   delete: async (id: string, cancel = false) => {
     await api.request({
-      url: `/rooms/${id}`,
+      url: `/private/rooms/${id}`,
       method: "DELETE",
       signal: cancel ? cancelApiObj["delete"].handleRequestCancel().signal : undefined,
     });
   },
   create: async (room: Room, cancel = false) => {
     const response = await api.request({
-      url: `/rooms`,
+      url: `/private/rooms`,
       method: "POST",
       data: room,
       signal: cancel ? cancelApiObj["create"].handleRequestCancel().signal : undefined,

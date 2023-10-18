@@ -12,7 +12,7 @@ pub mod private {
         view,
     };
 
-    #[get("/photos/upload")]
+    #[get("/private/photos/upload")]
     pub async fn upload(_user: LoginUser) -> Result<Json<view::photo::Upload>, Status> {
         let bucket_name = match env::var("ROOMS_BUCKET") {
             Ok(name) => name,

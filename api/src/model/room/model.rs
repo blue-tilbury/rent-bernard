@@ -119,6 +119,20 @@ impl Room {
         Ok(Self::rows_to_rooms(rec))
     }
 
+    pub async fn filter_by_user(db: &PgPool, user_id: Uuid) -> Result<Vec<Room>, sqlx::Error> {
+        let rec: Vec<RoomRow> = sqlx::query_as(
+            r#"
+                SELECT r.*, ri.s3_key FROM rooms r
+                LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
+                WHERE user_id = $1
+            "#,
+        )
+        .bind(user_id)
+        .fetch_all(db)
+        .await?;
+        Ok(Self::rows_to_rooms(rec))
+    }
+
     pub async fn update(db: &PgPool, room: UpdateRoom) -> Result<Option<()>, sqlx::Error> {
         let rec = sqlx::query(
             r#"
@@ -315,6 +329,50 @@ mod tests {
 
         let result = Room::list(&db.pool).await.unwrap();
         assert_eq!(result.len(), 2);
+    }
+
+    #[tokio::test]
+    async fn test_filter_by_user() {
+        let db = TestConnection::new().await;
+        let user_params1 = UserFactoryParams {
+            email: "user1".to_string(),
+            ..Default::default()
+        };
+        let user_id1 = UserFactory::create(&db.pool, user_params1).await;
+        let id1 = RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                user_id: Some(user_id1),
+                ..Default::default()
+            },
+        )
+        .await;
+        let user_params2 = UserFactoryParams {
+            email: "user2".to_string(),
+            ..Default::default()
+        };
+        let user_id2 = UserFactory::create(&db.pool, user_params2).await;
+        RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                user_id: Some(user_id2),
+                ..Default::default()
+            },
+        )
+        .await;
+        RoomImageFactory::create_many(
+            &db.pool,
+            RoomImageFactoryParams {
+                room_id: id1,
+                ..Default::default()
+            },
+            2,
+        )
+        .await;
+
+        let result = Room::filter_by_user(&db.pool, user_id1).await.unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(result.get(0).unwrap().user_id, user_id1);
     }
 
     #[tokio::test]

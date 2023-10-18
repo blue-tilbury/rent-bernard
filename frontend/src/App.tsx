@@ -1,13 +1,16 @@
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
-import { ErrorPage } from "./pages/ErrorPage";
-import { Login } from "./pages/Login";
-import { Posting } from "./pages/Posting";
-import { Search } from "./pages/Search";
-import { ThankYou } from "./pages/ThankYou";
-import { Wishlist } from "./pages/Wishlist";
-import { YourAds } from "./pages/YourAds";
+import {
+  ErrorPage,
+  Login,
+  Posting,
+  Search,
+  ThankYou,
+  Wishlist,
+  YourAds,
+  YourReviews,
+} from "./pages";
 import { Root } from "./routes/Root";
 
 const clientId =
@@ -27,6 +30,7 @@ const router = createBrowserRouter([
           { path: "posting", element: <Posting /> },
           { path: "thankyou", element: <ThankYou /> },
           { path: "your-ads", element: <YourAds /> },
+          { path: "your-reviews", element: <YourReviews /> },
           { path: "*", element: <ErrorPage /> },
         ],
       },

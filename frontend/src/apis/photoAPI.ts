@@ -1,5 +1,5 @@
-import { api } from "./axiosConfig";
-import { defineCancelApiObj } from "./axiosUtils";
+import { api } from "./config/axiosConfig";
+import { defineCancelApiObj } from "./config/axiosUtils";
 import { UploadPhoto } from "../types/room.type";
 
 type PhotoAPIType = {

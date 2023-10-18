@@ -1,5 +1,5 @@
-import { api } from "./axiosConfig";
-import { defineCancelApiObj } from "./axiosUtils";
+import { api } from "./config/axiosConfig";
+import { defineCancelApiObj } from "./config/axiosUtils";
 
 type S3APIType = {
   upload: (url: string, file: File, cancel?: boolean) => Promise<void>;

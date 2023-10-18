@@ -3,7 +3,7 @@ import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 
 import { AuthAPI } from "../apis/authAPI";
-import { api } from "../apis/axiosConfig";
+import { api } from "../apis/config/axiosConfig";
 import { PhotoAPI } from "../apis/photoAPI";
 import { RoomAPI } from "../apis/roomAPI";
 import { Room } from "../types/room.type";

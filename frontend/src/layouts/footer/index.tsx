@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { CustomLink } from "../../components/CustomLink";
 
 export const Footer = () => {
   return (
@@ -9,15 +9,15 @@ export const Footer = () => {
             <h2>RENT BERNARD</h2>
           </div>
           <div className="flex flex-2 flex-col gap-1 pb-8 text-sm font-light md:text-base">
-            <Link to="/" className="hover:text-rent-light-gray">
+            <CustomLink to="/" type="footer">
               Room
-            </Link>
-            <Link to="/wishlist" className="hover:text-rent-light-gray">
+            </CustomLink>
+            <CustomLink to="wishlist" type="footer">
               My Wishlist
-            </Link>
-            <Link to="/posting" className="hover:text-rent-light-gray">
+            </CustomLink>
+            <CustomLink to="posting" type="footer">
               Post Ad
-            </Link>
+            </CustomLink>
           </div>
         </div>
         <p className="text-center text-xs">

@@ -1,5 +1,5 @@
-import { api } from "./axiosConfig";
-import { defineCancelApiObj } from "./axiosUtils";
+import { api } from "./config/axiosConfig";
+import { defineCancelApiObj } from "./config/axiosUtils";
 import { Id } from "../types/common.type";
 import { GetRoom, ListRoom, Room } from "../types/room.type";
 

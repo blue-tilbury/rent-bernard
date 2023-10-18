@@ -28,7 +28,8 @@ export const Logout = ({ type }: LogoutProps) => {
       className={
         isMenuModal
           ? "flex cursor-pointer items-center gap-3"
-          : "flex cursor-pointer list-none items-center gap-3 py-1 pl-2 hover:rounded-md hover:bg-rent-very-light-gray"
+          : `flex cursor-pointer list-none items-center gap-3 py-1 pl-2
+            hover:rounded-md hover:bg-rent-very-light-gray`
       }
     >
       <ArrowRightOnRectangleIcon className={isMenuModal ? "h-6 w-6" : "h-4 w-4"} />

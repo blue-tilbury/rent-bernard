@@ -1,12 +1,10 @@
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
-import { atom, useSetAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import { useNavigate } from "react-router-dom";
 
 import Logo from "../assets/logo-no-background.png";
 import { useGetUser, useLoginUser } from "../hooks/useAxios";
-import { User } from "../types/user.type";
-
-export const userAtom = atom({} as User);
+import { userAtom } from "../utils/globalStateConfig";
 
 export const Login = () => {
   const setUser = useSetAtom(userAtom);

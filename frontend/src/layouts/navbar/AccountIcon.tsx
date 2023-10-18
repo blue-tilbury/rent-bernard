@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 import { UserMenu } from "./UserMenu";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
-import { userAtom } from "../../pages/Login";
+import { userAtom } from "../../utils/globalStateConfig";
 
 export const AccountIcon = () => {
   const user = useAtomValue(userAtom);

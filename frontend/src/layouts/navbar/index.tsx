@@ -35,7 +35,7 @@ export const Navbar = () => {
             <CustomLink to="wishlist" type="noStyle">
               <HeartIcon className="h-6 w-6 text-rent-gray hover:text-rent-dark-blue" />
             </CustomLink>
-            <CustomLink to="your-ads" type="navbar">
+            <CustomLink to="posting" type="navbar">
               POST AD
             </CustomLink>
             <AccountIcon />

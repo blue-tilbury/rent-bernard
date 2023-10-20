@@ -3,7 +3,7 @@ type ButtonProps = {
   size: "xs" | "sm" | "md" | "lg";
   color: "primary" | "secondary" | "danger";
   type: "submit" | "button";
-  handleClick?(): void;
+  handleClick?(e?: React.MouseEvent): void;
 };
 
 export const Button = ({ children, size, color, type, handleClick }: ButtonProps) => {

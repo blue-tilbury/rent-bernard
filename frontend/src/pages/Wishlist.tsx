@@ -1,22 +1,32 @@
 import roomImg from "../assets/sample.jpeg";
-import { Thumb } from "../layouts/listing/Thumb";
+import { Thumb } from "../layouts/listing/thumb";
 
 const rooms = [
   {
-    id: 0,
-    title: "Room 1",
+    id: "0",
+    title: "Room 0",
     price: 100000,
     city: "Vancuover",
     image_urls: roomImg,
     updated_at: "20",
+    is_furnished: false,
+    is_pet_friendly: false,
+    description: "Room 0 description",
+    email: "sample@example.com",
+    created_at: "2023-01-01T12:10:30Z",
   },
   {
-    id: 1,
+    id: "1",
     title: "Room 1",
     price: 100000,
     city: "Vancuover",
     image_urls: roomImg,
     updated_at: "20",
+    is_furnished: false,
+    is_pet_friendly: false,
+    description: "Room 1 description",
+    email: "sample@example.com",
+    created_at: "2023-01-01T12:10:30Z",
   },
 ];
 

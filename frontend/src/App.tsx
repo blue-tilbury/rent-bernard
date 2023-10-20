@@ -30,6 +30,7 @@ const router = createBrowserRouter([
           { path: "ads/:id", element: <Ad /> },
           { path: "wishlist", element: <Wishlist /> },
           { path: "posting", element: <Posting /> },
+          { path: "posting/:id", element: <Posting /> },
           { path: "thankyou", element: <ThankYou /> },
           { path: "your-ads", element: <YourAds /> },
           { path: "your-reviews", element: <YourReviews /> },

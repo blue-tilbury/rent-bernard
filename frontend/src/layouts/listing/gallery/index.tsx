@@ -1,7 +1,7 @@
 import { MapPinIcon } from "@heroicons/react/24/solid";
 import { useNavigate } from "react-router-dom";
 
-import { ListItem } from "../../types/room.type";
+import { ListItem } from "../../../types/room.type";
 
 export const Gallery = (props: ListItem) => {
   const navigate = useNavigate();

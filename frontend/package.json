@@ -38,7 +38,8 @@
   },
   "overrides": {
     "react-scripts": {
-      "typescript": "^5"
+      "typescript": "^5",
+      "resolve-url-loader": ">=5.0.0"
     },
     "css-select": ">=5.1.0",
     "semver": ">=7.5.3"

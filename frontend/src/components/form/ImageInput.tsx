@@ -1,9 +1,9 @@
 import { UseControllerProps, useController } from "react-hook-form";
 
 import { RegisterName } from "../../types/form.type";
-import { Room } from "../../types/room.type";
+import { PostRoom } from "../../types/room.type";
 
-type ImageProps = UseControllerProps<Room> & {
+type ImageProps = UseControllerProps<PostRoom> & {
   name: RegisterName;
   files: File[];
   handleFiles(value: File[], type: "update" | "delete"): void;

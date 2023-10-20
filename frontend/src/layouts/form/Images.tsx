@@ -4,12 +4,12 @@ import { UseFormSetValue } from "react-hook-form";
 import { ImageInput } from "../../components/form/ImageInput";
 import { Label } from "../../components/form/Label";
 import { ImageInputProps } from "../../types/form.type";
-import { Room } from "../../types/room.type";
+import { PostRoom } from "../../types/room.type";
 
 type ImagesPreviewProps = {
   files: File[];
   handleFiles(value: File[], type: "update" | "delete"): void;
-  setValue: UseFormSetValue<Room>;
+  setValue: UseFormSetValue<PostRoom>;
 };
 
 export const Images = ({

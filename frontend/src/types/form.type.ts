@@ -6,7 +6,7 @@ import {
   UseFormSetValue,
 } from "react-hook-form";
 
-import { Room } from "./room.type";
+import { PostRoom } from "./room.type";
 
 export type RegisterName =
   | "city"
@@ -30,16 +30,16 @@ export type InputProps = RegisterType & {
 };
 
 export type RegisterType = {
-  register: UseFormRegister<Room>;
+  register: UseFormRegister<PostRoom>;
 };
 
-export type ControlledInputProps = UseControllerProps<Room> & {
+export type ControlledInputProps = UseControllerProps<PostRoom> & {
   error?: FieldError;
 };
 
-export type ImageInputProps = UseControllerProps<Room> & {
+export type ImageInputProps = UseControllerProps<PostRoom> & {
   error?: Merge<FieldError, (FieldError | undefined)[]>;
   files: File[];
   handleFiles(value: File[], type: "update" | "delete"): void;
-  setValue: UseFormSetValue<Room>;
+  setValue: UseFormSetValue<PostRoom>;
 };

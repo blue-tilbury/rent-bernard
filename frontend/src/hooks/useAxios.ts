@@ -1,22 +1,37 @@
-import { AxiosRequestConfig } from "axios";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 
 import { AuthAPI } from "../apis/authAPI";
-import { api } from "../apis/config/axiosConfig";
 import { PhotoAPI } from "../apis/photoAPI";
 import { RoomAPI } from "../apis/roomAPI";
-import { Room } from "../types/room.type";
+import { Room, UpdateRoom } from "../types/room.type";
 import { AuthParams } from "../types/user.type";
 
-const fetcher = <T>(url: string, params: AxiosRequestConfig<T>) =>
-  api.request({ url, params }).then((res) => res.data);
-
-export const useRoom = <T>(params: AxiosRequestConfig<T>) => {
-  const { data, error, isLoading } = useSWR(["/rooms", params], ([url, params]) =>
-    fetcher(url, params),
-  );
+// Room
+export const useRoom = () => {
+  const { data, error, isLoading } = useSWR("/rooms", RoomAPI.index);
   return { data, isError: error, isLoading };
+};
+
+export const useGetRoom = (id: string) => {
+  const { trigger: triggerGetRoom } = useSWRMutation(
+    `/rooms/${id}`,
+    async (_url: string, { arg }: { arg: string }) => RoomAPI.show(arg),
+  );
+  return { triggerGetRoom };
+};
+
+export const useYourRoom = () => {
+  const { data, error, isLoading } = useSWR("/private/rooms", RoomAPI.private_index);
+  return { data, isError: error, isLoading };
+};
+
+export const useDeleteRoom = () => {
+  const { trigger: triggerDeleteRoom } = useSWRMutation(
+    `/private/rooms`,
+    async (_url: string, { arg }: { arg: string }) => RoomAPI.delete(arg),
+  );
+  return { triggerDeleteRoom };
 };
 
 export const useCreateRoom = () => {
@@ -27,6 +42,15 @@ export const useCreateRoom = () => {
   return { triggerRoom };
 };
 
+export const useUpdateRoom = () => {
+  const { trigger: triggerUpdateRoom } = useSWRMutation(
+    "/rooms",
+    async (_url: string, { arg }: { arg: UpdateRoom }) => RoomAPI.update(arg),
+  );
+  return { triggerUpdateRoom };
+};
+
+// Photo
 export const useGetPhoto = () => {
   const { trigger: triggerPhoto } = useSWRMutation("/photos/upload", async () =>
     PhotoAPI.show(),
@@ -34,6 +58,7 @@ export const useGetPhoto = () => {
   return { triggerPhoto };
 };
 
+// User
 export const useLoginUser = () => {
   const { trigger: triggerLogin } = useSWRMutation(
     "/login",

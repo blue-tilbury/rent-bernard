@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
+import { PhotoAPI } from "../apis/photoAPI";
 import { S3API } from "../apis/s3API";
 import { Button } from "../components/Button";
-import { useCreateRoom, useGetPhoto } from "../hooks/useAxios";
+import { useCreateRoom, useGetPhoto, useGetRoom, useUpdateRoom } from "../hooks/useAxios";
 import {
   Description,
   Email,
@@ -17,23 +18,70 @@ import {
   Price,
   Title,
 } from "../layouts/form";
+import { Converter } from "../shared/typeConverter";
 import { scheme } from "../shared/zodScheme";
-import { Room } from "../types/room.type";
+import { PostRoom, Room } from "../types/room.type";
 
 export const Posting = () => {
+  const params = useParams();
+  const navigate = useNavigate();
+  const [files, setFiles] = useState<File[]>([]);
+  const { triggerPhoto } = useGetPhoto();
+  const { triggerRoom } = useCreateRoom();
+  const { triggerUpdateRoom } = useUpdateRoom();
+  const { triggerGetRoom } = useGetRoom(params.id as string);
+  const defaultVals = useMemo<PostRoom>(() => {
+    return {
+      title: "",
+      price: null,
+      city: "",
+      street: "",
+      is_furnished: null,
+      is_pet_friendly: null,
+      s3_keys: [],
+      description: "",
+      email: "",
+    };
+  }, []);
   const {
     register,
     control,
     setValue,
     handleSubmit,
     formState: { errors },
-  } = useForm<Room>({
+    reset,
+  } = useForm<PostRoom>({
     resolver: zodResolver(scheme),
+    defaultValues: getDefaultVals,
   });
-  const navigate = useNavigate();
-  const [files, setFiles] = useState<File[]>([]);
-  const { triggerPhoto } = useGetPhoto();
-  const { triggerRoom } = useCreateRoom();
+
+  async function getDefaultVals(): Promise<PostRoom | Room> {
+    if (!params.id) return defaultVals;
+
+    const room = await triggerGetRoom(params.id);
+
+    const defaultFiles = await Promise.allSettled(
+      room.image_urls.map(async (url, i) => {
+        const blob = await PhotoAPI.convert(url);
+
+        return new File([blob], `img_${i}`);
+      }),
+    );
+
+    const resolvedFiles = defaultFiles
+      .filter(
+        (result): result is PromiseFulfilledResult<File> => result.status === "fulfilled",
+      )
+      .map((result) => result.value);
+    setFiles(resolvedFiles);
+
+    return Converter.GetRoomToRoom(room, resolvedFiles);
+  }
+
+  useEffect(() => {
+    reset(defaultVals);
+    setFiles([]);
+  }, [params.id, defaultVals, reset]);
 
   const handleFiles = (selectedFiles: File[], type: "update" | "delete") => {
     switch (type) {
@@ -46,16 +94,22 @@ export const Posting = () => {
     }
   };
 
-  const submit = async (formValues: Room) => {
-    formValues.s3_keys = [];
+  const submit = async (formValues: PostRoom) => {
+    const room = Converter.PostRoomToRoom(formValues);
+    room.s3_keys = [];
 
     for (const file of files) {
       const photo = await triggerPhoto();
       S3API.upload(photo.url, file);
-      formValues.s3_keys.push(photo.key);
+      room.s3_keys.push(photo.key);
     }
-    await triggerRoom(formValues);
-    navigate("/thankyou");
+    if (params.id) {
+      await triggerUpdateRoom({ ...room, id: params.id });
+      navigate(`/ads/${params.id}`);
+    } else {
+      await triggerRoom(room);
+      navigate("/thankyou");
+    }
   };
 
   return (

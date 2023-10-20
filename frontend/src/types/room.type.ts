@@ -1,3 +1,5 @@
+import { Id } from "./common.type";
+
 export type Room = {
   title: string;
   price: number;
@@ -9,6 +11,20 @@ export type Room = {
   description: string;
   email: string;
 };
+
+export type PostRoom = {
+  title: string;
+  price: number | null;
+  city: string;
+  street?: string;
+  is_furnished: boolean | null;
+  is_pet_friendly: boolean | null;
+  s3_keys: string[];
+  description: string;
+  email: string;
+};
+
+export type UpdateRoom = Room & Id;
 
 export type GetRoom = {
   id: string;

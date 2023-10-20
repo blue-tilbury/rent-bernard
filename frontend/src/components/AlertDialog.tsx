@@ -5,9 +5,12 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { useState } from "react";
 
 import { Button } from "./Button";
+import { useDeleteRoom } from "../hooks/useAxios";
+import { Id } from "../types/common.type";
 
-export default function AlertDialog() {
+export default function AlertDialog({ id }: Id) {
   const [open, setOpen] = useState(false);
+  const { triggerDeleteRoom } = useDeleteRoom();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -17,9 +20,9 @@ export default function AlertDialog() {
     setOpen(false);
   };
 
-  const deleteAd = () => {
+  const deleteAd = async () => {
     handleClose();
-    // TODO: call delete api
+    await triggerDeleteRoom(id);
   };
 
   return (

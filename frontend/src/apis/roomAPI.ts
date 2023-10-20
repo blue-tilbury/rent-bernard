@@ -1,38 +1,37 @@
 import { api } from "./config/axiosConfig";
 import { defineCancelApiObj } from "./config/axiosUtils";
 import { Id } from "../types/common.type";
-import { GetRoom, ListRoom, Room } from "../types/room.type";
+import { GetRoom, ListRoom, Room, UpdateRoom } from "../types/room.type";
 
 type RoomAPIType = {
-  show: (id: string, cancel?: boolean) => Promise<GetRoom>;
-  index: (cancel?: boolean) => Promise<ListRoom>;
-  update: (id: string, room: Room, cancel?: boolean) => Promise<void>;
+  show: (id: string) => Promise<GetRoom>;
+  index: () => Promise<ListRoom>;
+  update: (room: UpdateRoom, cancel?: boolean) => Promise<void>;
   delete: (id: string, cancel?: boolean) => Promise<void>;
   create: (room: Room, cancel?: boolean) => Promise<Id>;
+  private_index: () => Promise<ListRoom>;
 };
 
 export const RoomAPI: RoomAPIType = {
-  show: async (id: string, cancel = false) => {
+  show: async (id: string) => {
     const response = await api.request({
       url: `/rooms/${id}`,
       method: "GET",
-      signal: cancel ? cancelApiObj["show"].handleRequestCancel().signal : undefined,
     });
 
     return response.data;
   },
-  index: async (cancel = false) => {
+  index: async () => {
     const response = await api.request({
       url: "/rooms",
       method: "GET",
-      signal: cancel ? cancelApiObj["index"].handleRequestCancel().signal : undefined,
     });
 
     return response.data;
   },
-  update: async (id: string, room: Room, cancel = false) => {
+  update: async (room: UpdateRoom, cancel = false) => {
     const response = await api.request({
-      url: `/private/rooms/${id}`,
+      url: `/private/rooms/${room.id}`,
       method: "PUT",
       data: room,
       signal: cancel ? cancelApiObj["update"].handleRequestCancel().signal : undefined,
@@ -53,6 +52,14 @@ export const RoomAPI: RoomAPIType = {
       method: "POST",
       data: room,
       signal: cancel ? cancelApiObj["create"].handleRequestCancel().signal : undefined,
+    });
+
+    return response.data;
+  },
+  private_index: async () => {
+    const response = await api.request({
+      url: "/private/rooms/",
+      method: "GET",
     });
 
     return response.data;

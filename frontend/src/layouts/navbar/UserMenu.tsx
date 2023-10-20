@@ -1,4 +1,7 @@
-import { ChatBubbleLeftRightIcon, HomeIcon } from "@heroicons/react/24/solid";
+import {
+  ChatBubbleLeftRightIcon,
+  ClipboardDocumentListIcon,
+} from "@heroicons/react/24/outline";
 import Divider from "@mui/material/Divider";
 
 import { Logout } from "./Logout";
@@ -27,7 +30,7 @@ export const UserMenu = ({ user, isUserMenuOpen, handleClick }: UserMenuProps) =
       <ul className="rounded-md bg-white p-2">
         <li>
           <CustomLink to="your-ads" type="userMenu" handleClick={handleClick}>
-            <HomeIcon className="h-4 w-4" />
+            <ClipboardDocumentListIcon className="h-4 w-4" />
             <p>Your ads</p>
           </CustomLink>
         </li>

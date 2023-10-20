@@ -1,26 +1,21 @@
-import roomImg from "../assets/sample.jpeg";
-import { Thumb } from "../layouts/listing/Thumb";
-
-const ads = [
-  {
-    id: 0,
-    title: "Room 1",
-    price: 100000,
-    city: "Vancuover",
-    image_urls: roomImg,
-    updated_at: "20",
-  },
-  {
-    id: 1,
-    title: "Room 1",
-    price: 100000,
-    city: "Vancuover",
-    image_urls: roomImg,
-    updated_at: "20",
-  },
-];
+import { ErrorMsg } from "../components/ErrorMsg";
+import { Loading } from "../components/Loading";
+import { useYourRoom } from "../hooks/useAxios";
+import { Thumb } from "../layouts/listing/thumb";
+import { ListItem } from "../types/room.type";
 
 export const YourAds = () => {
+  const { data, isError, isLoading } = useYourRoom();
+
+  if (isError)
+    return (
+      <ErrorMsg msg="Sorry, something wrong with the connection." isReloadBtn={true} />
+    );
+  if (isLoading) return <Loading />;
+  if (!data || data.rooms.length === 0)
+    return <ErrorMsg msg="Sorry, no ads found." isReloadBtn={false} />;
+
+  const ads: ListItem[] = data.rooms;
   const thumbs = ads.map((ad) => <Thumb key={ad.id} room={ad} page="yourAds" />);
 
   return (

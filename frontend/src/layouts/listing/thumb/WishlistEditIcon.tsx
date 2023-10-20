@@ -6,12 +6,14 @@ export const WishlistEditIcon = () => {
   const [isFav, setIsFav] = useState(true);
 
   // TODO: call delete api
-  const deleteFav = async () => {
+  const deleteFav = async (e: React.MouseEvent<SVGSVGElement>) => {
+    e.stopPropagation();
     setIsFav(false);
   };
 
   // TODO: call add api
-  const addFav = () => {
+  const addFav = (e: React.MouseEvent<SVGSVGElement>) => {
+    e.stopPropagation();
     setIsFav(true);
   };
 

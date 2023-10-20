@@ -1,4 +1,5 @@
 import Divider from "@mui/material/Divider";
+import { useNavigate } from "react-router-dom";
 
 import { WishlistEditIcon } from "./WishlistEditIcon";
 import { YourAdsEditIcons } from "./YourAdsEditIcons";
@@ -10,11 +11,14 @@ type ThumbProps = {
 };
 
 export const Thumb = ({ room, page }: ThumbProps) => {
+  const navigate = useNavigate();
   const isWishlistPage = page === "wishlist";
   const isYourAdsPage = page === "yourAds";
 
+  const onClick = () => navigate(`/ads/${room.id}`);
+
   return (
-    <li className="flex justify-between rounded-md bg-white">
+    <li onClick={onClick} className="flex justify-between rounded-md bg-white">
       <div className="flex">
         <img
           className="h-40 w-56 rounded-3xl object-cover p-4"

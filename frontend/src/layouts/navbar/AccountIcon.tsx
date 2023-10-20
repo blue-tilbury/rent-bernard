@@ -10,12 +10,16 @@ export const AccountIcon = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const ref = useOutsideClick(setIsUserMenuOpen, false);
 
+  const handleClick = () => {
+    setIsUserMenuOpen(!isUserMenuOpen);
+  };
+
   return (
     <div ref={ref} className="relative flex">
       <button onClick={() => setIsUserMenuOpen((prev) => !prev)}>
         <img src={user.picture} className="h-8 w-8 rounded-full" />
       </button>
-      <UserMenu user={user} isUserMenuOpen={isUserMenuOpen} />
+      <UserMenu user={user} isUserMenuOpen={isUserMenuOpen} handleClick={handleClick} />
     </div>
   );
 };

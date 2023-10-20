@@ -6,9 +6,10 @@ type CustomLinkProps = {
   children: React.ReactNode;
   to: PagePath;
   type: "navbar" | "userMenu" | "footer" | "noStyle";
+  handleClick?(): void;
 };
 
-export const CustomLink = ({ children, to, type }: CustomLinkProps) => {
+export const CustomLink = ({ children, to, type, handleClick }: CustomLinkProps) => {
   let style;
 
   switch (type) {
@@ -28,7 +29,7 @@ export const CustomLink = ({ children, to, type }: CustomLinkProps) => {
   }
 
   return (
-    <Link to={to} className={style}>
+    <Link to={to} className={style} onClick={handleClick}>
       {children}
     </Link>
   );

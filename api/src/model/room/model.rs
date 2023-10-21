@@ -133,6 +133,20 @@ impl Room {
         Ok(Self::rows_to_rooms(rec))
     }
 
+    pub async fn get_wishlists(db: &PgPool, user_id: Uuid) -> Result<Vec<Room>, sqlx::Error> {
+        let rec: Vec<RoomRow> = sqlx::query_as(
+            r#"
+                SELECT r.*, ri.s3_key FROM rooms r
+                INNER JOIN wishlists w ON r.id = w.room_id AND w.user_id = $1
+                LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
+            "#,
+        )
+        .bind(user_id)
+        .fetch_all(db)
+        .await?;
+        Ok(Self::rows_to_rooms(rec))
+    }
+
     pub async fn update(db: &PgPool, room: UpdateRoom) -> Result<Option<()>, sqlx::Error> {
         let rec = sqlx::query(
             r#"
@@ -219,6 +233,7 @@ mod tests {
             room::factory::tests::{RoomFactory, RoomFactoryParams},
             room_image::factory::tests::{RoomImageFactory, RoomImageFactoryParams},
             user::factory::tests::UserFactory,
+            wishlist::factory::tests::{WishlistFactory, WishlistFactoryParams},
         },
     };
 
@@ -355,6 +370,47 @@ mod tests {
         let result = Room::filter_by_user(&db.pool, user_id1).await.unwrap();
         assert_eq!(result.len(), 1);
         assert_eq!(result.get(0).unwrap().user_id, user_id1);
+    }
+
+    #[tokio::test]
+    async fn test_get_wishlists() {
+        let db = TestConnection::new().await;
+        let login_user_id = UserFactory::create(&db.pool, Faker.fake()).await;
+        let room_id1 = RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                user_id: None,
+                ..Faker.fake()
+            },
+        )
+        .await;
+        let room_id2 = RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                user_id: None,
+                ..Faker.fake()
+            },
+        )
+        .await;
+        WishlistFactory::create(
+            &db.pool,
+            WishlistFactoryParams {
+                user_id: login_user_id,
+                room_id: room_id1,
+            },
+        )
+        .await;
+        WishlistFactory::create(
+            &db.pool,
+            WishlistFactoryParams {
+                user_id: login_user_id,
+                room_id: room_id2,
+            },
+        )
+        .await;
+
+        let result = Room::get_wishlists(&db.pool, login_user_id).await.unwrap();
+        assert_eq!(result.len(), 2);
     }
 
     #[tokio::test]

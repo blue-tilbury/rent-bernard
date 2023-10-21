@@ -1,11 +1,12 @@
 #[cfg(test)]
 pub mod tests {
+    use fake::{Dummy, Fake, Faker};
     use sqlx::{PgPool, Row};
     use uuid::Uuid;
 
-    use crate::model::user::factory::tests::{UserFactory, UserFactoryParams};
+    use crate::model::user::factory::tests::UserFactory;
 
-    #[derive(Default, Clone)]
+    #[derive(Dummy, Clone)]
     pub struct RoomFactoryParams {
         pub title: String,
         pub price: i32,
@@ -24,7 +25,7 @@ pub mod tests {
         pub async fn create(db: &PgPool, params: RoomFactoryParams) -> Uuid {
             let user_id = match params.user_id {
                 Some(user_id) => user_id,
-                None => UserFactory::create(&db, UserFactoryParams::default()).await,
+                None => UserFactory::create(db, Faker.fake()).await,
             };
             let rec = sqlx::query(
                 r#"

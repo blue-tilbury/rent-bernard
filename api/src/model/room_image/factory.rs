@@ -1,11 +1,12 @@
 #[cfg(test)]
 pub mod tests {
+    use fake::Dummy;
     use sqlx::{PgPool, Row};
     use uuid::Uuid;
 
     use crate::model::room_image::model::RoomImage;
 
-    #[derive(Default, Clone)]
+    #[derive(Dummy, Clone)]
     pub struct RoomImageFactoryParams {
         pub room_id: Uuid,
         pub s3_key: String,

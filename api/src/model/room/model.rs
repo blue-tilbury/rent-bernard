@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use chrono::NaiveDateTime;
 use sqlx::{FromRow, PgPool, Row};
 use uuid::Uuid;
@@ -112,6 +110,7 @@ impl Room {
             r#"
                 SELECT r.*, ri.s3_key FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
+                ORDER BY r.created_at DESC, r.id DESC
             "#,
         )
         .fetch_all(db)
@@ -125,6 +124,7 @@ impl Room {
                 SELECT r.*, ri.s3_key FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
                 WHERE user_id = $1
+                ORDER BY r.created_at DESC, r.id DESC
             "#,
         )
         .bind(user_id)
@@ -139,6 +139,7 @@ impl Room {
                 SELECT r.*, ri.s3_key FROM rooms r
                 INNER JOIN wishlists w ON r.id = w.room_id AND w.user_id = $1
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
+                ORDER BY r.created_at DESC, r.id DESC
             "#,
         )
         .bind(user_id)
@@ -205,18 +206,27 @@ impl Room {
     }
 
     fn rows_to_rooms(rows: Vec<RoomRow>) -> Vec<Room> {
-        let mut hashmap = HashMap::<Uuid, Vec<RoomRow>>::new();
+        let mut rooms = Vec::<(Uuid, Vec<RoomRow>)>::new();
+        let mut current_idx = 0;
         for row in rows {
-            match hashmap.get_mut(&row.id) {
-                Some(v) => v.push(row),
+            let room = match rooms.get_mut(current_idx) {
+                Some(vec) => vec,
+                // The first element
                 None => {
-                    hashmap.insert(row.id, vec![row]);
+                    rooms.push((row.id, vec![row]));
+                    continue;
                 }
+            };
+            if room.0 == row.id {
+                room.1.push(row);
+            } else {
+                rooms.push((row.id, vec![row]));
+                current_idx += 1;
             }
         }
-        hashmap
-            .values()
-            .cloned()
+        rooms
+            .into_iter()
+            .map(|room| room.1)
             .filter_map(Self::rows_to_room)
             .collect()
     }
@@ -305,7 +315,7 @@ mod tests {
     async fn test_list() {
         let db = TestConnection::new().await;
         let user_id1 = UserFactory::create(&db.pool, Faker.fake()).await;
-        let id1 = RoomFactory::create(
+        let room_id1 = RoomFactory::create(
             &db.pool,
             RoomFactoryParams {
                 user_id: Some(user_id1),
@@ -314,7 +324,7 @@ mod tests {
         )
         .await;
         let user_id2 = UserFactory::create(&db.pool, Faker.fake()).await;
-        RoomFactory::create(
+        let room_id2 = RoomFactory::create(
             &db.pool,
             RoomFactoryParams {
                 user_id: Some(user_id2),
@@ -325,7 +335,7 @@ mod tests {
         RoomImageFactory::create_many(
             &db.pool,
             RoomImageFactoryParams {
-                room_id: id1,
+                room_id: room_id1,
                 ..Faker.fake()
             },
             2,
@@ -334,13 +344,24 @@ mod tests {
 
         let result = Room::list(&db.pool).await.unwrap();
         assert_eq!(result.len(), 2);
+        // ORDER BY created_ad DESC
+        assert_eq!(result[0].id, room_id2);
+        assert_eq!(result[1].id, room_id1);
     }
 
     #[tokio::test]
     async fn test_filter_by_user() {
         let db = TestConnection::new().await;
         let user_id1 = UserFactory::create(&db.pool, Faker.fake()).await;
-        let id1 = RoomFactory::create(
+        let room_id1 = RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                user_id: Some(user_id1),
+                ..Faker.fake()
+            },
+        )
+        .await;
+        let room_id2 = RoomFactory::create(
             &db.pool,
             RoomFactoryParams {
                 user_id: Some(user_id1),
@@ -357,19 +378,13 @@ mod tests {
             },
         )
         .await;
-        RoomImageFactory::create_many(
-            &db.pool,
-            RoomImageFactoryParams {
-                room_id: id1,
-                ..Faker.fake()
-            },
-            2,
-        )
-        .await;
 
         let result = Room::filter_by_user(&db.pool, user_id1).await.unwrap();
-        assert_eq!(result.len(), 1);
+        assert_eq!(result.len(), 2);
         assert_eq!(result.get(0).unwrap().user_id, user_id1);
+        // ORDER BY created_ad DESC
+        assert_eq!(result[0].id, room_id2);
+        assert_eq!(result[1].id, room_id1);
     }
 
     #[tokio::test]
@@ -411,6 +426,9 @@ mod tests {
 
         let result = Room::get_wishlists(&db.pool, login_user_id).await.unwrap();
         assert_eq!(result.len(), 2);
+        // ORDER BY created_ad DESC
+        assert_eq!(result[0].id, room_id2);
+        assert_eq!(result[1].id, room_id1);
     }
 
     #[tokio::test]

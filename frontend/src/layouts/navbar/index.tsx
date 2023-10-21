@@ -5,7 +5,7 @@ import { useState } from "react";
 import { AccountIcon } from "./AccountIcon";
 import { LoginLink } from "./LoginLink";
 import { MenuModal } from "./MenuModal";
-import Logo from "../../assets/logo-no-background.png";
+import Logo from "../../assets/logo-blue.svg?react";
 import { CustomLink } from "../../components/CustomLink";
 import useMediaQuery from "../../hooks/useMediaQuery";
 import { userAtom } from "../../shared/globalStateConfig";
@@ -24,7 +24,7 @@ export const Navbar = () => {
     <nav className="shadow-md">
       <div className="container flex items-center">
         <CustomLink to="/" type="noStyle">
-          <img src={Logo} className="w-40" />
+          <Logo className="w-40 h-8" />
         </CustomLink>
         <div className="flex flex-1 justify-end py-6">
           <div

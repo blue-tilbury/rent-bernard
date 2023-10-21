@@ -13,10 +13,8 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-  env: {
-    node: true,
-  },
-  plugins: ["react", "@typescript-eslint", "prettier", "import"],
+  env: { browser: true, es2020: true },
+  plugins: ["react", "react-refresh", "@typescript-eslint", "prettier", "import"],
   rules: {
     "sort-imports": [
       "error",
@@ -49,6 +47,7 @@ module.exports = {
     ],
     "react/react-in-jsx-scope": "off",
     "react/jsx-uses-react": "off",
+    "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
   },
   settings: {
     "import/resolver": {
@@ -60,5 +59,5 @@ module.exports = {
       version: "detect",
     },
   },
-  ignorePatterns: ["src/**/*.test.tsx"],
+  ignorePatterns: ["src/**/*.test.tsx", "dist"],
 };

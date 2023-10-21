@@ -214,4 +214,23 @@ pub mod private {
             }
         }
     }
+
+    #[get("/private/rooms/wishlist")]
+    pub async fn wishlist(db: &DB, user: LoginUser) -> Result<Json<view::room::List>, Status> {
+        let bucket_name = match env::var("ROOMS_BUCKET") {
+            Ok(name) => name,
+            Err(err) => {
+                eprintln!("{err}");
+                return Err(Status::InternalServerError);
+            }
+        };
+        let client = S3Client::new(bucket_name).await?;
+        match Room::get_wishlists(db, user.user_id).await {
+            Ok(rooms) => Ok(view::room::List::generate(rooms, client).await?),
+            Err(err) => {
+                eprintln!("{err}");
+                Err(Status::InternalServerError)
+            }
+        }
+    }
 }

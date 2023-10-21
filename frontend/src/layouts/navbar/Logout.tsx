@@ -1,10 +1,10 @@
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/solid";
 import { useSetAtom } from "jotai";
+import { RESET } from "jotai/utils";
 import { useNavigate } from "react-router-dom";
 
 import { useLogoutUser } from "../../hooks/useAxios";
 import { userAtom } from "../../shared/globalStateConfig";
-import { User } from "../../types/user.type";
 
 type LogoutProps = {
   type: "menuModal" | "userMenu";
@@ -18,7 +18,7 @@ export const Logout = ({ type }: LogoutProps) => {
 
   const handleLogout = async () => {
     await triggerLogout();
-    setUser({} as User);
+    setUser(RESET);
     navigate("/");
   };
 

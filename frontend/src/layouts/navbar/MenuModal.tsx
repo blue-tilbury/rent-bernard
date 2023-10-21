@@ -3,7 +3,7 @@ import { useAtomValue } from "jotai";
 
 import { Logout } from "./Logout";
 import { MenuModalLink } from "./MenuModalLink";
-import { userAtom } from "../../shared/globalStateConfig";
+import { loggedIn, userAtom } from "../../shared/globalStateConfig";
 
 type MenuModalProps = {
   handleMenuOpen(): void;
@@ -12,7 +12,6 @@ type MenuModalProps = {
 
 export const MenuModal = ({ handleMenuOpen, hidden }: MenuModalProps) => {
   const user = useAtomValue(userAtom);
-  const isUserEmpty = Object.keys(user).length === 0;
 
   return (
     <div
@@ -27,7 +26,7 @@ export const MenuModal = ({ handleMenuOpen, hidden }: MenuModalProps) => {
       </div>
       <div className="flex flex-col items-start gap-4 text-2xl font-medium">
         <MenuModalLink to="/" handleClick={handleMenuOpen} />
-        {isUserEmpty ? (
+        {!loggedIn(user) ? (
           <MenuModalLink to="login" handleClick={handleMenuOpen} />
         ) : (
           <>

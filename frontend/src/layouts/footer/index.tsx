@@ -1,25 +1,24 @@
 import { useAtomValue } from "jotai";
 
-import { CustomLink } from "../../components/CustomLink";
-import { userAtom } from "../../shared/globalStateConfig";
 import Logo from "../../assets/logo-white.svg?react";
+import { CustomLink } from "../../components/CustomLink";
+import { loggedIn, userAtom } from "../../shared/globalStateConfig";
 
 export const Footer = () => {
   const user = useAtomValue(userAtom);
-  const isUserEmpty = Object.keys(user).length === 0;
 
   return (
     <footer className="w-full bg-rent-dark-blue">
       <div className="container py-10 text-white">
         <div className="flex flex-col sm:flex-row">
           <div className="flex-3 pb-2 text-lg font-medium">
-            <Logo className="w-36 h-8" />
+            <Logo className="h-8 w-36" />
           </div>
           <div className="flex flex-2 flex-col gap-1 pb-8 text-sm font-light md:text-base">
             <CustomLink to="/" type="footer">
               Home
             </CustomLink>
-            {isUserEmpty ? (
+            {!loggedIn(user) ? (
               <CustomLink to="login" type="footer">
                 Login
               </CustomLink>

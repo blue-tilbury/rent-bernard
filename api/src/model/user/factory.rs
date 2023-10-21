@@ -1,9 +1,10 @@
 #[cfg(test)]
 pub mod tests {
+    use fake::Dummy;
     use sqlx::{PgPool, Row};
     use uuid::Uuid;
 
-    #[derive(Default, Clone)]
+    #[derive(Dummy, Clone)]
     pub struct UserFactoryParams {
         pub name: String,
         pub email: String,

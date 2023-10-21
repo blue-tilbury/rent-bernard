@@ -4,6 +4,7 @@ use sqlx::PgPool;
 pub mod photos;
 pub mod rooms;
 pub mod users;
+pub mod wishlists;
 
 type DB = State<PgPool>;
 

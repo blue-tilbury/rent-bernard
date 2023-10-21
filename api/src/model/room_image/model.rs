@@ -39,6 +39,8 @@ impl RoomImage {
 
 #[cfg(test)]
 mod tests {
+    use fake::{Fake, Faker};
+
     use super::*;
     use crate::{
         fairing::db::tests::TestConnection,
@@ -51,7 +53,11 @@ mod tests {
     #[tokio::test]
     async fn test_create_many() {
         let db = TestConnection::new().await;
-        let room_id = RoomFactory::create(&db.pool, RoomFactoryParams::default()).await;
+        let params = RoomFactoryParams {
+            user_id: None,
+            ..Faker.fake()
+        };
+        let room_id = RoomFactory::create(&db.pool, params).await;
         let s3_keys = vec!["key1".to_string(), "key2".to_string()];
         assert!(RoomImage::create_many(&db.pool, room_id, s3_keys)
             .await
@@ -59,12 +65,19 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_delete() {
+    async fn test_delete_many() {
         let db = TestConnection::new().await;
-        let room_id = RoomFactory::create(&db.pool, RoomFactoryParams::default()).await;
+        let room_id = RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                user_id: None,
+                ..Faker.fake()
+            },
+        )
+        .await;
         let params = RoomImageFactoryParams {
             room_id,
-            s3_key: "key".to_string(),
+            ..Faker.fake()
         };
         RoomImageFactory::create_many(&db.pool, params, 2).await;
         assert!(RoomImage::delete_many(&db.pool, room_id).await.is_ok());

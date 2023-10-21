@@ -210,20 +210,22 @@ impl Room {
 
 #[cfg(test)]
 mod tests {
+    use fake::{Fake, Faker};
+
     use super::*;
     use crate::{
         fairing::db::tests::TestConnection,
         model::{
             room::factory::tests::{RoomFactory, RoomFactoryParams},
             room_image::factory::tests::{RoomImageFactory, RoomImageFactoryParams},
-            user::factory::tests::{UserFactory, UserFactoryParams},
+            user::factory::tests::UserFactory,
         },
     };
 
     #[tokio::test]
     async fn test_create() {
         let db = TestConnection::new().await;
-        let user_id = UserFactory::create(&db.pool, UserFactoryParams::default()).await;
+        let user_id = UserFactory::create(&db.pool, Faker.fake()).await;
         let params = CreateRoom {
             title: "title".to_string(),
             price: 10000,
@@ -242,7 +244,7 @@ mod tests {
     #[tokio::test]
     async fn test_get() {
         let db = TestConnection::new().await;
-        let user_id = UserFactory::create(&db.pool, UserFactoryParams::default()).await;
+        let user_id = UserFactory::create(&db.pool, Faker.fake()).await;
         let params = RoomFactoryParams {
             title: "title".to_string(),
             price: 10000,
@@ -255,15 +257,11 @@ mod tests {
             user_id: Some(user_id),
         };
         let id = RoomFactory::create(&db.pool, params).await;
-        RoomImageFactory::create_many(
-            &db.pool,
-            RoomImageFactoryParams {
-                room_id: id,
-                ..Default::default()
-            },
-            2,
-        )
-        .await;
+        let room_image_params = RoomImageFactoryParams {
+            room_id: id,
+            ..Faker.fake()
+        };
+        RoomImageFactory::create_many(&db.pool, room_image_params, 2).await;
         let result = Room::get(&db.pool, id.to_string()).await.unwrap().unwrap();
         assert!(!result.id.to_string().is_empty());
         assert_eq!(result.title, "title".to_string());
@@ -291,29 +289,21 @@ mod tests {
     #[tokio::test]
     async fn test_list() {
         let db = TestConnection::new().await;
-        let user_params1 = UserFactoryParams {
-            email: "user1".to_string(),
-            ..Default::default()
-        };
-        let user_id1 = UserFactory::create(&db.pool, user_params1).await;
+        let user_id1 = UserFactory::create(&db.pool, Faker.fake()).await;
         let id1 = RoomFactory::create(
             &db.pool,
             RoomFactoryParams {
                 user_id: Some(user_id1),
-                ..Default::default()
+                ..Faker.fake()
             },
         )
         .await;
-        let user_params2 = UserFactoryParams {
-            email: "user2".to_string(),
-            ..Default::default()
-        };
-        let user_id2 = UserFactory::create(&db.pool, user_params2).await;
+        let user_id2 = UserFactory::create(&db.pool, Faker.fake()).await;
         RoomFactory::create(
             &db.pool,
             RoomFactoryParams {
                 user_id: Some(user_id2),
-                ..Default::default()
+                ..Faker.fake()
             },
         )
         .await;
@@ -321,7 +311,7 @@ mod tests {
             &db.pool,
             RoomImageFactoryParams {
                 room_id: id1,
-                ..Default::default()
+                ..Faker.fake()
             },
             2,
         )
@@ -334,29 +324,21 @@ mod tests {
     #[tokio::test]
     async fn test_filter_by_user() {
         let db = TestConnection::new().await;
-        let user_params1 = UserFactoryParams {
-            email: "user1".to_string(),
-            ..Default::default()
-        };
-        let user_id1 = UserFactory::create(&db.pool, user_params1).await;
+        let user_id1 = UserFactory::create(&db.pool, Faker.fake()).await;
         let id1 = RoomFactory::create(
             &db.pool,
             RoomFactoryParams {
                 user_id: Some(user_id1),
-                ..Default::default()
+                ..Faker.fake()
             },
         )
         .await;
-        let user_params2 = UserFactoryParams {
-            email: "user2".to_string(),
-            ..Default::default()
-        };
-        let user_id2 = UserFactory::create(&db.pool, user_params2).await;
+        let user_id2 = UserFactory::create(&db.pool, Faker.fake()).await;
         RoomFactory::create(
             &db.pool,
             RoomFactoryParams {
                 user_id: Some(user_id2),
-                ..Default::default()
+                ..Faker.fake()
             },
         )
         .await;
@@ -364,7 +346,7 @@ mod tests {
             &db.pool,
             RoomImageFactoryParams {
                 room_id: id1,
-                ..Default::default()
+                ..Faker.fake()
             },
             2,
         )
@@ -380,7 +362,8 @@ mod tests {
         let db = TestConnection::new().await;
         let params = RoomFactoryParams {
             title: "title".to_string(),
-            ..Default::default()
+            user_id: None,
+            ..Faker.fake()
         };
         let id = RoomFactory::create(&db.pool, params.clone()).await;
 
@@ -416,7 +399,14 @@ mod tests {
     #[tokio::test]
     async fn test_delete() {
         let db = TestConnection::new().await;
-        let id = RoomFactory::create(&db.pool, RoomFactoryParams::default()).await;
+        let id = RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                user_id: None,
+                ..Faker.fake()
+            },
+        )
+        .await;
         let result = Room::delete(&db.pool, id.to_string()).await.unwrap();
         assert!(result.is_some());
     }

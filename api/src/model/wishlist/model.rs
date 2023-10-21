@@ -19,6 +19,15 @@ impl Wishlist {
             .await?;
         Ok(())
     }
+
+    pub async fn delete(db: &PgPool, room_id: Uuid, user_id: Uuid) -> Result<(), sqlx::Error> {
+        sqlx::query(r#"DELETE FROM wishlists WHERE room_id = $1 AND user_id = $2"#)
+            .bind(room_id)
+            .bind(user_id)
+            .execute(db)
+            .await?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -31,6 +40,7 @@ mod tests {
         model::{
             room::factory::tests::{RoomFactory, RoomFactoryParams},
             user::factory::tests::UserFactory,
+            wishlist::factory::tests::{WishlistFactory, WishlistFactoryParams},
         },
     };
 
@@ -47,5 +57,21 @@ mod tests {
         .await;
         let user_id = UserFactory::create(&db.pool, Faker.fake()).await;
         assert!(Wishlist::create(&db.pool, room_id, user_id).await.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_delete() {
+        let db = TestConnection::new().await;
+        let room_id = RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                user_id: None,
+                ..Faker.fake()
+            },
+        )
+        .await;
+        let user_id = UserFactory::create(&db.pool, Faker.fake()).await;
+        WishlistFactory::create(&db.pool, WishlistFactoryParams { room_id, user_id }).await;
+        assert!(Wishlist::delete(&db.pool, room_id, user_id).await.is_ok());
     }
 }

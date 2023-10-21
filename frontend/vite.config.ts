@@ -1,9 +1,10 @@
-import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react-swc'
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react-swc';
+import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
   base: '/',
-  plugins: [react()],
+  plugins: [svgr(), react()],
   server: {
     // this ensures that the browser opens upon server start
     open: true,

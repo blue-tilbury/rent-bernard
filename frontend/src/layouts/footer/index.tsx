@@ -2,6 +2,7 @@ import { useAtomValue } from "jotai";
 
 import { CustomLink } from "../../components/CustomLink";
 import { userAtom } from "../../shared/globalStateConfig";
+import Logo from "../../assets/logo-white.svg?react";
 
 export const Footer = () => {
   const user = useAtomValue(userAtom);
@@ -12,7 +13,7 @@ export const Footer = () => {
       <div className="container py-10 text-white">
         <div className="flex flex-col sm:flex-row">
           <div className="flex-3 pb-2 text-lg font-medium">
-            <h2>RENT BERNARD</h2>
+            <Logo className="w-36 h-8" />
           </div>
           <div className="flex flex-2 flex-col gap-1 pb-8 text-sm font-light md:text-base">
             <CustomLink to="/" type="footer">

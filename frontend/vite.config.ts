@@ -1,9 +1,9 @@
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react-swc';
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react-swc";
 import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
-  base: '/',
+  base: "/",
   plugins: [svgr(), react()],
   server: {
     // this sets a default port to 3000
@@ -12,14 +12,14 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    environment: 'jsdom',
-    setupFiles: './src/setupTests.ts',
+    environment: "jsdom",
+    setupFiles: "./src/setupTests.ts",
     css: true,
-    reporters: ['verbose'],
+    reporters: ["verbose"],
     coverage: {
-      reporter: ['text', 'json', 'html'],
-      include: ['src/**/*'],
+      reporter: ["text", "json", "html"],
+      include: ["src/**/*"],
       exclude: [],
-    }
+    },
   },
-})
+});

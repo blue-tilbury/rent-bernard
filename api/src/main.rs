@@ -32,6 +32,7 @@ fn rocket() -> Rocket<Build> {
         users::logout,
         users::private::login_user,
         wishlists::private::create,
+        wishlists::private::delete,
         cors_handler
     ];
     let figment: Figment = Config::figment().merge(Toml::file("App.toml").nested());

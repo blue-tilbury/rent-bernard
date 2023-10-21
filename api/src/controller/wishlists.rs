@@ -21,4 +21,16 @@ pub mod private {
             Err(_) => Status::InternalServerError,
         }
     }
+
+    #[delete("/wishlists", data = "<wishlist>")]
+    pub async fn delete(wishlist: Json<WishlistParams>, db: &DB, user: LoginUser) -> Status {
+        let room_id = match Uuid::parse_str(&wishlist.room_id) {
+            Ok(uuid) => uuid,
+            Err(_) => return Status::NotFound,
+        };
+        match Wishlist::delete(db, room_id, user.user_id).await {
+            Ok(_) => Status::NoContent,
+            Err(_) => Status::InternalServerError,
+        }
+    }
 }

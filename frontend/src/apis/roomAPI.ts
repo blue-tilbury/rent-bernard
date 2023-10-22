@@ -10,6 +10,7 @@ type RoomAPIType = {
   delete: (id: string, cancel?: boolean) => Promise<void>;
   create: (room: Room, cancel?: boolean) => Promise<Id>;
   private_index: () => Promise<ListRoom>;
+  wishlist: () => Promise<ListRoom>;
 };
 
 export const RoomAPI: RoomAPIType = {
@@ -59,6 +60,14 @@ export const RoomAPI: RoomAPIType = {
   private_index: async () => {
     const response = await api.request({
       url: "/private/rooms/",
+      method: "GET",
+    });
+
+    return response.data;
+  },
+  wishlist: async () => {
+    const response = await api.request({
+      url: "/private/rooms/wishlist",
       method: "GET",
     });
 

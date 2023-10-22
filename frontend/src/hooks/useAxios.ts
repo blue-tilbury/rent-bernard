@@ -4,6 +4,7 @@ import useSWRMutation from "swr/mutation";
 import { AuthAPI } from "../apis/authAPI";
 import { PhotoAPI } from "../apis/photoAPI";
 import { RoomAPI } from "../apis/roomAPI";
+import { WishlistAPI } from "../apis/wishlistAPI";
 import { Room, UpdateRoom } from "../types/room.type";
 import { AuthParams } from "../types/user.type";
 
@@ -24,6 +25,14 @@ export const useGetRoom = (id: string) => {
 export const useYourRoom = () => {
   const { data, error, isLoading } = useSWR("/private/rooms", RoomAPI.private_index);
   return { data, isError: error, isLoading };
+};
+
+export const useWishlist = () => {
+  const { data, error, isLoading, isValidating } = useSWR(
+    "/private/rooms/wishlist",
+    RoomAPI.wishlist,
+  );
+  return { data, isError: error, isLoading, isValidating };
 };
 
 export const useDeleteRoom = () => {
@@ -48,6 +57,22 @@ export const useUpdateRoom = () => {
     async (_url: string, { arg }: { arg: UpdateRoom }) => RoomAPI.update(arg),
   );
   return { triggerUpdateRoom };
+};
+
+export const useAddFav = () => {
+  const { trigger: triggerAddFav } = useSWRMutation(
+    "/wishlists",
+    async (_url: string, { arg }: { arg: string }) => WishlistAPI.create(arg),
+  );
+  return { triggerAddFav };
+};
+
+export const useDeleteFav = () => {
+  const { trigger: triggerDeleteFav } = useSWRMutation(
+    "/wishlists",
+    async (_url: string, { arg }: { arg: string }) => WishlistAPI.delete(arg),
+  );
+  return { triggerDeleteFav };
 };
 
 // Photo

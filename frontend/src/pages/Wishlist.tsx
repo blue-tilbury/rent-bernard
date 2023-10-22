@@ -1,36 +1,20 @@
-import roomImg from "../assets/sample.jpeg";
+import { ErrorMsg } from "../components/ErrorMsg";
+import { Loading } from "../components/Loading";
+import { useWishlist } from "../hooks/useAxios";
 import { Thumb } from "../layouts/listing/thumb";
-
-const rooms = [
-  {
-    id: "0",
-    title: "Room 0",
-    price: 100000,
-    city: "Vancuover",
-    image_urls: roomImg,
-    updated_at: "20",
-    is_furnished: false,
-    is_pet_friendly: false,
-    description: "Room 0 description",
-    email: "sample@example.com",
-    created_at: "2023-01-01T12:10:30Z",
-  },
-  {
-    id: "1",
-    title: "Room 1",
-    price: 100000,
-    city: "Vancuover",
-    image_urls: roomImg,
-    updated_at: "20",
-    is_furnished: false,
-    is_pet_friendly: false,
-    description: "Room 1 description",
-    email: "sample@example.com",
-    created_at: "2023-01-01T12:10:30Z",
-  },
-];
+import { errorMessage } from "../shared/errorMessage";
 
 export const Wishlist = () => {
+  const { data, isError, isLoading, isValidating } = useWishlist();
+
+  if (isError) return <ErrorMsg msg={errorMessage.connection} isReloadBtn={true} />;
+  if (isLoading) return <Loading />;
+  // TODO: set UI for isValidating
+  if (isValidating) return <p>Validating...</p>;
+  if (!data || data.rooms.length === 0)
+    return <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />;
+
+  const { rooms } = data;
   const thumbs = rooms.map((room) => <Thumb key={room.id} room={room} page="wishlist" />);
 
   return (

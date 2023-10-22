@@ -35,7 +35,7 @@ export const Thumb = ({ room, page }: ThumbProps) => {
         </div>
       </div>
       <div className="flex space-x-5 py-6 pr-14">
-        {isWishlistPage && <WishlistEditIcon />}
+        {isWishlistPage && <WishlistEditIcon roomId={room.id} isDefaultFav={true} />}
         {isYourAdsPage && <YourAdsEditIcons id={room.id} />}
       </div>
     </li>

@@ -3,7 +3,12 @@ pub mod public {
 
     use rocket::{http::Status, serde::json::Json};
 
-    use crate::{controller::DB, model::room::model::Room, utils::s3::S3Client, view};
+    use crate::{
+        controller::DB,
+        model::room::model::{Order, Room, SortBy},
+        utils::s3::S3Client,
+        view,
+    };
 
     #[get("/rooms/<id>")]
     pub async fn show(id: String, db: &DB) -> Result<Json<view::room::Get>, Status> {
@@ -32,8 +37,12 @@ pub mod public {
         Ok(response)
     }
 
-    #[get("/rooms")]
-    pub async fn index(db: &DB) -> Result<Json<view::room::List>, Status> {
+    #[get("/rooms?<sort_by>&<order>")]
+    pub async fn index(
+        db: &DB,
+        sort_by: Option<SortBy>,
+        order: Option<Order>,
+    ) -> Result<Json<view::room::List>, Status> {
         let bucket_name = match env::var("ROOMS_BUCKET") {
             Ok(name) => name,
             Err(err) => {
@@ -42,7 +51,7 @@ pub mod public {
             }
         };
         let client = S3Client::new(bucket_name).await?;
-        match Room::list(db).await {
+        match Room::list(db, sort_by, order).await {
             Ok(rooms) => Ok(view::room::List::generate(rooms, client).await?),
             Err(err) => {
                 eprintln!("{err}");

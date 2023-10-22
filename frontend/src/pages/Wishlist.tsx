@@ -2,19 +2,17 @@ import { ErrorMsg } from "../components/ErrorMsg";
 import { Loading } from "../components/Loading";
 import { useWishlist } from "../hooks/useAxios";
 import { Thumb } from "../layouts/listing/thumb";
+import { errorMessage } from "../shared/errorMessage";
 
 export const Wishlist = () => {
   const { data, isError, isLoading, isValidating } = useWishlist();
 
-  if (isError)
-    return (
-      <ErrorMsg msg="Sorry, something wrong with the connection." isReloadBtn={true} />
-    );
+  if (isError) return <ErrorMsg msg={errorMessage.connection} isReloadBtn={true} />;
   if (isLoading) return <Loading />;
   // TODO: set UI for isValidating
   if (isValidating) return <p>Validating...</p>;
   if (!data || data.rooms.length === 0)
-    return <ErrorMsg msg="Sorry, no ads found." isReloadBtn={false} />;
+    return <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />;
 
   const { rooms } = data;
   const thumbs = rooms.map((room) => <Thumb key={room.id} room={room} page="wishlist" />);

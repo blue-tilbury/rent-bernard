@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use sqlx::{FromRow, PgPool, Row};
+use sqlx::{FromRow, PgPool, Postgres, QueryBuilder, Row};
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -62,6 +62,36 @@ struct RoomRow {
     updated_at: NaiveDateTime,
 }
 
+#[derive(Debug, PartialEq, FromFormField)]
+pub enum SortBy {
+    UpdatedAt,
+    Price,
+}
+
+impl ToString for SortBy {
+    fn to_string(&self) -> String {
+        match self {
+            SortBy::UpdatedAt => "updated_at".to_string(),
+            SortBy::Price => "price".to_string(),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, FromFormField)]
+pub enum Order {
+    Asc,
+    Desc,
+}
+
+impl ToString for Order {
+    fn to_string(&self) -> String {
+        match self {
+            Order::Asc => "ASC".to_string(),
+            Order::Desc => "DESC".to_string(),
+        }
+    }
+}
+
 impl Room {
     pub async fn create(db: &PgPool, room: CreateRoom) -> Result<Uuid, sqlx::Error> {
         let rec = sqlx::query(
@@ -105,16 +135,21 @@ impl Room {
         Ok(Self::rows_to_room(rec))
     }
 
-    pub async fn list(db: &PgPool) -> Result<Vec<Room>, sqlx::Error> {
-        let rec: Vec<RoomRow> = sqlx::query_as(
+    pub async fn list(
+        db: &PgPool,
+        sort_by: Option<SortBy>,
+        order: Option<Order>,
+    ) -> Result<Vec<Room>, sqlx::Error> {
+        let sort_by = sort_by.unwrap_or(SortBy::UpdatedAt).to_string();
+        let order = order.unwrap_or(Order::Desc).to_string();
+        let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"
                 SELECT r.*, ri.s3_key FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
-                ORDER BY r.created_at DESC, r.id DESC
             "#,
-        )
-        .fetch_all(db)
-        .await?;
+        );
+        query_builder.push(format_args!("ORDER BY r.{sort_by} {order}, r.id DESC"));
+        let rec: Vec<RoomRow> = sqlx::query_as(query_builder.sql()).fetch_all(db).await?;
         Ok(Self::rows_to_rooms(rec))
     }
 
@@ -124,7 +159,7 @@ impl Room {
                 SELECT r.*, ri.s3_key FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
                 WHERE user_id = $1
-                ORDER BY r.created_at DESC, r.id DESC
+                ORDER BY r.updated_at DESC, r.id DESC
             "#,
         )
         .bind(user_id)
@@ -139,7 +174,7 @@ impl Room {
                 SELECT r.*, ri.s3_key FROM rooms r
                 INNER JOIN wishlists w ON r.id = w.room_id AND w.user_id = $1
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
-                ORDER BY r.created_at DESC, r.id DESC
+                ORDER BY r.updated_at DESC, r.id DESC
             "#,
         )
         .bind(user_id)
@@ -312,7 +347,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_list() {
+    async fn test_list_sorted_by_updated_at() {
         let db = TestConnection::new().await;
         let user_id1 = UserFactory::create(&db.pool, Faker.fake()).await;
         let room_id1 = RoomFactory::create(
@@ -342,11 +377,55 @@ mod tests {
         )
         .await;
 
-        let result = Room::list(&db.pool).await.unwrap();
+        let result = Room::list(&db.pool, Some(SortBy::UpdatedAt), Some(Order::Desc))
+            .await
+            .unwrap();
         assert_eq!(result.len(), 2);
-        // ORDER BY created_ad DESC
+        // ORDER BY updated_at DESC
         assert_eq!(result[0].id, room_id2);
         assert_eq!(result[1].id, room_id1);
+    }
+
+    #[tokio::test]
+    async fn test_list_sorted_by_price() {
+        let db = TestConnection::new().await;
+        let user_id1 = UserFactory::create(&db.pool, Faker.fake()).await;
+        let room_id1 = RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                user_id: Some(user_id1),
+                price: 1000,
+                ..Faker.fake()
+            },
+        )
+        .await;
+        let user_id2 = UserFactory::create(&db.pool, Faker.fake()).await;
+        let room_id2 = RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                user_id: Some(user_id2),
+                price: 500,
+                ..Faker.fake()
+            },
+        )
+        .await;
+        RoomImageFactory::create_many(
+            &db.pool,
+            RoomImageFactoryParams {
+                room_id: room_id1,
+                ..Faker.fake()
+            },
+            2,
+        )
+        .await;
+
+        let result = Room::list(&db.pool, Some(SortBy::Price), Some(Order::Desc))
+            .await
+            .unwrap();
+        assert_eq!(result.len(), 2);
+        // ORDER BY price DESC
+        assert_eq!(result[0].id, room_id1);
+        assert_eq!(result[1].id, room_id2);
     }
 
     #[tokio::test]

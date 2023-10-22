@@ -2,7 +2,7 @@ use chrono::NaiveDateTime;
 use sqlx::{FromRow, PgPool, Postgres, QueryBuilder, Row};
 use uuid::Uuid;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, FromRow)]
 pub struct Room {
     pub id: Uuid,
     pub title: String,
@@ -43,23 +43,6 @@ pub struct UpdateRoom {
     pub is_pet_friendly: bool,
     pub description: String,
     pub email: String,
-}
-
-#[derive(FromRow, Clone)]
-struct RoomRow {
-    id: Uuid,
-    title: String,
-    price: i32,
-    city: String,
-    street: Option<String>,
-    is_furnished: bool,
-    is_pet_friendly: bool,
-    description: String,
-    s3_key: Option<String>,
-    email: String,
-    user_id: Uuid,
-    created_at: NaiveDateTime,
-    updated_at: NaiveDateTime,
 }
 
 #[derive(Debug, PartialEq, FromFormField)]
@@ -122,17 +105,18 @@ impl Room {
             Ok(uuid) => uuid,
             Err(_) => return Ok(None),
         };
-        let rec: Vec<RoomRow> = sqlx::query_as(
+        let rec: Room = sqlx::query_as(
             r#"
-                SELECT r.*, ri.s3_key FROM rooms r
+                SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
                 WHERE r.id = $1
+                GROUP BY r.id
             "#,
         )
         .bind(uuid)
-        .fetch_all(db)
+        .fetch_one(db)
         .await?;
-        Ok(Self::rows_to_room(rec))
+        Ok(Some(rec))
     }
 
     pub async fn list(
@@ -144,43 +128,43 @@ impl Room {
         let order = order.unwrap_or(Order::Desc).to_string();
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"
-                SELECT r.*, ri.s3_key FROM rooms r
+                SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
+                GROUP BY r.id
             "#,
         );
         query_builder.push(format_args!("ORDER BY r.{sort_by} {order}, r.id DESC"));
-        let rec: Vec<RoomRow> = sqlx::query_as(query_builder.sql()).fetch_all(db).await?;
-        Ok(Self::rows_to_rooms(rec))
+        sqlx::query_as(query_builder.sql()).fetch_all(db).await
     }
 
     pub async fn filter_by_user(db: &PgPool, user_id: Uuid) -> Result<Vec<Room>, sqlx::Error> {
-        let rec: Vec<RoomRow> = sqlx::query_as(
+        sqlx::query_as(
             r#"
-                SELECT r.*, ri.s3_key FROM rooms r
+                SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
                 WHERE user_id = $1
+                GROUP BY r.id
                 ORDER BY r.updated_at DESC, r.id DESC
             "#,
         )
         .bind(user_id)
         .fetch_all(db)
-        .await?;
-        Ok(Self::rows_to_rooms(rec))
+        .await
     }
 
     pub async fn get_wishlists(db: &PgPool, user_id: Uuid) -> Result<Vec<Room>, sqlx::Error> {
-        let rec: Vec<RoomRow> = sqlx::query_as(
+        sqlx::query_as(
             r#"
-                SELECT r.*, ri.s3_key FROM rooms r
+                SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys FROM rooms r
                 INNER JOIN wishlists w ON r.id = w.room_id AND w.user_id = $1
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
+                GROUP BY r.id
                 ORDER BY r.updated_at DESC, r.id DESC
             "#,
         )
         .bind(user_id)
         .fetch_all(db)
-        .await?;
-        Ok(Self::rows_to_rooms(rec))
+        .await
     }
 
     pub async fn update(db: &PgPool, room: UpdateRoom) -> Result<Option<()>, sqlx::Error> {
@@ -220,50 +204,6 @@ impl Room {
             0 => Ok(None),
             _ => Ok(Some(())),
         }
-    }
-
-    fn rows_to_room(rows: Vec<RoomRow>) -> Option<Room> {
-        rows.get(0).map(|row| Room {
-            id: row.id,
-            title: row.title.clone(),
-            price: row.price,
-            city: row.city.clone(),
-            street: row.street.clone(),
-            is_furnished: row.is_furnished,
-            is_pet_friendly: row.is_pet_friendly,
-            description: row.description.clone(),
-            s3_keys: rows.iter().filter_map(|r| r.s3_key.clone()).collect(),
-            email: row.email.clone(),
-            user_id: row.user_id,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-        })
-    }
-
-    fn rows_to_rooms(rows: Vec<RoomRow>) -> Vec<Room> {
-        let mut rooms = Vec::<(Uuid, Vec<RoomRow>)>::new();
-        let mut current_idx = 0;
-        for row in rows {
-            let room = match rooms.get_mut(current_idx) {
-                Some(vec) => vec,
-                // The first element
-                None => {
-                    rooms.push((row.id, vec![row]));
-                    continue;
-                }
-            };
-            if room.0 == row.id {
-                room.1.push(row);
-            } else {
-                rooms.push((row.id, vec![row]));
-                current_idx += 1;
-            }
-        }
-        rooms
-            .into_iter()
-            .map(|room| room.1)
-            .filter_map(Self::rows_to_room)
-            .collect()
     }
 }
 

@@ -60,6 +60,21 @@ export type ListItem = {
   updated_at: string;
 };
 
+export enum SortBy {
+  UPDATED_AT = "updated_at",
+  PRICE = "price",
+}
+
+export enum Order {
+  ASC = "asc",
+  DESC = "desc",
+}
+
+export type QueryParams = {
+  sortBy: SortBy;
+  order: Order;
+};
+
 export type UploadPhoto = {
   url: string;
   key: string;

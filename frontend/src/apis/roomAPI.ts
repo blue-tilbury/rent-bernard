@@ -1,11 +1,11 @@
 import { api } from "./config/axiosConfig";
 import { defineCancelApiObj } from "./config/axiosUtils";
 import { Id } from "../types/common.type";
-import { GetRoom, ListRoom, Room, UpdateRoom } from "../types/room.type";
+import { GetRoom, ListRoom, Order, Room, SortBy, UpdateRoom } from "../types/room.type";
 
 type RoomAPIType = {
   show: (id: string) => Promise<GetRoom>;
-  index: () => Promise<ListRoom>;
+  index: (sortBy?: SortBy, order?: Order) => Promise<ListRoom>;
   update: (room: UpdateRoom, cancel?: boolean) => Promise<void>;
   delete: (id: string, cancel?: boolean) => Promise<void>;
   create: (room: Room, cancel?: boolean) => Promise<Id>;
@@ -22,9 +22,10 @@ export const RoomAPI: RoomAPIType = {
 
     return response.data;
   },
-  index: async () => {
+  index: async (sortBy?: SortBy, order?: Order) => {
     const response = await api.request({
-      url: "/rooms",
+      url: `/rooms`,
+      params: { sort_by: sortBy, order: order },
       method: "GET",
     });
 

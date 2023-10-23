@@ -2,6 +2,8 @@ use chrono::NaiveDateTime;
 use sqlx::{FromRow, PgPool, Postgres, QueryBuilder, Row};
 use uuid::Uuid;
 
+use crate::model::Pagination;
+
 #[derive(Debug, Clone, FromRow)]
 pub struct Room {
     pub id: Uuid,
@@ -132,6 +134,7 @@ impl Room {
         sort_by: Option<SortBy>,
         order: Option<Order>,
         filter: Filter,
+        pagination: Pagination,
     ) -> Result<Vec<Room>, sqlx::Error> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"
@@ -147,29 +150,31 @@ impl Room {
         {
             query_builder.push("HAVING ");
         }
-        let mut separated = query_builder.separated(" AND ");
+        let mut separated_by_and = query_builder.separated(" AND ");
         if filter.is_furnished.is_some_and(|is_furnished| is_furnished) {
-            separated.push("r.is_furnished = TRUE");
+            separated_by_and.push("r.is_furnished = TRUE");
         }
         if filter
             .is_pet_friendly
             .is_some_and(|is_pet_friendly| is_pet_friendly)
         {
-            separated.push("r.is_pet_friendly = TRUE");
+            separated_by_and.push("r.is_pet_friendly = TRUE");
         }
         if let Some(price_min) = filter.price_min {
-            separated
+            separated_by_and
                 .push("r.price >=")
                 .push_bind_unseparated(price_min);
         }
         if let Some(price_max) = filter.price_max {
-            separated
+            separated_by_and
                 .push("r.price <=")
                 .push_bind_unseparated(price_max);
         }
         let sort_by = sort_by.unwrap_or(SortBy::UpdatedAt).to_string();
         let order = order.unwrap_or(Order::Desc).to_string();
-        query_builder.push(format_args!(" ORDER BY r.{sort_by} {order}, r.id DESC"));
+        query_builder.push(format_args!(" ORDER BY r.{sort_by} {order}, r.id DESC "));
+        query_builder.push(pagination.to_sql());
+        println!("{}", query_builder.sql());
         query_builder.build_query_as().fetch_all(db).await
     }
 
@@ -275,188 +280,6 @@ mod tests {
         };
 
         assert!(Room::create(&db.pool, params).await.is_ok());
-    }
-
-    #[tokio::test]
-    async fn test_get() {
-        let db = TestConnection::new().await;
-        let user_id = UserFactory::create(&db.pool, Faker.fake()).await;
-        let params = RoomFactoryParams {
-            title: "title".to_string(),
-            price: 10000,
-            city: "city".to_string(),
-            street: None,
-            is_furnished: true,
-            is_pet_friendly: false,
-            email: "email".to_string(),
-            description: "description".to_string(),
-            user_id: Some(user_id),
-        };
-        let id = RoomFactory::create(&db.pool, params).await;
-        let room_image_params = RoomImageFactoryParams {
-            room_id: id,
-            ..Faker.fake()
-        };
-        RoomImageFactory::create_many(&db.pool, room_image_params, 2).await;
-        let result = Room::get(&db.pool, id.to_string()).await.unwrap().unwrap();
-        assert!(!result.id.to_string().is_empty());
-        assert_eq!(result.title, "title".to_string());
-        assert_eq!(result.price, 10000);
-        assert_eq!(result.city, "city".to_string());
-        assert!(result.street.is_none());
-        assert!(result.is_furnished);
-        assert!(!result.is_pet_friendly);
-        assert_eq!(result.s3_keys.len(), 2);
-        assert_eq!(result.description, "description".to_string());
-        assert_eq!(result.email, "email".to_string());
-        assert_eq!(result.user_id, user_id);
-        assert!(!result.created_at.to_string().is_empty());
-        assert!(!result.updated_at.to_string().is_empty());
-    }
-
-    #[tokio::test]
-    async fn test_get_not_found() {
-        let db = TestConnection::new().await;
-        let id = "random_id".to_string();
-        let result = Room::get(&db.pool, id).await.unwrap();
-        assert!(result.is_none());
-    }
-
-    #[tokio::test]
-    async fn test_list_sorted_by_updated_at() {
-        let db = TestConnection::new().await;
-        let user_id1 = UserFactory::create(&db.pool, Faker.fake()).await;
-        let room_id1 = RoomFactory::create(
-            &db.pool,
-            RoomFactoryParams {
-                user_id: Some(user_id1),
-                ..Faker.fake()
-            },
-        )
-        .await;
-        let user_id2 = UserFactory::create(&db.pool, Faker.fake()).await;
-        let room_id2 = RoomFactory::create(
-            &db.pool,
-            RoomFactoryParams {
-                user_id: Some(user_id2),
-                ..Faker.fake()
-            },
-        )
-        .await;
-        RoomImageFactory::create_many(
-            &db.pool,
-            RoomImageFactoryParams {
-                room_id: room_id1,
-                ..Faker.fake()
-            },
-            2,
-        )
-        .await;
-
-        let filter = Filter {
-            ..Default::default()
-        };
-        let result = Room::list(&db.pool, Some(SortBy::UpdatedAt), Some(Order::Desc), filter)
-            .await
-            .unwrap();
-        assert_eq!(result.len(), 2);
-        // ORDER BY updated_at DESC
-        assert_eq!(result[0].id, room_id2);
-        assert_eq!(result[1].id, room_id1);
-    }
-
-    #[tokio::test]
-    async fn test_list_sorted_by_price() {
-        let db = TestConnection::new().await;
-        let user_id1 = UserFactory::create(&db.pool, Faker.fake()).await;
-        let room_id1 = RoomFactory::create(
-            &db.pool,
-            RoomFactoryParams {
-                user_id: Some(user_id1),
-                price: 1000,
-                ..Faker.fake()
-            },
-        )
-        .await;
-        let user_id2 = UserFactory::create(&db.pool, Faker.fake()).await;
-        let room_id2 = RoomFactory::create(
-            &db.pool,
-            RoomFactoryParams {
-                user_id: Some(user_id2),
-                price: 500,
-                ..Faker.fake()
-            },
-        )
-        .await;
-        RoomImageFactory::create_many(
-            &db.pool,
-            RoomImageFactoryParams {
-                room_id: room_id1,
-                ..Faker.fake()
-            },
-            2,
-        )
-        .await;
-
-        let filter = Filter {
-            ..Default::default()
-        };
-        let result = Room::list(&db.pool, Some(SortBy::Price), Some(Order::Desc), filter)
-            .await
-            .unwrap();
-        assert_eq!(result.len(), 2);
-        // ORDER BY price DESC
-        assert_eq!(result[0].id, room_id1);
-        assert_eq!(result[1].id, room_id2);
-    }
-
-    #[tokio::test]
-    async fn test_filtered_list() {
-        let db = TestConnection::new().await;
-        RoomFactory::create(
-            &db.pool,
-            RoomFactoryParams {
-                price: 1000,
-                is_furnished: true,
-                is_pet_friendly: true,
-                user_id: None,
-                ..Faker.fake()
-            },
-        )
-        .await;
-        RoomFactory::create(
-            &db.pool,
-            RoomFactoryParams {
-                price: 500,
-                is_furnished: false,
-                is_pet_friendly: false,
-                user_id: None,
-                ..Faker.fake()
-            },
-        )
-        .await;
-        RoomFactory::create(
-            &db.pool,
-            RoomFactoryParams {
-                price: 1500,
-                is_furnished: true,
-                is_pet_friendly: true,
-                user_id: None,
-                ..Faker.fake()
-            },
-        )
-        .await;
-
-        let filter = Filter {
-            is_furnished: Some(true),
-            is_pet_friendly: Some(true),
-            price_min: Some(800),
-            price_max: Some(2000),
-        };
-        let result = Room::list(&db.pool, Some(SortBy::Price), Some(Order::Desc), filter)
-            .await
-            .unwrap();
-        assert_eq!(result.len(), 2);
     }
 
     #[tokio::test]
@@ -602,5 +425,233 @@ mod tests {
             .await
             .unwrap();
         assert!(result.is_none());
+    }
+
+    mod get {
+        use super::*;
+
+        #[tokio::test]
+        async fn test_get() {
+            let db = TestConnection::new().await;
+            let user_id = UserFactory::create(&db.pool, Faker.fake()).await;
+            let params = RoomFactoryParams {
+                title: "title".to_string(),
+                price: 10000,
+                city: "city".to_string(),
+                street: None,
+                is_furnished: true,
+                is_pet_friendly: false,
+                email: "email".to_string(),
+                description: "description".to_string(),
+                user_id: Some(user_id),
+            };
+            let id = RoomFactory::create(&db.pool, params).await;
+            let room_image_params = RoomImageFactoryParams {
+                room_id: id,
+                ..Faker.fake()
+            };
+            RoomImageFactory::create_many(&db.pool, room_image_params, 2).await;
+            let result = Room::get(&db.pool, id.to_string()).await.unwrap().unwrap();
+            assert!(!result.id.to_string().is_empty());
+            assert_eq!(result.title, "title".to_string());
+            assert_eq!(result.price, 10000);
+            assert_eq!(result.city, "city".to_string());
+            assert!(result.street.is_none());
+            assert!(result.is_furnished);
+            assert!(!result.is_pet_friendly);
+            assert_eq!(result.s3_keys.len(), 2);
+            assert_eq!(result.description, "description".to_string());
+            assert_eq!(result.email, "email".to_string());
+            assert_eq!(result.user_id, user_id);
+            assert!(!result.created_at.to_string().is_empty());
+            assert!(!result.updated_at.to_string().is_empty());
+        }
+
+        #[tokio::test]
+        async fn test_get_not_found() {
+            let db = TestConnection::new().await;
+            let id = "random_id".to_string();
+            let result = Room::get(&db.pool, id).await.unwrap();
+            assert!(result.is_none());
+        }
+    }
+
+    mod list {
+        use super::*;
+
+        #[tokio::test]
+        async fn test_list_sorted_by_updated_at() {
+            let db = TestConnection::new().await;
+            let room_id1 = RoomFactory::create(
+                &db.pool,
+                RoomFactoryParams {
+                    user_id: None,
+                    ..Faker.fake()
+                },
+            )
+            .await;
+            let room_id2 = RoomFactory::create(
+                &db.pool,
+                RoomFactoryParams {
+                    user_id: None,
+                    ..Faker.fake()
+                },
+            )
+            .await;
+
+            let filter = Filter {
+                ..Default::default()
+            };
+            let result = Room::list(
+                &db.pool,
+                Some(SortBy::UpdatedAt),
+                Some(Order::Desc),
+                filter,
+                Pagination::new(None, None),
+            )
+            .await
+            .unwrap();
+            assert_eq!(result.len(), 2);
+            // ORDER BY updated_at DESC
+            assert_eq!(result[0].id, room_id2);
+            assert_eq!(result[1].id, room_id1);
+        }
+
+        #[tokio::test]
+        async fn test_list_sorted_by_price() {
+            let db = TestConnection::new().await;
+            let room_id1 = RoomFactory::create(
+                &db.pool,
+                RoomFactoryParams {
+                    user_id: None,
+                    price: 1000,
+                    ..Faker.fake()
+                },
+            )
+            .await;
+            let room_id2 = RoomFactory::create(
+                &db.pool,
+                RoomFactoryParams {
+                    user_id: None,
+                    price: 500,
+                    ..Faker.fake()
+                },
+            )
+            .await;
+
+            let filter = Filter {
+                ..Default::default()
+            };
+            let result = Room::list(
+                &db.pool,
+                Some(SortBy::Price),
+                Some(Order::Desc),
+                filter,
+                Pagination::new(None, None),
+            )
+            .await
+            .unwrap();
+            assert_eq!(result.len(), 2);
+            // ORDER BY price DESC
+            assert_eq!(result[0].id, room_id1);
+            assert_eq!(result[1].id, room_id2);
+        }
+
+        #[tokio::test]
+        async fn test_filtered_list() {
+            let db = TestConnection::new().await;
+            RoomFactory::create(
+                &db.pool,
+                RoomFactoryParams {
+                    price: 1000,
+                    is_furnished: true,
+                    is_pet_friendly: true,
+                    user_id: None,
+                    ..Faker.fake()
+                },
+            )
+            .await;
+            RoomFactory::create(
+                &db.pool,
+                RoomFactoryParams {
+                    price: 500,
+                    is_furnished: false,
+                    is_pet_friendly: false,
+                    user_id: None,
+                    ..Faker.fake()
+                },
+            )
+            .await;
+            RoomFactory::create(
+                &db.pool,
+                RoomFactoryParams {
+                    price: 1500,
+                    is_furnished: true,
+                    is_pet_friendly: true,
+                    user_id: None,
+                    ..Faker.fake()
+                },
+            )
+            .await;
+
+            let filter = Filter {
+                is_furnished: Some(true),
+                is_pet_friendly: Some(true),
+                price_min: Some(800),
+                price_max: Some(2000),
+            };
+            let result = Room::list(
+                &db.pool,
+                Some(SortBy::Price),
+                Some(Order::Desc),
+                filter,
+                Pagination::new(None, None),
+            )
+            .await
+            .unwrap();
+            assert_eq!(result.len(), 2);
+        }
+
+        #[tokio::test]
+        async fn test_list_pagination() {
+            let db = TestConnection::new().await;
+            RoomFactory::create(
+                &db.pool,
+                RoomFactoryParams {
+                    user_id: None,
+                    ..Faker.fake()
+                },
+            )
+            .await;
+            RoomFactory::create(
+                &db.pool,
+                RoomFactoryParams {
+                    user_id: None,
+                    ..Faker.fake()
+                },
+            )
+            .await;
+            let room_id = RoomFactory::create(
+                &db.pool,
+                RoomFactoryParams {
+                    user_id: None,
+                    ..Faker.fake()
+                },
+            )
+            .await;
+
+            let filter = Filter {
+                ..Default::default()
+            };
+            let pagination = Pagination {
+                page: 0,
+                per_page: 1,
+            };
+            let result = Room::list(&db.pool, None, None, filter, pagination)
+                .await
+                .unwrap();
+            assert_eq!(result.len(), 1);
+            assert_eq!(result[0].id, room_id);
+        }
     }
 }

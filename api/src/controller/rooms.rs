@@ -5,7 +5,7 @@ pub mod public {
 
     use crate::{
         controller::DB,
-        model::room::model::{Order, Room, SortBy},
+        model::room::model::{Filter, Order, Room, SortBy},
         utils::s3::S3Client,
         view,
     };
@@ -37,11 +37,15 @@ pub mod public {
         Ok(response)
     }
 
-    #[get("/rooms?<sort_by>&<order>")]
+    #[get("/rooms?<sort_by>&<order>&<is_furnished>&<is_pet_friendly>&<price_min>&<price_max>")]
     pub async fn index(
         db: &DB,
         sort_by: Option<SortBy>,
         order: Option<Order>,
+        is_furnished: Option<bool>,
+        is_pet_friendly: Option<bool>,
+        price_min: Option<i32>,
+        price_max: Option<i32>,
     ) -> Result<Json<view::room::List>, Status> {
         let bucket_name = match env::var("ROOMS_BUCKET") {
             Ok(name) => name,
@@ -51,7 +55,19 @@ pub mod public {
             }
         };
         let client = S3Client::new(bucket_name).await?;
-        match Room::list(db, sort_by, order).await {
+        match Room::list(
+            db,
+            sort_by,
+            order,
+            Filter {
+                is_furnished,
+                is_pet_friendly,
+                price_min,
+                price_max,
+            },
+        )
+        .await
+        {
             Ok(rooms) => Ok(view::room::List::generate(rooms, client).await?),
             Err(err) => {
                 eprintln!("{err}");

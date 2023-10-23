@@ -75,6 +75,14 @@ impl ToString for Order {
     }
 }
 
+#[derive(Default)]
+pub struct Filter {
+    pub is_furnished: Option<bool>,
+    pub is_pet_friendly: Option<bool>,
+    pub price_min: Option<i32>,
+    pub price_max: Option<i32>,
+}
+
 impl Room {
     pub async fn create(db: &PgPool, room: CreateRoom) -> Result<Uuid, sqlx::Error> {
         let rec = sqlx::query(
@@ -123,9 +131,8 @@ impl Room {
         db: &PgPool,
         sort_by: Option<SortBy>,
         order: Option<Order>,
+        filter: Filter,
     ) -> Result<Vec<Room>, sqlx::Error> {
-        let sort_by = sort_by.unwrap_or(SortBy::UpdatedAt).to_string();
-        let order = order.unwrap_or(Order::Desc).to_string();
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"
                 SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys FROM rooms r
@@ -133,8 +140,37 @@ impl Room {
                 GROUP BY r.id
             "#,
         );
-        query_builder.push(format_args!("ORDER BY r.{sort_by} {order}, r.id DESC"));
-        sqlx::query_as(query_builder.sql()).fetch_all(db).await
+        if filter.is_furnished.is_some()
+            || filter.is_pet_friendly.is_some()
+            || filter.price_min.is_some()
+            || filter.price_max.is_some()
+        {
+            query_builder.push("HAVING ");
+        }
+        let mut separated = query_builder.separated(" AND ");
+        if filter.is_furnished.is_some_and(|is_furnished| is_furnished) {
+            separated.push("r.is_furnished = TRUE");
+        }
+        if filter
+            .is_pet_friendly
+            .is_some_and(|is_pet_friendly| is_pet_friendly)
+        {
+            separated.push("r.is_pet_friendly = TRUE");
+        }
+        if let Some(price_min) = filter.price_min {
+            separated
+                .push("r.price >=")
+                .push_bind_unseparated(price_min);
+        }
+        if let Some(price_max) = filter.price_max {
+            separated
+                .push("r.price <=")
+                .push_bind_unseparated(price_max);
+        }
+        let sort_by = sort_by.unwrap_or(SortBy::UpdatedAt).to_string();
+        let order = order.unwrap_or(Order::Desc).to_string();
+        query_builder.push(format_args!(" ORDER BY r.{sort_by} {order}, r.id DESC"));
+        query_builder.build_query_as().fetch_all(db).await
     }
 
     pub async fn filter_by_user(db: &PgPool, user_id: Uuid) -> Result<Vec<Room>, sqlx::Error> {
@@ -317,7 +353,10 @@ mod tests {
         )
         .await;
 
-        let result = Room::list(&db.pool, Some(SortBy::UpdatedAt), Some(Order::Desc))
+        let filter = Filter {
+            ..Default::default()
+        };
+        let result = Room::list(&db.pool, Some(SortBy::UpdatedAt), Some(Order::Desc), filter)
             .await
             .unwrap();
         assert_eq!(result.len(), 2);
@@ -359,13 +398,65 @@ mod tests {
         )
         .await;
 
-        let result = Room::list(&db.pool, Some(SortBy::Price), Some(Order::Desc))
+        let filter = Filter {
+            ..Default::default()
+        };
+        let result = Room::list(&db.pool, Some(SortBy::Price), Some(Order::Desc), filter)
             .await
             .unwrap();
         assert_eq!(result.len(), 2);
         // ORDER BY price DESC
         assert_eq!(result[0].id, room_id1);
         assert_eq!(result[1].id, room_id2);
+    }
+
+    #[tokio::test]
+    async fn test_filtered_list() {
+        let db = TestConnection::new().await;
+        RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                price: 1000,
+                is_furnished: true,
+                is_pet_friendly: true,
+                user_id: None,
+                ..Faker.fake()
+            },
+        )
+        .await;
+        RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                price: 500,
+                is_furnished: false,
+                is_pet_friendly: false,
+                user_id: None,
+                ..Faker.fake()
+            },
+        )
+        .await;
+        RoomFactory::create(
+            &db.pool,
+            RoomFactoryParams {
+                price: 1500,
+                is_furnished: true,
+                is_pet_friendly: true,
+                user_id: None,
+                ..Faker.fake()
+            },
+        )
+        .await;
+
+        let filter = Filter {
+            is_furnished: Some(true),
+            is_pet_friendly: Some(true),
+            price_min: Some(800),
+            price_max: Some(2000),
+        };
+        let result = Room::list(&db.pool, Some(SortBy::Price), Some(Order::Desc), filter)
+            .await
+            .unwrap();
+        assert_eq!(result.len(), 2);
     }
 
     #[tokio::test]

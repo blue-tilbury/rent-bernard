@@ -5,12 +5,19 @@ import { AuthAPI } from "../apis/authAPI";
 import { PhotoAPI } from "../apis/photoAPI";
 import { RoomAPI } from "../apis/roomAPI";
 import { WishlistAPI } from "../apis/wishlistAPI";
-import { Room, UpdateRoom } from "../types/room.type";
+import { QueryParams, Room, UpdateRoom } from "../types/room.type";
 import { AuthParams } from "../types/user.type";
 
 // Room
-export const useRoom = () => {
-  const { data, error, isLoading } = useSWR("/rooms", RoomAPI.index);
+export const useRoom = (queryParams: QueryParams) => {
+  const { data, error, isLoading } = useSWR(
+    [
+      `/rooms?${new URLSearchParams(queryParams).toString()}`,
+      queryParams.sortBy,
+      queryParams.order,
+    ],
+    ([, sortBy, order]) => RoomAPI.index(sortBy, order),
+  );
   return { data, isError: error, isLoading };
 };
 

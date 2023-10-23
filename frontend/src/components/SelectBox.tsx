@@ -1,21 +1,38 @@
 import FormControl from "@mui/material/FormControl";
 import MenuItem from "@mui/material/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import { useState } from "react";
 
-type SortBy = "new" | "old" | "low" | "high";
+import { SortType } from "../pages/Search";
+import { Order, SortBy } from "../types/room.type";
 
-export const SelectBox = () => {
-  const [sortBy, setSortBy] = useState<SortBy>("new");
+type SelectBoxProps = {
+  handleSelect(sortBy: string, order: string, sortType: SortType): void;
+  sortType: SortType;
+};
 
-  const handleChange = (event: SelectChangeEvent<typeof sortBy>) => {
-    setSortBy(event.target.value as SortBy);
-    // TODO: call the sort api
+export const SelectBox = ({ handleSelect, sortType }: SelectBoxProps) => {
+  const handleChange = (e: SelectChangeEvent<typeof sortType>) => {
+    const val = e.target.value as SortType;
+
+    switch (val) {
+      case "new":
+        handleSelect(SortBy.UPDATED_AT, Order.DESC, val);
+        break;
+      case "old":
+        handleSelect(SortBy.UPDATED_AT, Order.ASC, val);
+        break;
+      case "low":
+        handleSelect(SortBy.PRICE, Order.ASC, val);
+        break;
+      case "high":
+        handleSelect(SortBy.PRICE, Order.DESC, val);
+        break;
+    }
   };
 
   return (
     <FormControl sx={{ p: 1, minWidth: 192 }} size="small">
-      <Select value={sortBy} onChange={handleChange}>
+      <Select value={sortType} onChange={handleChange}>
         <MenuItem value="new">Posted: newest</MenuItem>
         <MenuItem value="old">Posted: oldest</MenuItem>
         <MenuItem value="low">Price: lowest</MenuItem>

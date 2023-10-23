@@ -5,7 +5,10 @@ pub mod public {
 
     use crate::{
         controller::DB,
-        model::room::model::{Filter, Order, Room, SortBy},
+        model::{
+            room::model::{Filter, Order, Room, SortBy},
+            Pagination,
+        },
         utils::s3::S3Client,
         view,
     };
@@ -37,7 +40,8 @@ pub mod public {
         Ok(response)
     }
 
-    #[get("/rooms?<sort_by>&<order>&<is_furnished>&<is_pet_friendly>&<price_min>&<price_max>")]
+    #[get("/rooms?<sort_by>&<order>&<is_furnished>&<is_pet_friendly>&<price_min>&<price_max>&<page>&<per_page>")]
+    #[allow(clippy::too_many_arguments)]
     pub async fn index(
         db: &DB,
         sort_by: Option<SortBy>,
@@ -46,6 +50,8 @@ pub mod public {
         is_pet_friendly: Option<bool>,
         price_min: Option<i32>,
         price_max: Option<i32>,
+        page: Option<usize>,
+        per_page: Option<usize>,
     ) -> Result<Json<view::room::List>, Status> {
         let bucket_name = match env::var("ROOMS_BUCKET") {
             Ok(name) => name,
@@ -65,6 +71,7 @@ pub mod public {
                 price_min,
                 price_max,
             },
+            Pagination::new(page, per_page),
         )
         .await
         {

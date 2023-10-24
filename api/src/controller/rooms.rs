@@ -1,7 +1,11 @@
 pub mod public {
     use std::env;
 
-    use rocket::{http::Status, serde::json::Json};
+    use rocket::{
+        http::{CookieJar, Status},
+        serde::json::Json,
+    };
+    use uuid::Uuid;
 
     use crate::{
         controller::DB,
@@ -9,7 +13,7 @@ pub mod public {
             room::model::{Filter, Order, Room, SortBy},
             Pagination,
         },
-        utils::s3::S3Client,
+        utils::{auth::Session, s3::S3Client},
         view,
     };
 
@@ -44,6 +48,7 @@ pub mod public {
     #[allow(clippy::too_many_arguments)]
     pub async fn index(
         db: &DB,
+        cookies: &CookieJar<'_>,
         sort_by: Option<SortBy>,
         order: Option<Order>,
         is_furnished: Option<bool>,
@@ -52,7 +57,15 @@ pub mod public {
         price_max: Option<i32>,
         page: Option<usize>,
         per_page: Option<usize>,
-    ) -> Result<Json<view::room::List>, Status> {
+    ) -> Result<Json<view::room::public::List>, Status> {
+        let session = match Session::get(cookies).await {
+            Ok(option) => option,
+            Err(err) => {
+                eprintln!("{err}");
+                return Err(Status::InternalServerError);
+            }
+        };
+        let user_id = session.and_then(|session| Uuid::parse_str(&session.user_id).ok());
         let bucket_name = match env::var("ROOMS_BUCKET") {
             Ok(name) => name,
             Err(err) => {
@@ -71,11 +84,12 @@ pub mod public {
                 price_min,
                 price_max,
             },
+            user_id,
             Pagination::new(page, per_page),
         )
         .await
         {
-            Ok(rooms) => Ok(view::room::List::generate(rooms, client).await?),
+            Ok(rooms) => Ok(view::room::public::List::generate(rooms, client).await?),
             Err(err) => {
                 eprintln!("{err}");
                 Err(Status::InternalServerError)
@@ -229,7 +243,10 @@ pub mod private {
     }
 
     #[get("/private/rooms")]
-    pub async fn index(db: &DB, user: LoginUser) -> Result<Json<view::room::List>, Status> {
+    pub async fn index(
+        db: &DB,
+        user: LoginUser,
+    ) -> Result<Json<view::room::private::List>, Status> {
         let bucket_name = match env::var("ROOMS_BUCKET") {
             Ok(name) => name,
             Err(err) => {
@@ -239,7 +256,7 @@ pub mod private {
         };
         let client = S3Client::new(bucket_name).await?;
         match Room::filter_by_user(db, user.user_id).await {
-            Ok(rooms) => Ok(view::room::List::generate(rooms, client).await?),
+            Ok(rooms) => Ok(view::room::private::List::generate(rooms, client).await?),
             Err(err) => {
                 eprintln!("{err}");
                 Err(Status::InternalServerError)
@@ -248,7 +265,10 @@ pub mod private {
     }
 
     #[get("/private/rooms/wishlist")]
-    pub async fn wishlist(db: &DB, user: LoginUser) -> Result<Json<view::room::List>, Status> {
+    pub async fn wishlist(
+        db: &DB,
+        user: LoginUser,
+    ) -> Result<Json<view::room::private::List>, Status> {
         let bucket_name = match env::var("ROOMS_BUCKET") {
             Ok(name) => name,
             Err(err) => {
@@ -258,7 +278,7 @@ pub mod private {
         };
         let client = S3Client::new(bucket_name).await?;
         match Room::get_wishlists(db, user.user_id).await {
-            Ok(rooms) => Ok(view::room::List::generate(rooms, client).await?),
+            Ok(rooms) => Ok(view::room::private::List::generate(rooms, client).await?),
             Err(err) => {
                 eprintln!("{err}");
                 Err(Status::InternalServerError)

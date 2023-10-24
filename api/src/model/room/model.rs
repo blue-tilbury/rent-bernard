@@ -331,7 +331,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let user_id = UserFactory::create(&db.pool, Faker.fake()).await;
         let params = CreateRoom {
             title: "title".to_string(),
@@ -346,11 +346,12 @@ mod tests {
         };
 
         assert!(Room::create(&db.pool, params).await.is_ok());
+        db.clean_up().await;
     }
 
     #[tokio::test]
     async fn test_filter_by_user() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let user_id1 = UserFactory::create(&db.pool, Faker.fake()).await;
         let room_id1 = RoomFactory::create(
             &db.pool,
@@ -384,11 +385,12 @@ mod tests {
         // ORDER BY created_ad DESC
         assert_eq!(result[0].id, room_id2);
         assert_eq!(result[1].id, room_id1);
+        db.clean_up().await;
     }
 
     #[tokio::test]
     async fn test_get_wishlists() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let login_user_id = UserFactory::create(&db.pool, Faker.fake()).await;
         let room_id1 = RoomFactory::create(
             &db.pool,
@@ -428,11 +430,12 @@ mod tests {
         // ORDER BY created_ad DESC
         assert_eq!(result[0].id, room_id2);
         assert_eq!(result[1].id, room_id1);
+        db.clean_up().await;
     }
 
     #[tokio::test]
     async fn test_update() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let params = RoomFactoryParams {
             title: "title".to_string(),
             user_id: None,
@@ -455,11 +458,12 @@ mod tests {
         let room = Room::get(&db.pool, id.to_string()).await.unwrap().unwrap();
         assert!(result.is_some());
         assert_eq!(room.title, "new_title".to_string());
+        db.clean_up().await;
     }
 
     #[tokio::test]
     async fn test_update_not_found() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let params = UpdateRoom {
             id: Uuid::new_v4(),
             title: "title".to_string(),
@@ -467,11 +471,12 @@ mod tests {
         };
         let result = Room::update(&db.pool, params).await.unwrap();
         assert!(result.is_none());
+        db.clean_up().await;
     }
 
     #[tokio::test]
     async fn test_delete() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let id = RoomFactory::create(
             &db.pool,
             RoomFactoryParams {
@@ -482,15 +487,17 @@ mod tests {
         .await;
         let result = Room::delete(&db.pool, id.to_string()).await.unwrap();
         assert!(result.is_some());
+        db.clean_up().await;
     }
 
     #[tokio::test]
     async fn test_delete_not_found() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let result = Room::delete(&db.pool, "invalid_id".to_string())
             .await
             .unwrap();
         assert!(result.is_none());
+        db.clean_up().await;
     }
 
     mod get {
@@ -498,7 +505,7 @@ mod tests {
 
         #[tokio::test]
         async fn test_get() {
-            let db = TestConnection::new().await;
+            let mut db = TestConnection::new().await;
             let user_id = UserFactory::create(&db.pool, Faker.fake()).await;
             let params = RoomFactoryParams {
                 title: "title".to_string(),
@@ -531,14 +538,16 @@ mod tests {
             assert_eq!(result.user_id, user_id);
             assert!(!result.created_at.to_string().is_empty());
             assert!(!result.updated_at.to_string().is_empty());
+            db.clean_up().await;
         }
 
         #[tokio::test]
         async fn test_get_not_found() {
-            let db = TestConnection::new().await;
+            let mut db = TestConnection::new().await;
             let id = "random_id".to_string();
             let result = Room::get(&db.pool, id).await.unwrap();
             assert!(result.is_none());
+            db.clean_up().await;
         }
     }
 
@@ -547,7 +556,7 @@ mod tests {
 
         #[tokio::test]
         async fn test_list_sorted_by_updated_at() {
-            let db = TestConnection::new().await;
+            let mut db = TestConnection::new().await;
             let room_id1 = RoomFactory::create(
                 &db.pool,
                 RoomFactoryParams {
@@ -582,11 +591,12 @@ mod tests {
             // ORDER BY updated_at DESC
             assert_eq!(result[0].id, room_id2);
             assert_eq!(result[1].id, room_id1);
+            db.clean_up().await;
         }
 
         #[tokio::test]
         async fn test_list_sorted_by_price() {
-            let db = TestConnection::new().await;
+            let mut db = TestConnection::new().await;
             let room_id1 = RoomFactory::create(
                 &db.pool,
                 RoomFactoryParams {
@@ -623,11 +633,12 @@ mod tests {
             // ORDER BY price DESC
             assert_eq!(result[0].id, room_id1);
             assert_eq!(result[1].id, room_id2);
+            db.clean_up().await;
         }
 
         #[tokio::test]
         async fn test_filtered_list() {
-            let db = TestConnection::new().await;
+            let mut db = TestConnection::new().await;
             RoomFactory::create(
                 &db.pool,
                 RoomFactoryParams {
@@ -679,11 +690,12 @@ mod tests {
             .await
             .unwrap();
             assert_eq!(result.len(), 2);
+            db.clean_up().await;
         }
 
         #[tokio::test]
         async fn test_list_pagination() {
-            let db = TestConnection::new().await;
+            let mut db = TestConnection::new().await;
             RoomFactory::create(
                 &db.pool,
                 RoomFactoryParams {
@@ -721,11 +733,12 @@ mod tests {
                 .unwrap();
             assert_eq!(result.len(), 1);
             assert_eq!(result[0].id, room_id);
+            db.clean_up().await;
         }
 
         #[tokio::test]
         async fn test_wishlist() {
-            let db = TestConnection::new().await;
+            let mut db = TestConnection::new().await;
             let room_id = RoomFactory::create(
                 &db.pool,
                 RoomFactoryParams {
@@ -762,6 +775,7 @@ mod tests {
             .unwrap();
             assert_eq!(result.len(), 1);
             assert!(result[0].is_favorite);
+            db.clean_up().await;
         }
     }
 }

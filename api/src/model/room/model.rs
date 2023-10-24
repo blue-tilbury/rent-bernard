@@ -644,7 +644,7 @@ mod tests {
                 ..Default::default()
             };
             let pagination = Pagination {
-                page: 0,
+                page: 1,
                 per_page: 1,
             };
             let result = Room::list(&db.pool, None, None, filter, pagination)

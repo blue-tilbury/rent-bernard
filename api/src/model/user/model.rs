@@ -76,7 +76,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let params = CreateUser {
             name: "name".to_string(),
             email: "email".to_string(),
@@ -84,11 +84,12 @@ mod tests {
         };
 
         assert!(User::create(&db.pool, params).await.is_ok());
+        db.clean_up().await;
     }
 
     #[tokio::test]
     async fn test_find_by_email() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let params: UserFactoryParams = Faker.fake();
         let expected_id = UserFactory::create(&db.pool, params.clone()).await;
         let user = User::find_by_email(&db.pool, params.email)
@@ -97,13 +98,15 @@ mod tests {
             .unwrap();
 
         assert_eq!(user.id, expected_id);
+        db.clean_up().await;
     }
 
     #[tokio::test]
     async fn test_find_by_id() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let params: UserFactoryParams = Faker.fake();
         let id = UserFactory::create(&db.pool, params).await;
         assert!(User::find_by_id(&db.pool, id).await.unwrap().is_some());
+        db.clean_up().await;
     }
 }

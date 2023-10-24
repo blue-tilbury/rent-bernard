@@ -52,7 +52,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_many() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let params = RoomFactoryParams {
             user_id: None,
             ..Faker.fake()
@@ -62,11 +62,12 @@ mod tests {
         assert!(RoomImage::create_many(&db.pool, room_id, s3_keys)
             .await
             .is_ok());
+        db.clean_up().await;
     }
 
     #[tokio::test]
     async fn test_delete_many() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let room_id = RoomFactory::create(
             &db.pool,
             RoomFactoryParams {
@@ -81,5 +82,6 @@ mod tests {
         };
         RoomImageFactory::create_many(&db.pool, params, 2).await;
         assert!(RoomImage::delete_many(&db.pool, room_id).await.is_ok());
+        db.clean_up().await;
     }
 }

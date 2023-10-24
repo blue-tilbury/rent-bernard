@@ -46,7 +46,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let room_id = RoomFactory::create(
             &db.pool,
             RoomFactoryParams {
@@ -57,11 +57,12 @@ mod tests {
         .await;
         let user_id = UserFactory::create(&db.pool, Faker.fake()).await;
         assert!(Wishlist::create(&db.pool, room_id, user_id).await.is_ok());
+        db.clean_up().await;
     }
 
     #[tokio::test]
     async fn test_delete() {
-        let db = TestConnection::new().await;
+        let mut db = TestConnection::new().await;
         let room_id = RoomFactory::create(
             &db.pool,
             RoomFactoryParams {
@@ -73,5 +74,6 @@ mod tests {
         let user_id = UserFactory::create(&db.pool, Faker.fake()).await;
         WishlistFactory::create(&db.pool, WishlistFactoryParams { room_id, user_id }).await;
         assert!(Wishlist::delete(&db.pool, room_id, user_id).await.is_ok());
+        db.clean_up().await;
     }
 }

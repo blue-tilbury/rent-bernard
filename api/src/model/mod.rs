@@ -12,7 +12,7 @@ pub struct Pagination {
 impl Pagination {
     pub fn new(page: Option<usize>, per_page: Option<usize>) -> Self {
         Self {
-            page: page.unwrap_or(0),
+            page: page.unwrap_or(1),
             per_page: per_page.unwrap_or(DEFAULT_PER_PAGE),
         }
     }
@@ -21,7 +21,8 @@ impl Pagination {
         format!(
             "LIMIT {} OFFSET {}",
             self.per_page,
-            self.per_page * self.page
+            // 1-indexed
+            self.per_page * (self.page - 1)
         )
     }
 }

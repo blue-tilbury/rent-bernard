@@ -21,6 +21,24 @@ pub struct Room {
     pub updated_at: NaiveDateTime,
 }
 
+#[derive(Debug, Clone, FromRow)]
+pub struct ListRoom {
+    pub id: Uuid,
+    pub title: String,
+    pub price: i32,
+    pub city: String,
+    pub street: Option<String>,
+    pub is_furnished: bool,
+    pub is_pet_friendly: bool,
+    pub description: String,
+    pub s3_keys: Vec<String>,
+    pub email: String,
+    pub user_id: Uuid,
+    pub is_favorite: bool,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+}
+
 #[derive(Default)]
 pub struct CreateRoom {
     pub title: String,
@@ -134,21 +152,44 @@ impl Room {
         sort_by: Option<SortBy>,
         order: Option<Order>,
         filter: Filter,
+        user_id: Option<Uuid>,
         pagination: Pagination,
-    ) -> Result<Vec<Room>, sqlx::Error> {
+    ) -> Result<Vec<ListRoom>, sqlx::Error> {
+        #[derive(FromRow)]
+        struct Record {
+            id: Uuid,
+            title: String,
+            price: i32,
+            city: String,
+            street: Option<String>,
+            is_furnished: bool,
+            is_pet_friendly: bool,
+            description: String,
+            s3_keys: Vec<String>,
+            email: String,
+            user_id: Uuid,
+            wishlist_count: i64,
+            created_at: NaiveDateTime,
+            updated_at: NaiveDateTime,
+        }
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"
-                SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys FROM rooms r
+                SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys, COUNT(w.id) wishlist_count
+                FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
-                GROUP BY r.id
+                LEFT OUTER JOIN wishlists w ON r.id = w.room_id
             "#,
         );
+        if user_id.is_some() {
+            query_builder.push(" WHERE w.user_id =").push_bind(user_id);
+        }
+        query_builder.push(" GROUP BY r.id ");
         if filter.is_furnished.is_some()
             || filter.is_pet_friendly.is_some()
             || filter.price_min.is_some()
             || filter.price_max.is_some()
         {
-            query_builder.push("HAVING ");
+            query_builder.push(" HAVING ");
         }
         let mut separated_by_and = query_builder.separated(" AND ");
         if filter.is_furnished.is_some_and(|is_furnished| is_furnished) {
@@ -174,8 +215,33 @@ impl Room {
         let order = order.unwrap_or(Order::Desc).to_string();
         query_builder.push(format_args!(" ORDER BY r.{sort_by} {order}, r.id DESC "));
         query_builder.push(pagination.to_sql());
-        println!("{}", query_builder.sql());
-        query_builder.build_query_as().fetch_all(db).await
+        let rooms = query_builder
+            .build_query_as::<Record>()
+            .fetch_all(db)
+            .await?
+            .into_iter()
+            .map(|room| ListRoom {
+                id: room.id,
+                title: room.title,
+                price: room.price,
+                city: room.city,
+                street: room.street,
+                is_furnished: room.is_furnished,
+                is_pet_friendly: room.is_pet_friendly,
+                description: room.description,
+                s3_keys: room.s3_keys,
+                email: room.email,
+                user_id: room.user_id,
+                created_at: room.created_at,
+                updated_at: room.updated_at,
+                is_favorite: if user_id.is_none() {
+                    false
+                } else {
+                    room.wishlist_count == 1
+                },
+            })
+            .collect();
+        Ok(rooms)
     }
 
     pub async fn filter_by_user(db: &PgPool, user_id: Uuid) -> Result<Vec<Room>, sqlx::Error> {
@@ -507,6 +573,7 @@ mod tests {
                 Some(SortBy::UpdatedAt),
                 Some(Order::Desc),
                 filter,
+                None,
                 Pagination::new(None, None),
             )
             .await
@@ -547,6 +614,7 @@ mod tests {
                 Some(SortBy::Price),
                 Some(Order::Desc),
                 filter,
+                None,
                 Pagination::new(None, None),
             )
             .await
@@ -605,6 +673,7 @@ mod tests {
                 Some(SortBy::Price),
                 Some(Order::Desc),
                 filter,
+                None,
                 Pagination::new(None, None),
             )
             .await
@@ -647,11 +716,52 @@ mod tests {
                 page: 1,
                 per_page: 1,
             };
-            let result = Room::list(&db.pool, None, None, filter, pagination)
+            let result = Room::list(&db.pool, None, None, filter, None, pagination)
                 .await
                 .unwrap();
             assert_eq!(result.len(), 1);
             assert_eq!(result[0].id, room_id);
+        }
+
+        #[tokio::test]
+        async fn test_wishlist() {
+            let db = TestConnection::new().await;
+            let room_id = RoomFactory::create(
+                &db.pool,
+                RoomFactoryParams {
+                    user_id: None,
+                    ..Faker.fake()
+                },
+            )
+            .await;
+            let login_user_id = UserFactory::create(&db.pool, Faker.fake()).await;
+            WishlistFactory::create(&db.pool, {
+                WishlistFactoryParams {
+                    user_id: login_user_id,
+                    room_id,
+                }
+            })
+            .await;
+
+            let filter = Filter {
+                ..Default::default()
+            };
+            let pagination = Pagination {
+                page: 1,
+                per_page: 1,
+            };
+            let result = Room::list(
+                &db.pool,
+                None,
+                None,
+                filter,
+                Some(login_user_id),
+                pagination,
+            )
+            .await
+            .unwrap();
+            assert_eq!(result.len(), 1);
+            assert!(result[0].is_favorite);
         }
     }
 }

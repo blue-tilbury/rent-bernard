@@ -1,7 +1,7 @@
 type ButtonProps = {
   children: React.ReactNode;
   size: "xs" | "sm" | "md" | "lg";
-  color: "primary" | "secondary" | "danger";
+  color: "primary" | "secondary" | "trinary" | "danger";
   type: "submit" | "button";
   handleClick?(e?: React.MouseEvent): void;
 };
@@ -12,10 +12,10 @@ export const Button = ({ children, size, color, type, handleClick }: ButtonProps
 
   switch (size) {
     case "xs":
-      btnSize = "px-2 py-1 text-xs font-base";
+      btnSize = "px-2 py-1 text-xs font-normal";
       break;
     case "sm":
-      btnSize = "px-4 py-2 text-sm font-base";
+      btnSize = "px-4 py-2 text-sm font-normal";
       break;
     case "md":
       btnSize = "px-8 py-2 text-md font-medium";
@@ -30,6 +30,9 @@ export const Button = ({ children, size, color, type, handleClick }: ButtonProps
       break;
     case "secondary":
       btnColor = "bg-white hover:bg-rent-bg-gray border border-rent-dark-blue";
+      break;
+    case "trinary":
+      btnColor = "bg-white hover:bg-rent-blue text-rent-blue hover:text-white";
       break;
     case "danger":
       btnColor = "bg-red-600 hover:bg-red-400 text-white";

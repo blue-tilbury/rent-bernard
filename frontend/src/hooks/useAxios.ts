@@ -10,13 +10,19 @@ import { AuthParams } from "../types/user.type";
 
 // Room
 export const useRoom = (queryParams: QueryParams) => {
-  const { data, error, isLoading } = useSWR(
-    [
-      `/rooms?${new URLSearchParams(queryParams).toString()}`,
+  const params = new URLSearchParams({
+    sortBy: queryParams.sortBy,
+    order: queryParams.order,
+    page: queryParams.page.toString(),
+    per_page: queryParams.per_page.toString(),
+  });
+  const { data, error, isLoading } = useSWR(`/rooms?${params}`, () =>
+    RoomAPI.index(
       queryParams.sortBy,
       queryParams.order,
-    ],
-    ([, sortBy, order]) => RoomAPI.index(sortBy, order),
+      queryParams.page,
+      queryParams.per_page,
+    ),
   );
   return { data, isError: error, isLoading };
 };

@@ -42,6 +42,7 @@ export type GetRoom = {
 };
 
 export type ListRoom = {
+  count: number;
   rooms: ListItem[];
 };
 
@@ -73,6 +74,8 @@ export enum Order {
 export type QueryParams = {
   sortBy: SortBy;
   order: Order;
+  page: number;
+  per_page: number;
 };
 
 export type UploadPhoto = {

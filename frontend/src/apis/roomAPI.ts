@@ -5,7 +5,12 @@ import { GetRoom, ListRoom, Order, Room, SortBy, UpdateRoom } from "../types/roo
 
 type RoomAPIType = {
   show: (id: string) => Promise<GetRoom>;
-  index: (sortBy?: SortBy, order?: Order) => Promise<ListRoom>;
+  index: (
+    sortBy?: SortBy,
+    order?: Order,
+    page?: number,
+    per_page?: number,
+  ) => Promise<ListRoom>;
   update: (room: UpdateRoom, cancel?: boolean) => Promise<void>;
   delete: (id: string, cancel?: boolean) => Promise<void>;
   create: (room: Room, cancel?: boolean) => Promise<Id>;
@@ -22,10 +27,10 @@ export const RoomAPI: RoomAPIType = {
 
     return response.data;
   },
-  index: async (sortBy?: SortBy, order?: Order) => {
+  index: async (sortBy?: SortBy, order?: Order, page?: number, per_page?: number) => {
     const response = await api.request({
       url: `/rooms`,
-      params: { sort_by: sortBy, order: order },
+      params: { sort_by: sortBy, order, page, per_page },
       method: "GET",
     });
 

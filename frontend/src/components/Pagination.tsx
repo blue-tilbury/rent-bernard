@@ -1,35 +1,43 @@
-import { ArrowLongLeftIcon, ArrowLongRightIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import ReactPaginate from "react-paginate";
 
-import { Button } from "./Button";
-// import useSWR from "swr";
+type PaginationType = {
+  handlePagination(page: number): void;
+  pageCount: number;
+  pageIndex: number;
+};
 
-export const Pagination = () => {
-  const [pageIndex, setPageIndex] = useState(0);
-  // const { data } = useSWR(`/api/data?page=${index}`, fetcher);
+export const Pagination = ({
+  handlePagination,
+  pageCount,
+  pageIndex,
+}: PaginationType) => {
+  const handlePageClick = (e: { selected: number }) => {
+    handlePagination(e.selected);
+  };
 
   return (
-    <div className="flex justify-center py-6">
-      {/* {data.map((item) => (
-        <div key={item.id}>{item.name}</div>
-      ))} */}
-      <Button
-        size="xs"
-        color="secondary"
-        type="button"
-        handleClick={() => setPageIndex(pageIndex - 1)}
-      >
-        <ArrowLongLeftIcon className="h-4 w-4" />
-      </Button>
-      1
-      <Button
-        size="xs"
-        color="secondary"
-        type="button"
-        handleClick={() => setPageIndex(pageIndex + 1)}
-      >
-        <ArrowLongRightIcon className="h-4 w-4" />
-      </Button>
+    <div className="flex justify-center space-x-1 py-6">
+      <ReactPaginate
+        pageCount={pageCount}
+        pageRangeDisplayed={3}
+        marginPagesDisplayed={1}
+        breakLabel={"..."}
+        onPageChange={handlePageClick}
+        previousLabel={<ChevronLeftIcon className="h-4 w-4" />}
+        nextLabel={<ChevronRightIcon className="h-4 w-4" />}
+        forcePage={pageIndex}
+        renderOnZeroPageCount={null}
+        className="text-md flex items-center justify-center space-x-2 py-6 font-medium"
+        nextClassName="h-7 w-7 bg-white hover:bg-rent-light-green text-rent-gray rounded-md shadow-md"
+        nextLinkClassName="flex items-center justify-center h-full w-full"
+        previousClassName="h-7 w-7 bg-white hover:bg-rent-light-green text-rent-gray rounded-md shadow-md"
+        previousLinkClassName="flex items-center justify-center h-full w-full"
+        pageClassName="h-7 w-7 bg-white hover:bg-rent-light-green text-rent-gray rounded-md shadow-md"
+        pageLinkClassName="flex items-center justify-center h-full w-full"
+        activeClassName="bg-rent-light-green"
+        disabledClassName="hidden"
+      />
     </div>
   );
 };

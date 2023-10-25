@@ -55,6 +55,7 @@ export type ListItem = {
   is_pet_friendly: boolean;
   description: string;
   thumbnail_url?: string;
+  is_favorite: boolean;
   email: string;
   created_at: string;
   updated_at: string;

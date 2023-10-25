@@ -26,7 +26,7 @@ export const Gallery = (props: ListItem) => {
           <div className="flex items-center justify-between">
             <p className="text-sm text-rent-gray">{props.updated_at} mins ago</p>
             {loggedIn(user) && (
-              <WishlistEditIcon roomId={props.id} isDefaultFav={false} />
+              <WishlistEditIcon roomId={props.id} isDefaultFav={props.is_favorite} />
             )}
           </div>
         </div>

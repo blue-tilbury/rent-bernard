@@ -35,6 +35,7 @@ pub struct ListRoom {
     pub email: String,
     pub user_id: Uuid,
     pub is_favorite: bool,
+    pub count: i64,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -169,19 +170,20 @@ impl Room {
             email: String,
             user_id: Uuid,
             wishlist_count: i64,
+            count: i64,
             created_at: NaiveDateTime,
             updated_at: NaiveDateTime,
         }
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"
-                SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys, COUNT(w.id) wishlist_count
+                SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys, COUNT(w.id) wishlist_count, COUNT(*) OVER() count
                 FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
                 LEFT OUTER JOIN wishlists w ON r.id = w.room_id
             "#,
         );
         if user_id.is_some() {
-            query_builder.push(" WHERE w.user_id =").push_bind(user_id);
+            query_builder.push(" AND w.user_id =").push_bind(user_id);
         }
         query_builder.push(" GROUP BY r.id ");
         if filter.is_furnished.is_some()
@@ -239,6 +241,7 @@ impl Room {
                 } else {
                     room.wishlist_count == 1
                 },
+                count: room.count,
             })
             .collect();
         Ok(rooms)
@@ -725,7 +728,7 @@ mod tests {
                 ..Default::default()
             };
             let pagination = Pagination {
-                page: 1,
+                page: 0,
                 per_page: 1,
             };
             let result = Room::list(&db.pool, None, None, filter, None, pagination)
@@ -733,6 +736,7 @@ mod tests {
                 .unwrap();
             assert_eq!(result.len(), 1);
             assert_eq!(result[0].id, room_id);
+            assert_eq!(result[0].count, 3);
             db.clean_up().await;
         }
 
@@ -759,17 +763,13 @@ mod tests {
             let filter = Filter {
                 ..Default::default()
             };
-            let pagination = Pagination {
-                page: 1,
-                per_page: 1,
-            };
             let result = Room::list(
                 &db.pool,
                 None,
                 None,
                 filter,
                 Some(login_user_id),
-                pagination,
+                Pagination::new(None, None),
             )
             .await
             .unwrap();

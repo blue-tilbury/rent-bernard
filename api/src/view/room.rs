@@ -139,6 +139,7 @@ pub mod public {
 
     #[derive(Serialize, Deserialize)]
     pub struct List {
+        pub count: i64,
         pub rooms: Vec<ListItem>,
     }
 
@@ -171,7 +172,7 @@ pub mod public {
 
         async fn to_list(rooms: Vec<ListRoom>, client: impl S3Operation) -> Result<List, Status> {
             let mut list_items: Vec<ListItem> = Vec::new();
-            for room in rooms {
+            for room in rooms.clone() {
                 let key = room.s3_keys.first().map(|key| key.to_string());
                 let thumbnail_url = match key {
                     Some(key) => Some(client.get_object(key).await?),
@@ -195,7 +196,11 @@ pub mod public {
                 };
                 list_items.push(item);
             }
-            Ok(List { rooms: list_items })
+            let count = rooms.get(0).map(|room| room.count).unwrap_or(0);
+            Ok(List {
+                rooms: list_items,
+                count,
+            })
         }
     }
 }
@@ -279,9 +284,11 @@ mod tests {
                 is_favorite: true,
                 created_at: Local::now().naive_local(),
                 updated_at: Local::now().naive_local(),
+                count: 1,
             };
             let json = List::generate(vec![room], MockS3Client {}).await.unwrap();
             assert_eq!(json.rooms.len(), 1);
+            assert_eq!(json.count, 1);
 
             let room = &json.rooms[0];
             assert_eq!(room.id, id.to_string());

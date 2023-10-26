@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
@@ -9,8 +9,8 @@ pub struct User {
     pub name: String,
     pub email: String,
     pub picture: String,
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Default, Deserialize, Clone)]

@@ -29,13 +29,13 @@ export const Pagination = ({
         forcePage={pageIndex}
         renderOnZeroPageCount={null}
         className="text-md flex items-center justify-center space-x-2 py-6 font-medium"
-        nextClassName="h-7 w-7 bg-white hover:bg-rent-light-green text-rent-gray rounded-md shadow-md"
+        nextClassName="h-7 w-7 bg-white hover:bg-rent-pagination-light-blue text-rent-pagination-blue rounded-md shadow-md"
         nextLinkClassName="flex items-center justify-center h-full w-full"
-        previousClassName="h-7 w-7 bg-white hover:bg-rent-light-green text-rent-gray rounded-md shadow-md"
+        previousClassName="h-7 w-7 bg-white hover:bg-rent-pagination-light-blue text-rent-pagination-blue rounded-md shadow-md"
         previousLinkClassName="flex items-center justify-center h-full w-full"
-        pageClassName="h-7 w-7 bg-white hover:bg-rent-light-green text-rent-gray rounded-md shadow-md"
+        pageClassName="h-7 w-7 bg-white hover:bg-rent-pagination-light-blue text-rent-pagination-blue rounded-md shadow-md"
         pageLinkClassName="flex items-center justify-center h-full w-full"
-        activeClassName="bg-rent-light-green"
+        activeLinkClassName="bg-rent-pagination-blue text-white rounded-md shadow-md"
         disabledClassName="hidden"
       />
     </div>

@@ -33,6 +33,7 @@
     "fork-ts-checker-webpack-plugin": "^6.5.3",
     "framer-motion": "^10.12.18",
     "jotai": "^2.4.2",
+    "moment": "^2.29.4",
     "popmotion": "^11.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

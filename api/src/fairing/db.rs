@@ -65,7 +65,11 @@ pub mod tests {
 
         pub async fn clean_up(&mut self) {
             let url = env::var("TEST_DATABASE_URL").expect("DATABASE_URL must be set");
-            let pool = PgPoolOptions::new().connect(url.as_str()).await.unwrap();
+            let pool = PgPoolOptions::new()
+                .max_connections(5)
+                .connect(url.as_str())
+                .await
+                .unwrap();
             sqlx::query(
                 format!(
                     "DROP DATABASE IF EXISTS {} WITH (FORCE)",
@@ -82,9 +86,10 @@ pub mod tests {
 
     impl Drop for TestConnection {
         fn drop(&mut self) {
-            if !self.is_cleaned_up {
-                panic!("TestConnection must be cleaned up after each test");
-            }
+            assert!(
+                self.is_cleaned_up,
+                "TestConnection must be cleaned up after each test"
+            );
         }
     }
 }

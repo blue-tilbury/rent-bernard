@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use sqlx::{FromRow, PgPool, Postgres, QueryBuilder, Row};
 use uuid::Uuid;
 
@@ -17,8 +17,8 @@ pub struct Room {
     pub s3_keys: Vec<String>,
     pub email: String,
     pub user_id: Uuid,
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, FromRow)]
@@ -36,8 +36,8 @@ pub struct ListRoom {
     pub user_id: Uuid,
     pub is_favorite: bool,
     pub count: i64,
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Default)]
@@ -171,8 +171,8 @@ impl Room {
             user_id: Uuid,
             wishlist_count: i64,
             count: i64,
-            created_at: NaiveDateTime,
-            updated_at: NaiveDateTime,
+            created_at: DateTime<Utc>,
+            updated_at: DateTime<Utc>,
         }
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"

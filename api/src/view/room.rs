@@ -207,7 +207,7 @@ pub mod public {
 
 #[cfg(test)]
 mod tests {
-    use chrono::Local;
+    use chrono::Utc;
     use uuid::Uuid;
 
     use super::*;
@@ -241,8 +241,8 @@ mod tests {
             s3_keys: vec!["key".to_string()],
             email: "email".to_string(),
             user_id,
-            created_at: Local::now().naive_local(),
-            updated_at: Local::now().naive_local(),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
         };
         let json = Get::generate(room, MockS3Client {}).await.unwrap();
         assert_eq!(json.id, id.to_string());
@@ -282,8 +282,8 @@ mod tests {
                 email: "email".to_string(),
                 user_id,
                 is_favorite: true,
-                created_at: Local::now().naive_local(),
-                updated_at: Local::now().naive_local(),
+                created_at: Utc::now(),
+                updated_at: Utc::now(),
                 count: 1,
             };
             let json = List::generate(vec![room], MockS3Client {}).await.unwrap();
@@ -329,8 +329,8 @@ mod tests {
                 s3_keys: vec!["key".to_string()],
                 email: "email".to_string(),
                 user_id,
-                created_at: Local::now().naive_local(),
-                updated_at: Local::now().naive_local(),
+                created_at: Utc::now(),
+                updated_at: Utc::now(),
             };
             let json = List::generate(vec![room], MockS3Client {}).await.unwrap();
             assert_eq!(json.rooms.len(), 1);

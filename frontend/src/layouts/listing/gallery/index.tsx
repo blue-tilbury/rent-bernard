@@ -1,5 +1,7 @@
 import { MapPinIcon } from "@heroicons/react/24/solid";
 import { useAtomValue } from "jotai";
+import moment from "moment";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { loggedIn, userAtom } from "../../../shared/globalStateConfig";
@@ -11,6 +13,18 @@ export const Gallery = (props: ListItem) => {
   const navigate = useNavigate();
 
   const onClick = () => navigate(`/ads/${props.id}`);
+  const postedAt = useMemo(() => {
+    const updatedAt = moment(props.updated_at);
+    const now = moment();
+    const diff = now.diff(updatedAt, "minutes");
+    if (diff < 60) {
+      return `${diff} mins ago`;
+    } else if (60 <= diff && diff < 24 * 60) {
+      return `${Math.floor(diff / 60)}h ago`;
+    } else {
+      return updatedAt.format("YYYY/MM/DD");
+    }
+  }, [props.updated_at]);
 
   return (
     <li onClick={onClick} className="flex flex-1 flex-col py-1 sm:flex-1/3 sm:px-1">
@@ -24,7 +38,7 @@ export const Gallery = (props: ListItem) => {
             <p className="pl-1 text-sm text-rent-gray">{props.city}</p>
           </div>
           <div className="flex items-center justify-between">
-            <p className="text-sm text-rent-gray">{props.updated_at} mins ago</p>
+            <p className="text-sm text-rent-gray">{postedAt}</p>
             {loggedIn(user) && (
               <WishlistEditIcon roomId={props.id} isDefaultFav={props.is_favorite} />
             )}

@@ -28,7 +28,7 @@ impl Get {
 
 #[cfg(test)]
 mod tests {
-    use chrono::Local;
+    use chrono::Utc;
     use uuid::Uuid;
 
     use super::*;
@@ -41,8 +41,8 @@ mod tests {
             name: "name".to_string(),
             email: "email".to_string(),
             picture: "picture".to_string(),
-            created_at: Local::now().naive_local(),
-            updated_at: Local::now().naive_local(),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
         };
         let json = Get::generate(user);
         assert_eq!(json.id, id.to_string());

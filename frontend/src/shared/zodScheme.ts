@@ -8,15 +8,18 @@ export const scheme = z.object({
     .number({ invalid_type_error: "Number is required." })
     .positive({ message: "Price must be positive number." })
     .int({ message: "Price must be integer." }),
-  city: z.string().nonempty({ message: "City is required." }),
-  street: z.string(),
-  description: z.string().nonempty({ message: "Description is required." }),
+  place_id: z
+    .string({ required_error: "Address is required." })
+    .min(1, { message: "Address is required." }),
+  description: z
+    .string({ required_error: "Description is required." })
+    .min(1, { message: "Description is required." }),
   s3_keys: z
     .string({ required_error: "Image is required." })
     .array()
     .nonempty({ message: "Image is required." }),
   email: z
-    .string()
-    .nonempty({ message: "Email is required." })
+    .string({ required_error: "Email is required." })
+    .min(1, { message: "Email is required." })
     .email({ message: "Invalid email address." }),
 });

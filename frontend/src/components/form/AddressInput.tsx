@@ -3,7 +3,7 @@ import { useController } from "react-hook-form";
 
 import { AddressInputProps } from "../../types/form.type";
 
-export const ControlledTextInput = ({
+export const AddressInput = ({
   control,
   name,
   error,

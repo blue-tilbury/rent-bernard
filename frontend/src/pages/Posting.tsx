@@ -8,24 +8,33 @@ import { S3API } from "../apis/s3API";
 import { Button } from "../components/Button";
 import { useCreateRoom, useGetPhoto, useGetRoom, useUpdateRoom } from "../hooks/useAxios";
 import {
+  Address,
   Description,
   Email,
   Furnished,
   Heading,
   Images,
-  Location,
   PetFriendly,
   Price,
   Title,
 } from "../layouts/form";
 import { Converter } from "../shared/typeConverter";
 import { scheme } from "../shared/zodScheme";
-import { PostRoom, Room } from "../types/room.type";
+import { AddressInfoType } from "../types/form.type";
+import { PostRoom } from "../types/room.type";
 
 export const Posting = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [files, setFiles] = useState<File[]>([]);
+  const addressDefaultVals = useMemo<AddressInfoType>(() => {
+    return {
+      address_components: [],
+      formatted_address: "",
+      inputValue: "",
+    };
+  }, []);
+  const [addressInfo, setAddressInfo] = useState<AddressInfoType>(addressDefaultVals);
   const { triggerPhoto } = useGetPhoto();
   const { triggerRoom } = useCreateRoom();
   const { triggerUpdateRoom } = useUpdateRoom();
@@ -34,8 +43,7 @@ export const Posting = () => {
     return {
       title: "",
       price: null,
-      city: "",
-      street: "",
+      place_id: "",
       is_furnished: null,
       is_pet_friendly: null,
       s3_keys: [],
@@ -55,9 +63,14 @@ export const Posting = () => {
     defaultValues: getDefaultVals,
   });
 
-  async function getDefaultVals(): Promise<PostRoom | Room> {
+  /**
+   * @returns default values for the form
+   */
+  async function getDefaultVals(): Promise<PostRoom> {
+    // for creating a new room
     if (!params.id) return defaultVals;
 
+    // for updating the room
     const room = await triggerGetRoom(params.id);
 
     const defaultFiles = await Promise.allSettled(
@@ -75,13 +88,18 @@ export const Posting = () => {
       .map((result) => result.value);
     setFiles(resolvedFiles);
 
-    return Converter.GetRoomToRoom(room, resolvedFiles);
+    setAddressInfo({
+      ...addressInfo,
+      inputValue: room.city,
+    });
+    return Converter.GetRoomToPostRoom(room, resolvedFiles);
   }
 
   useEffect(() => {
     reset(defaultVals);
     setFiles([]);
-  }, [params.id, defaultVals, reset]);
+    setAddressInfo(addressDefaultVals);
+  }, [params.id, defaultVals, reset, addressDefaultVals]);
 
   const handleFiles = (selectedFiles: File[], type: "update" | "delete") => {
     switch (type) {
@@ -94,8 +112,12 @@ export const Posting = () => {
     }
   };
 
+  const handleAddress = (selectedAddress: AddressInfoType) => {
+    setAddressInfo(selectedAddress);
+  };
+
   const submit = async (formValues: PostRoom) => {
-    const room = Converter.PostRoomToRoom(formValues);
+    const room = Converter.PostRoomToRoom(formValues, addressInfo);
     room.s3_keys = [];
 
     for (const file of files) {
@@ -125,7 +147,13 @@ export const Posting = () => {
             name="is_pet_friendly"
           />
           <Price register={register} error={errors.price} />
-          <Location register={register} error={errors.city} />
+          <Address
+            control={control}
+            error={errors.place_id}
+            name="place_id"
+            handleAddress={handleAddress}
+            addressInfo={addressInfo}
+          />
           <Description register={register} error={errors.description} />
           <Images
             control={control}

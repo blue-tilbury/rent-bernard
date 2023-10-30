@@ -9,10 +9,9 @@ import {
 import { PostRoom } from "./room.type";
 
 export type RegisterName =
-  | "city"
+  | "place_id"
   | "title"
   | "price"
-  | "street"
   | "is_furnished"
   | "is_pet_friendly"
   | "s3_keys"
@@ -42,4 +41,16 @@ export type ImageInputProps = UseControllerProps<PostRoom> & {
   files: File[];
   handleFiles(value: File[], type: "update" | "delete"): void;
   setValue: UseFormSetValue<PostRoom>;
+};
+
+export type AddressInputProps = UseControllerProps<PostRoom> & {
+  error?: FieldError;
+  handleAddress(value: AddressInfoType): void;
+  addressInfo: AddressInfoType;
+};
+
+export type AddressInfoType = {
+  address_components: google.maps.GeocoderAddressComponent[];
+  formatted_address: string;
+  inputValue: string;
 };

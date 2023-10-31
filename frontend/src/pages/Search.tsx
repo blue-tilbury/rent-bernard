@@ -42,15 +42,17 @@ export const Search = () => {
   };
 
   return (
-    <section className="container py-6">
-      <div className="flex justify-between">
-        <h2 className="p-2 text-sm">
-          Showing {pageIndex * ItemsPerPage + 1}-{(pageIndex + 1) * ItemsPerPage} of{" "}
-          {data.count} results
-        </h2>
-        <SelectBox handleSelect={handleSelectBox} sortType={sortType} />
+    <section className="container flex min-h-screen flex-col justify-between py-6">
+      <div>
+        <div className="flex justify-between">
+          <h2 className="p-2 text-sm">
+            Showing {pageIndex * ItemsPerPage + 1}-{(pageIndex + 1) * ItemsPerPage} of{" "}
+            {data.count} results
+          </h2>
+          <SelectBox handleSelect={handleSelectBox} sortType={sortType} />
+        </div>
+        <ul className="flex flex-col flex-wrap sm:flex-row">{galleries}</ul>
       </div>
-      <ul className="flex flex-col flex-wrap sm:flex-row">{galleries}</ul>
       <Pagination
         handlePagination={handlePagination}
         pageCount={Math.ceil(data.count / ItemsPerPage)}

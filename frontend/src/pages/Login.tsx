@@ -3,9 +3,7 @@ import { useSetAtom } from "jotai";
 import { useNavigate } from "react-router-dom";
 
 import Logo from "../assets/logo-blue.svg?react";
-import { ErrorMsg } from "../components/ErrorMsg";
 import { useGetUser, useLoginUser } from "../hooks/useAxios";
-import { errorMessage } from "../shared/errorMessage";
 import { userAtom } from "../shared/globalStateConfig";
 
 export const Login = () => {
@@ -21,8 +19,8 @@ export const Login = () => {
         const user = await triggerGetUser();
         setUser(user);
         navigate("/");
-      } catch (error) {
-        <ErrorMsg msg={errorMessage.loginFail} isReloadBtn={true} />;
+      } catch (e) {
+        navigate("/error");
       }
     }
   };

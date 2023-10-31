@@ -3,16 +3,15 @@ import { useSetAtom } from "jotai";
 import { RESET } from "jotai/utils";
 import { useNavigate } from "react-router-dom";
 
-import { ErrorMsg } from "../../components/ErrorMsg";
 import { useLogoutUser } from "../../hooks/useAxios";
-import { errorMessage } from "../../shared/errorMessage";
 import { userAtom } from "../../shared/globalStateConfig";
 
 type LogoutProps = {
   type: "menuModal" | "userMenu";
+  handleClick(): void;
 };
 
-export const Logout = ({ type }: LogoutProps) => {
+export const Logout = ({ type, handleClick }: LogoutProps) => {
   const setUser = useSetAtom(userAtom);
   const { triggerLogout } = useLogoutUser();
   const navigate = useNavigate();
@@ -23,8 +22,9 @@ export const Logout = ({ type }: LogoutProps) => {
       await triggerLogout();
       setUser(RESET);
       navigate("/");
-    } catch (error) {
-      <ErrorMsg msg={errorMessage.logoutFail} isReloadBtn={true} />;
+    } catch (e) {
+      handleClick();
+      navigate("/error");
     }
   };
 

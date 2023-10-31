@@ -42,7 +42,7 @@ export const UserMenu = ({ user, isUserMenuOpen, handleClick }: UserMenuProps) =
           </CustomLink>
         </li>
         <Divider component="li" role="presentation" sx={{ my: 0.5 }} />
-        <Logout type="userMenu" />
+        <Logout type="userMenu" handleClick={handleClick} />
       </ul>
     </div>
   );

@@ -1,10 +1,9 @@
 import { HeartIcon as OutlinedHeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as SolidHeartIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { ErrorMsg } from "../../../components/ErrorMsg";
 import { useAddFav, useDeleteFav } from "../../../hooks/useAxios";
-import { errorMessage } from "../../../shared/errorMessage";
 
 type WishlistEditIconProps = {
   roomId: string;
@@ -15,6 +14,7 @@ export const WishlistEditIcon = ({ roomId, isDefaultFav }: WishlistEditIconProps
   const { triggerAddFav } = useAddFav();
   const { triggerDeleteFav } = useDeleteFav();
   const [isFav, setIsFav] = useState(isDefaultFav);
+  const navigate = useNavigate();
 
   const handleFavAction = async (
     e: React.MouseEvent<SVGSVGElement>,
@@ -28,11 +28,8 @@ export const WishlistEditIcon = ({ roomId, isDefaultFav }: WishlistEditIconProps
       } else {
         await triggerDeleteFav(roomId);
       }
-    } catch (error) {
-      <ErrorMsg
-        msg={action === "add" ? errorMessage.addFavFail : errorMessage.deleteFavFail}
-        isReloadBtn={true}
-      />;
+    } catch (e) {
+      navigate("/error");
     }
   };
 

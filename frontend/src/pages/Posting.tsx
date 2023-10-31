@@ -6,7 +6,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { PhotoAPI } from "../apis/photoAPI";
 import { S3API } from "../apis/s3API";
 import { Button } from "../components/Button";
-import { ErrorMsg } from "../components/ErrorMsg";
 import { useCreateRoom, useGetPhoto, useGetRoom, useUpdateRoom } from "../hooks/useAxios";
 import {
   Address,
@@ -19,7 +18,6 @@ import {
   Price,
   Title,
 } from "../layouts/form";
-import { errorMessage } from "../shared/errorMessage";
 import { Converter } from "../shared/typeConverter";
 import { scheme } from "../shared/zodScheme";
 import { AddressInfoType } from "../types/form.type";
@@ -135,8 +133,8 @@ export const Posting = () => {
         await triggerRoom(room);
         navigate("/thankyou");
       }
-    } catch (error) {
-      <ErrorMsg msg={errorMessage.postAdFail} isReloadBtn={true} />;
+    } catch (e) {
+      navigate("/error");
     }
   };
 

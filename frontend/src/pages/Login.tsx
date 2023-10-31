@@ -14,10 +14,14 @@ export const Login = () => {
 
   const handleResponse = async (response: CredentialResponse) => {
     if (response.credential) {
-      await triggerLogin({ token: response.credential });
-      const user = await triggerGetUser();
-      setUser(user);
-      navigate("/");
+      try {
+        await triggerLogin({ token: response.credential });
+        const user = await triggerGetUser();
+        setUser(user);
+        navigate("/");
+      } catch (e) {
+        navigate("/error");
+      }
     }
   };
 

@@ -34,7 +34,7 @@ export const MenuModal = ({ handleMenuOpen, hidden }: MenuModalProps) => {
             <MenuModalLink to="posting" handleClick={handleMenuOpen} />
             <MenuModalLink to="your-ads" handleClick={handleMenuOpen} />
             <MenuModalLink to="your-reviews" handleClick={handleMenuOpen} />
-            <Logout type="menuModal" />
+            <Logout type="menuModal" handleClick={handleMenuOpen} />
           </>
         )}
       </div>

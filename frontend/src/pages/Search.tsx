@@ -1,9 +1,9 @@
 import { useState } from "react";
 
 import { ErrorMsg } from "../components/ErrorMsg";
-import { Loading } from "../components/Loading";
 import { Pagination } from "../components/Pagination";
 import { SelectBox } from "../components/SelectBox";
+import { Spinner } from "../components/Spinner";
 import { useRoom } from "../hooks/useAxios";
 import { Gallery } from "../layouts/listing/gallery/index";
 import { errorMessage } from "../shared/errorMessage";
@@ -21,10 +21,10 @@ export const Search = () => {
   });
   const [sortType, setSortType] = useState<SortType>("new");
   const [pageIndex, setPageIndex] = useState(0);
-  const { data, isError, isLoading } = useRoom(queryParams);
+  const { data, isError, isLoading, isValidating } = useRoom(queryParams);
 
   if (isError) return <ErrorMsg msg={errorMessage.connection} isReloadBtn={true} />;
-  if (isLoading) return <Loading />;
+  if (isLoading || isValidating) return <Spinner />;
   if (!data || data.count === 0)
     return <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />;
 
@@ -42,15 +42,17 @@ export const Search = () => {
   };
 
   return (
-    <section className="container py-6">
-      <div className="flex justify-between">
-        <h2 className="p-2 text-sm">
-          Showing {pageIndex * ItemsPerPage + 1}-{(pageIndex + 1) * ItemsPerPage} of{" "}
-          {data.count} results
-        </h2>
-        <SelectBox handleSelect={handleSelectBox} sortType={sortType} />
+    <section className="container flex min-h-screen flex-col justify-between py-6">
+      <div>
+        <div className="flex justify-between">
+          <h2 className="p-2 text-sm">
+            Showing {pageIndex * ItemsPerPage + 1}-{(pageIndex + 1) * ItemsPerPage} of{" "}
+            {data.count} results
+          </h2>
+          <SelectBox handleSelect={handleSelectBox} sortType={sortType} />
+        </div>
+        <ul className="flex flex-col flex-wrap sm:flex-row">{galleries}</ul>
       </div>
-      <ul className="flex flex-col flex-wrap sm:flex-row">{galleries}</ul>
       <Pagination
         handlePagination={handlePagination}
         pageCount={Math.ceil(data.count / ItemsPerPage)}

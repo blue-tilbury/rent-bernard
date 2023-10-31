@@ -63,6 +63,7 @@ export default function App() {
               element: <YourReviews />,
               loader: () => (!loggedIn(user) ? redirect("/") : null),
             },
+            { path: "error", element: <ErrorPage /> },
             { path: "*", element: <ErrorPage /> },
           ],
         },

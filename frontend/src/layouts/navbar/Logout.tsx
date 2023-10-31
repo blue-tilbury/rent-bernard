@@ -8,18 +8,24 @@ import { userAtom } from "../../shared/globalStateConfig";
 
 type LogoutProps = {
   type: "menuModal" | "userMenu";
+  handleClick(): void;
 };
 
-export const Logout = ({ type }: LogoutProps) => {
+export const Logout = ({ type, handleClick }: LogoutProps) => {
   const setUser = useSetAtom(userAtom);
   const { triggerLogout } = useLogoutUser();
   const navigate = useNavigate();
   const isMenuModal = type === "menuModal";
 
   const handleLogout = async () => {
-    await triggerLogout();
-    setUser(RESET);
-    navigate("/");
+    try {
+      await triggerLogout();
+      setUser(RESET);
+      navigate("/");
+    } catch (e) {
+      handleClick();
+      navigate("/error");
+    }
   };
 
   return (

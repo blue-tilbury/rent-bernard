@@ -16,7 +16,7 @@ export const useRoom = (queryParams: QueryParams) => {
     page: queryParams.page.toString(),
     per_page: queryParams.per_page.toString(),
   });
-  const { data, error, isLoading } = useSWR(`/rooms?${params}`, () =>
+  const { data, error, isLoading, isValidating } = useSWR(`/rooms?${params}`, () =>
     RoomAPI.index(
       queryParams.sortBy,
       queryParams.order,
@@ -24,7 +24,7 @@ export const useRoom = (queryParams: QueryParams) => {
       queryParams.per_page,
     ),
   );
-  return { data, isError: error, isLoading };
+  return { data, isError: error, isLoading, isValidating };
 };
 
 export const useGetRoom = (id: string) => {
@@ -36,8 +36,8 @@ export const useGetRoom = (id: string) => {
 };
 
 export const useYourRoom = () => {
-  const { data, error, isLoading } = useSWR("/private/rooms", RoomAPI.private_index);
-  return { data, isError: error, isLoading };
+  const { data, error, isLoading, isValidating } = useSWR("/private/rooms", RoomAPI.private_index);
+  return { data, isError: error, isLoading, isValidating };
 };
 
 export const useWishlist = () => {

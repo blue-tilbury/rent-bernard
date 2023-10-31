@@ -1,15 +1,15 @@
 import { ErrorMsg } from "../components/ErrorMsg";
-import { Loading } from "../components/Loading";
+import { Spinner } from "../components/Spinner";
 import { useYourRoom } from "../hooks/useAxios";
 import { Thumb } from "../layouts/listing/thumb";
 import { errorMessage } from "../shared/errorMessage";
 import { ListItem } from "../types/room.type";
 
 export const YourAds = () => {
-  const { data, isError, isLoading } = useYourRoom();
+  const { data, isError, isLoading, isValidating } = useYourRoom();
 
   if (isError) return <ErrorMsg msg={errorMessage.connection} isReloadBtn={true} />;
-  if (isLoading) return <Loading />;
+  if (isLoading || isValidating) return <Spinner />;
   if (!data || data.rooms.length === 0)
     return <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />;
 

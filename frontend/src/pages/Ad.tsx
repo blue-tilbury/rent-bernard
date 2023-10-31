@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 
 import { ErrorPage } from "./ErrorPage";
 import { RoomAPI } from "../apis/roomAPI";
-import { Loading } from "../components/Loading";
+import { Spinner } from "../components/Spinner";
 import { GetRoom } from "../types/room.type";
 
 export const Ad = (): ReactElement => {
@@ -21,7 +21,7 @@ export const Ad = (): ReactElement => {
     })();
   }, [params.id]);
 
-  if (loading) return <Loading />;
+  if (loading) return <Spinner />;
 
   if (room == null) return <ErrorPage />;
 

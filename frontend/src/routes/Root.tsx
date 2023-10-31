@@ -7,7 +7,7 @@ export const Root = () => {
   return (
     <div className="bg-rent-bg-gray">
       <Navbar />
-      <main>
+      <main className="min-h-screen">
         <Outlet />
       </main>
       <Footer />

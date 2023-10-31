@@ -5,7 +5,9 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { useState } from "react";
 
 import { Button } from "./Button";
+import { ErrorMsg } from "./ErrorMsg";
 import { useDeleteRoom } from "../hooks/useAxios";
+import { errorMessage } from "../shared/errorMessage";
 import { Id } from "../types/common.type";
 
 export default function AlertDialog({ id }: Id) {
@@ -19,7 +21,9 @@ export default function AlertDialog({ id }: Id) {
 
   const deleteAd = async (e: React.MouseEvent) => {
     handleClick(e);
-    await triggerDeleteRoom(id);
+    await triggerDeleteRoom(id).catch(() => {
+      <ErrorMsg msg={errorMessage.deleteAdFail} isReloadBtn={true} />;
+    });
   };
 
   return (

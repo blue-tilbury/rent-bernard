@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { PhotoAPI } from "../apis/photoAPI";
 import { S3API } from "../apis/s3API";
 import { Button } from "../components/Button";
+import { ErrorMsg } from "../components/ErrorMsg";
 import { useCreateRoom, useGetPhoto, useGetRoom, useUpdateRoom } from "../hooks/useAxios";
 import {
   Address,
@@ -18,6 +19,7 @@ import {
   Price,
   Title,
 } from "../layouts/form";
+import { errorMessage } from "../shared/errorMessage";
 import { Converter } from "../shared/typeConverter";
 import { scheme } from "../shared/zodScheme";
 import { AddressInfoType } from "../types/form.type";
@@ -72,6 +74,7 @@ export const Posting = () => {
 
     // for updating the room
     const room = await triggerGetRoom(params.id);
+    if (!room) return defaultVals;
 
     const defaultFiles = await Promise.allSettled(
       room.image_urls.map(async (url, i) => {
@@ -80,7 +83,6 @@ export const Posting = () => {
         return new File([blob], `img_${i}`);
       }),
     );
-
     const resolvedFiles = defaultFiles
       .filter(
         (result): result is PromiseFulfilledResult<File> => result.status === "fulfilled",
@@ -120,17 +122,21 @@ export const Posting = () => {
     const room = Converter.PostRoomToRoom(formValues, addressInfo);
     room.s3_keys = [];
 
-    for (const file of files) {
-      const photo = await triggerPhoto();
-      S3API.upload(photo.url, file);
-      room.s3_keys.push(photo.key);
-    }
-    if (params.id) {
-      await triggerUpdateRoom({ ...room, id: params.id });
-      navigate(`/ads/${params.id}`);
-    } else {
-      await triggerRoom(room);
-      navigate("/thankyou");
+    try {
+      for (const file of files) {
+        const photo = await triggerPhoto();
+        S3API.upload(photo.url, file);
+        room.s3_keys.push(photo.key);
+      }
+      if (params.id) {
+        await triggerUpdateRoom({ ...room, id: params.id });
+        navigate(`/ads/${params.id}`);
+      } else {
+        await triggerRoom(room);
+        navigate("/thankyou");
+      }
+    } catch (error) {
+      <ErrorMsg msg={errorMessage.postAdFail} isReloadBtn={true} />;
     }
   };
 

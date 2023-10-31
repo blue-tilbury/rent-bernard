@@ -36,7 +36,10 @@ export const useGetRoom = (id: string) => {
 };
 
 export const useYourRoom = () => {
-  const { data, error, isLoading, isValidating } = useSWR("/private/rooms", RoomAPI.private_index);
+  const { data, error, isLoading, isValidating } = useSWR(
+    "/private/rooms",
+    RoomAPI.private_index,
+  );
   return { data, isError: error, isLoading, isValidating };
 };
 

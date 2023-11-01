@@ -1,17 +1,17 @@
 #[cfg(test)]
 pub mod tests {
     use fake::{Dummy, Fake, Faker};
-    use sqlx::{PgPool, Row};
+    use sqlx::{types::Json, PgPool, Row};
     use uuid::Uuid;
 
-    use crate::model::user::factory::tests::UserFactory;
+    use crate::model::{room::model::AddressComponent, user::factory::tests::UserFactory};
 
     #[derive(Dummy, Clone)]
     pub struct RoomFactoryParams {
         pub title: String,
         pub price: i32,
-        pub city: String,
-        pub street: Option<String>,
+        pub place_id: String,
+        pub formatted_address: String,
         pub is_furnished: bool,
         pub is_pet_friendly: bool,
         pub email: String,
@@ -27,19 +27,34 @@ pub mod tests {
                 Some(user_id) => user_id,
                 None => UserFactory::create(db, Faker.fake()).await,
             };
+            let address_components: Json<Vec<AddressComponent>> = serde_json::from_str(
+                r#"
+                [
+                    {
+                        "long_name": "city",
+                        "short_name": "city",
+                        "types": [
+                            "locality"
+                        ]
+                    }
+                ]
+                "#,
+            )
+            .unwrap();
             let rec = sqlx::query(
                 r#"
                     INSERT INTO rooms (
-                        title, price, city, street, is_furnished, is_pet_friendly, description, email, user_id
+                        title, price, place_id, formatted_address, address_components, is_furnished, is_pet_friendly, description, email, user_id
                     )
-                    VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9 )
+                    VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 )
                     RETURNING id
                 "#
             )
             .bind(params.title)
             .bind(params.price)
-            .bind(params.city)
-            .bind(params.street)
+            .bind(params.place_id)
+            .bind(params.formatted_address)
+            .bind(address_components)
             .bind(params.is_furnished)
             .bind(params.is_pet_friendly)
             .bind(params.description)

@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
-use sqlx::{FromRow, PgPool, Postgres, QueryBuilder, Row};
+use serde::{Deserialize, Serialize};
+use sqlx::{types::Json, FromRow, PgPool, Postgres, QueryBuilder, Row};
 use uuid::Uuid;
 
 use crate::model::Pagination;
@@ -9,8 +10,9 @@ pub struct Room {
     pub id: Uuid,
     pub title: String,
     pub price: i32,
-    pub city: String,
-    pub street: Option<String>,
+    pub place_id: String,
+    pub formatted_address: String,
+    pub address_components: Json<Vec<AddressComponent>>,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
@@ -26,8 +28,9 @@ pub struct ListRoom {
     pub id: Uuid,
     pub title: String,
     pub price: i32,
-    pub city: String,
-    pub street: Option<String>,
+    pub place_id: String,
+    pub formatted_address: String,
+    pub address_components: Json<Vec<AddressComponent>>,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
@@ -44,8 +47,9 @@ pub struct ListRoom {
 pub struct CreateRoom {
     pub title: String,
     pub price: i32,
-    pub city: String,
-    pub street: Option<String>,
+    pub place_id: String,
+    pub formatted_address: String,
+    pub address_components: Json<Vec<AddressComponent>>,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
@@ -58,12 +62,20 @@ pub struct UpdateRoom {
     pub id: Uuid,
     pub title: String,
     pub price: i32,
-    pub city: String,
-    pub street: Option<String>,
+    pub place_id: String,
+    pub formatted_address: String,
+    pub address_components: Json<Vec<AddressComponent>>,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
     pub email: String,
+}
+
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct AddressComponent {
+    pub long_name: String,
+    pub short_name: String,
+    pub types: Vec<String>,
 }
 
 #[derive(Debug, PartialEq, FromFormField)]
@@ -109,16 +121,17 @@ impl Room {
         let rec = sqlx::query(
             r#"
                 INSERT INTO rooms (
-                    title, price, city, street, is_furnished, is_pet_friendly, description, email, user_id
+                    title, price, place_id, formatted_address, address_components, is_furnished, is_pet_friendly, description, email, user_id
                 )
-                VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9 )
+                VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 )
                 RETURNING id
             "#,
         )
         .bind(room.title)
         .bind(room.price)
-        .bind(room.city)
-        .bind(room.street)
+        .bind(room.place_id)
+        .bind(room.formatted_address)
+        .bind(room.address_components)
         .bind(room.is_furnished)
         .bind(room.is_pet_friendly)
         .bind(room.description)
@@ -161,8 +174,9 @@ impl Room {
             id: Uuid,
             title: String,
             price: i32,
-            city: String,
-            street: Option<String>,
+            place_id: String,
+            formatted_address: String,
+            address_components: Json<Vec<AddressComponent>>,
             is_furnished: bool,
             is_pet_friendly: bool,
             description: String,
@@ -226,8 +240,9 @@ impl Room {
                 id: room.id,
                 title: room.title,
                 price: room.price,
-                city: room.city,
-                street: room.street,
+                place_id: room.place_id,
+                formatted_address: room.formatted_address,
+                address_components: room.address_components,
                 is_furnished: room.is_furnished,
                 is_pet_friendly: room.is_pet_friendly,
                 description: room.description,
@@ -281,14 +296,16 @@ impl Room {
         let rec = sqlx::query(
             r#"
                 UPDATE rooms
-                SET title = $1, price = $2, city = $3, street = $4, is_furnished = $5, is_pet_friendly = $6, description = $7
-                WHERE id = $8
-            "#
+                SET title = $1, price = $2, place_id = $3, formatted_address = $4,
+                address_components = $5, is_furnished = $6, is_pet_friendly = $7, description = $8
+                WHERE id = $9
+            "#,
         )
         .bind(room.title)
         .bind(room.price)
-        .bind(room.city)
-        .bind(room.street)
+        .bind(room.place_id)
+        .bind(room.formatted_address)
+        .bind(room.address_components)
         .bind(room.is_furnished)
         .bind(room.is_pet_friendly)
         .bind(room.description)
@@ -339,8 +356,9 @@ mod tests {
         let params = CreateRoom {
             title: "title".to_string(),
             price: 10000,
-            city: "city".to_string(),
-            street: None,
+            place_id: "place_id".to_string(),
+            formatted_address: "formatted_address".to_string(),
+            address_components: Json(vec![]),
             is_furnished: true,
             is_pet_friendly: false,
             email: "email".to_string(),
@@ -450,8 +468,9 @@ mod tests {
             id,
             title: "new_title".to_string(),
             price: params.price,
-            city: params.city,
-            street: params.street,
+            place_id: params.place_id,
+            formatted_address: params.formatted_address,
+            address_components: Json(vec![]),
             is_furnished: params.is_furnished,
             is_pet_friendly: params.is_pet_friendly,
             email: params.email,
@@ -513,8 +532,8 @@ mod tests {
             let params = RoomFactoryParams {
                 title: "title".to_string(),
                 price: 10000,
-                city: "city".to_string(),
-                street: None,
+                place_id: "place_id".to_string(),
+                formatted_address: "formatted_address".to_string(),
                 is_furnished: true,
                 is_pet_friendly: false,
                 email: "email".to_string(),
@@ -531,8 +550,9 @@ mod tests {
             assert!(!result.id.to_string().is_empty());
             assert_eq!(result.title, "title".to_string());
             assert_eq!(result.price, 10000);
-            assert_eq!(result.city, "city".to_string());
-            assert!(result.street.is_none());
+            assert_eq!(result.place_id, "place_id".to_string());
+            assert_eq!(result.formatted_address, "formatted_address".to_string());
+            assert_eq!(result.address_components.len(), 1);
             assert!(result.is_furnished);
             assert!(!result.is_pet_friendly);
             assert_eq!(result.s3_keys.len(), 2);

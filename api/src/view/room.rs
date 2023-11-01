@@ -1,15 +1,19 @@
 use rocket::{http::Status, serde::json::Json};
 use serde::{Deserialize, Serialize};
 
-use crate::{model::room::model::Room, utils::s3::S3Operation};
+use crate::{
+    model::room::model::{AddressComponent, Room},
+    utils::s3::S3Operation,
+};
 
 #[derive(Serialize, Deserialize)]
 pub struct Get {
     pub id: String,
     title: String,
     price: i32,
-    city: String,
-    street: Option<String>,
+    city: Option<String>,
+    place_id: String,
+    formatted_address: String,
     is_furnished: bool,
     is_pet_friendly: bool,
     description: String,
@@ -31,8 +35,9 @@ impl Get {
             id,
             title,
             price,
-            city,
-            street,
+            place_id,
+            formatted_address,
+            address_components,
             is_furnished,
             is_pet_friendly,
             description,
@@ -46,12 +51,14 @@ impl Get {
         for key in s3_keys.clone() {
             image_urls.push(client.get_object(key).await?);
         }
+        let city = extract_city(address_components.to_vec());
         Ok(Get {
             id: id.to_string(),
             title,
             price,
+            place_id,
+            formatted_address,
             city,
-            street,
             is_furnished,
             is_pet_friendly,
             description,
@@ -70,6 +77,8 @@ pub mod private {
 
     use crate::{model::room::model::Room, utils::s3::S3Operation};
 
+    use super::extract_city;
+
     #[derive(Serialize, Deserialize)]
     pub struct List {
         pub rooms: Vec<ListItem>,
@@ -80,8 +89,9 @@ pub mod private {
         pub id: String,
         pub title: String,
         pub price: i32,
-        pub city: String,
-        pub street: Option<String>,
+        pub city: Option<String>,
+        pub place_id: String,
+        pub formatted_address: String,
         pub is_furnished: bool,
         pub is_pet_friendly: bool,
         pub description: String,
@@ -109,12 +119,14 @@ pub mod private {
                     Some(key) => Some(client.get_object(key).await?),
                     None => None,
                 };
+                let city = extract_city(room.address_components.to_vec());
                 let item = ListItem {
                     id: room.id.to_string(),
                     title: room.title,
                     price: room.price,
-                    city: room.city,
-                    street: room.street,
+                    city,
+                    place_id: room.place_id,
+                    formatted_address: room.formatted_address,
                     is_furnished: room.is_furnished,
                     is_pet_friendly: room.is_pet_friendly,
                     description: room.description,
@@ -137,6 +149,8 @@ pub mod public {
 
     use crate::{model::room::model::ListRoom, utils::s3::S3Operation};
 
+    use super::extract_city;
+
     #[derive(Serialize, Deserialize)]
     pub struct List {
         pub count: i64,
@@ -148,8 +162,9 @@ pub mod public {
         pub id: String,
         pub title: String,
         pub price: i32,
-        pub city: String,
-        pub street: Option<String>,
+        pub city: Option<String>,
+        pub place_id: String,
+        pub formatted_address: String,
         pub is_furnished: bool,
         pub is_pet_friendly: bool,
         pub description: String,
@@ -178,12 +193,14 @@ pub mod public {
                     Some(key) => Some(client.get_object(key).await?),
                     None => None,
                 };
+                let city = extract_city(room.address_components.to_vec());
                 let item = ListItem {
                     id: room.id.to_string(),
                     title: room.title,
                     price: room.price,
-                    city: room.city,
-                    street: room.street,
+                    city,
+                    place_id: room.place_id,
+                    formatted_address: room.formatted_address,
                     is_furnished: room.is_furnished,
                     is_pet_friendly: room.is_pet_friendly,
                     description: room.description,
@@ -205,9 +222,20 @@ pub mod public {
     }
 }
 
+fn extract_city(address_components: Vec<AddressComponent>) -> Option<String> {
+    address_components.into_iter().find_map(|component| {
+        if component.types.contains(&"locality".to_string()) {
+            Some(component.long_name)
+        } else {
+            None
+        }
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use chrono::Utc;
+    use sqlx::types::Json;
     use uuid::Uuid;
 
     use super::*;
@@ -229,12 +257,27 @@ mod tests {
     async fn test_get_room() {
         let id = Uuid::new_v4();
         let user_id = Uuid::new_v4();
+        let address_components: Json<Vec<AddressComponent>> = serde_json::from_str(
+            r#"
+                [
+                    {
+                        "long_name": "city",
+                        "short_name": "city",
+                        "types": [
+                            "locality"
+                        ]
+                    }
+                ]
+                "#,
+        )
+        .unwrap();
         let room = Room {
             id,
             title: "title".to_string(),
             price: 10000,
-            city: "city".to_string(),
-            street: None,
+            place_id: "place_id".to_string(),
+            formatted_address: "formatted_address".to_string(),
+            address_components,
             is_furnished: true,
             is_pet_friendly: false,
             description: "description".to_string(),
@@ -248,8 +291,9 @@ mod tests {
         assert_eq!(json.id, id.to_string());
         assert_eq!(json.title, "title".to_string());
         assert_eq!(json.price, 10000);
-        assert_eq!(json.city, "city".to_string());
-        assert!(json.street.is_none());
+        assert_eq!(json.city, Some("city".to_string()));
+        assert_eq!(json.place_id, "place_id".to_string());
+        assert_eq!(json.formatted_address, "formatted_address".to_string());
         assert!(json.is_furnished);
         assert!(!json.is_pet_friendly);
         assert_eq!(json.image_urls[0], "object".to_string());
@@ -269,12 +313,27 @@ mod tests {
         async fn test_list_rooms() {
             let id = Uuid::new_v4();
             let user_id = Uuid::new_v4();
+            let address_components: Json<Vec<AddressComponent>> = serde_json::from_str(
+                r#"
+                [
+                    {
+                        "long_name": "city",
+                        "short_name": "city",
+                        "types": [
+                            "locality"
+                        ]
+                    }
+                ]
+                "#,
+            )
+            .unwrap();
             let room = ListRoom {
                 id,
                 title: "title".to_string(),
                 price: 10000,
-                city: "city".to_string(),
-                street: None,
+                place_id: "place_id".to_string(),
+                formatted_address: "formatted_address".to_string(),
+                address_components,
                 is_furnished: true,
                 is_pet_friendly: false,
                 description: "description".to_string(),
@@ -294,8 +353,9 @@ mod tests {
             assert_eq!(room.id, id.to_string());
             assert_eq!(room.title, "title".to_string());
             assert_eq!(room.price, 10000);
-            assert_eq!(room.city, "city".to_string());
-            assert!(room.street.is_none());
+            assert_eq!(room.city, Some("city".to_string()));
+            assert_eq!(room.place_id, "place_id".to_string());
+            assert_eq!(room.formatted_address, "formatted_address".to_string());
             assert!(room.is_furnished);
             assert!(!room.is_pet_friendly);
             assert_eq!(room.thumbnail_url.as_ref().unwrap(), "object");
@@ -317,12 +377,27 @@ mod tests {
         async fn test_list_rooms() {
             let id = Uuid::new_v4();
             let user_id = Uuid::new_v4();
+            let address_components: Json<Vec<AddressComponent>> = serde_json::from_str(
+                r#"
+                [
+                    {
+                        "long_name": "city",
+                        "short_name": "city",
+                        "types": [
+                            "locality"
+                        ]
+                    }
+                ]
+                "#,
+            )
+            .unwrap();
             let room = Room {
                 id,
                 title: "title".to_string(),
                 price: 10000,
-                city: "city".to_string(),
-                street: None,
+                place_id: "place_id".to_string(),
+                formatted_address: "formatted_address".to_string(),
+                address_components,
                 is_furnished: true,
                 is_pet_friendly: false,
                 description: "description".to_string(),
@@ -339,8 +414,9 @@ mod tests {
             assert_eq!(room.id, id.to_string());
             assert_eq!(room.title, "title".to_string());
             assert_eq!(room.price, 10000);
-            assert_eq!(room.city, "city".to_string());
-            assert!(room.street.is_none());
+            assert_eq!(room.city, Some("city".to_string()));
+            assert_eq!(room.place_id, "place_id".to_string());
+            assert_eq!(room.formatted_address, "formatted_address".to_string());
             assert!(room.is_furnished);
             assert!(!room.is_pet_friendly);
             assert_eq!(room.thumbnail_url.as_ref().unwrap(), "object");

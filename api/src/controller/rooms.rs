@@ -120,13 +120,14 @@ pub mod private {
     pub struct RoomParams {
         pub title: String,
         pub price: i32,
-        pub city: String,
-        pub street: Option<String>,
         pub is_furnished: bool,
         pub is_pet_friendly: bool,
         pub s3_keys: Vec<String>,
         pub email: String,
         pub description: String,
+        pub place_id: String,
+        pub formatted_address: String,
+        pub address_components: String,
     }
 
     #[put("/private/rooms/<id>", data = "<room>")]
@@ -135,35 +136,31 @@ pub mod private {
             Ok(uuid) => uuid,
             Err(_) => return Status::NotFound,
         };
-        let RoomParams {
-            title,
-            price,
-            city,
-            street,
-            is_furnished,
-            is_pet_friendly,
-            s3_keys,
-            description,
-            email,
-            ..
-        } = room.0;
+        let address_components = match serde_json::from_str(&room.address_components) {
+            Ok(components) => components,
+            Err(_) => return Status::BadRequest,
+        };
         let update_room_params = UpdateRoom {
             id: room_id,
-            title,
-            price,
-            city,
-            street,
-            is_furnished,
-            is_pet_friendly,
-            email,
-            description,
+            title: room.title.clone(),
+            price: room.price,
+            place_id: room.place_id.clone(),
+            formatted_address: room.formatted_address.clone(),
+            address_components,
+            is_furnished: room.is_furnished,
+            is_pet_friendly: room.is_pet_friendly,
+            email: room.email.clone(),
+            description: room.description.clone(),
         };
         // TODO: transaction
         if RoomImage::delete_many(db, room_id).await.is_err() {
             eprintln!("Failed to delete room images");
             return Status::InternalServerError;
         }
-        if RoomImage::create_many(db, room_id, s3_keys).await.is_err() {
+        if RoomImage::create_many(db, room_id, room.s3_keys.clone())
+            .await
+            .is_err()
+        {
             eprintln!("Failed to create room images");
             return Status::InternalServerError;
         }
@@ -204,26 +201,18 @@ pub mod private {
         db: &DB,
         user: LoginUser,
     ) -> Result<Json<view::Id>, Status> {
-        let RoomParams {
-            title,
-            price,
-            city,
-            street,
-            is_furnished,
-            is_pet_friendly,
-            s3_keys,
-            description,
-            email,
-        } = room.0;
+        let address_components =
+            serde_json::from_str(&room.address_components).map_err(|_| Status::BadRequest)?;
         let create_room_params = CreateRoom {
-            title,
-            price,
-            city,
-            street,
-            is_furnished,
-            is_pet_friendly,
-            description,
-            email,
+            title: room.title.clone(),
+            price: room.price,
+            place_id: room.place_id.clone(),
+            formatted_address: room.formatted_address.clone(),
+            address_components,
+            is_furnished: room.is_furnished,
+            is_pet_friendly: room.is_pet_friendly,
+            description: room.description.clone(),
+            email: room.email.clone(),
             user_id: user.user_id,
         };
         let room_id = match Room::create(db, create_room_params).await {
@@ -233,7 +222,7 @@ pub mod private {
                 return Err(Status::InternalServerError);
             }
         };
-        match RoomImage::create_many(db, room_id, s3_keys).await {
+        match RoomImage::create_many(db, room_id, room.s3_keys.clone()).await {
             Ok(_) => Ok(view::Id::to_json(room_id.to_string())),
             Err(err) => {
                 eprintln!("{err}");

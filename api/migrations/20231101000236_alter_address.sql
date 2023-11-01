@@ -1,0 +1,7 @@
+-- Add migration script here
+ALTER TABLE rooms
+  DROP COLUMN IF EXISTS street,
+  DROP COLUMN IF EXISTS city,
+  ADD COLUMN IF NOT EXISTS formatted_address VARCHAR(255) NOT NULL,
+  ADD COLUMN IF NOT EXISTS place_id VARCHAR(255) NOT NULL,
+  ADD COLUMN IF NOT EXISTS address_components JSON NOT NULL;

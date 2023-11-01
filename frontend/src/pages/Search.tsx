@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { ErrorMsg } from "../components/ErrorMsg";
+import { Filter } from "../layouts/filter";
 import { Pagination } from "../components/Pagination";
 import { SelectBox } from "../components/SelectBox";
 import { Spinner } from "../components/Spinner";
@@ -8,32 +9,37 @@ import { useRoom } from "../hooks/useAxios";
 import { Gallery } from "../layouts/listing/gallery/index";
 import { errorMessage } from "../shared/errorMessage";
 import { Order, QueryParams, SortBy } from "../types/room.type";
+import { FilterType } from "../types/filter.type";
 
 export type SortType = "new" | "old" | "low" | "high";
 
 export const Search = () => {
   const ItemsPerPage = 3;
   const [queryParams, setQueryParams] = useState<QueryParams>({
-    sortBy: SortBy.UPDATED_AT,
+    sort_by: SortBy.UPDATED_AT,
     order: Order.DESC,
     page: 0,
     per_page: ItemsPerPage,
   });
   const [sortType, setSortType] = useState<SortType>("new");
+  const [filter, setFilter] = useState<FilterType>({});
   const [pageIndex, setPageIndex] = useState(0);
   const { data, isError, isLoading, isValidating } = useRoom(queryParams);
 
   if (isError) return <ErrorMsg msg={errorMessage.connection} isReloadBtn={true} />;
   if (isLoading || isValidating) return <Spinner />;
-  if (!data || data.count === 0)
-    return <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />;
 
-  const rooms = data.rooms;
-  const galleries = rooms.map((room) => <Gallery key={room.id} {...room} />);
+  const rooms = data?.rooms;
+  const galleries = rooms?.map((room) => <Gallery key={room.id} {...room} />);
 
-  const handleSelectBox = (sortBy: SortBy, order: Order, sortType: SortType) => {
+  const handleSelectBox = (sort_by: SortBy, order: Order, sortType: SortType) => {
     setSortType(sortType);
-    setQueryParams((prev) => ({ ...prev, sortBy, order }));
+    setQueryParams((prev) => ({ ...prev, sort_by, order }));
+  };
+
+  const handleFilter = (newValues: FilterType) => {
+    setFilter(newValues);
+    setQueryParams((prev) => ({ ...prev, ...newValues }));
   };
 
   const handlePagination = (page: number) => {
@@ -42,22 +48,29 @@ export const Search = () => {
   };
 
   return (
-    <section className="container flex min-h-screen flex-col justify-between py-6">
-      <div>
-        <div className="flex justify-between">
-          <h2 className="p-2 text-sm">
-            Showing {pageIndex * ItemsPerPage + 1}-{(pageIndex + 1) * ItemsPerPage} of{" "}
-            {data.count} results
-          </h2>
-          <SelectBox handleSelect={handleSelectBox} sortType={sortType} />
+    <section className="mx-auto flex min-h-screen justify-stretch py-6 lg:w-[1124px] xl:w-[1280px] 2xl:w-[1536px]">
+      <Filter handleFilter={handleFilter} filter={filter} />
+      {!data || data?.count === 0 ? (
+        <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />
+      ) : (
+        <div className="flex flex-col justify-between">
+          <div>
+            <div className="flex h-14 justify-between">
+              <h2 className="p-2 text-sm">
+                Showing {pageIndex * ItemsPerPage + 1}-{(pageIndex + 1) * ItemsPerPage} of{" "}
+                {data.count} results
+              </h2>
+              <SelectBox handleSelect={handleSelectBox} sortType={sortType} />
+            </div>
+            <ul className="flex flex-col flex-wrap sm:flex-row">{galleries}</ul>
+          </div>
+          <Pagination
+            handlePagination={handlePagination}
+            pageCount={Math.ceil(data.count / ItemsPerPage)}
+            pageIndex={pageIndex}
+          />
         </div>
-        <ul className="flex flex-col flex-wrap sm:flex-row">{galleries}</ul>
-      </div>
-      <Pagination
-        handlePagination={handlePagination}
-        pageCount={Math.ceil(data.count / ItemsPerPage)}
-        pageIndex={pageIndex}
-      />
+      )}
     </section>
   );
 };

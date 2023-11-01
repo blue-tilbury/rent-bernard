@@ -15,7 +15,7 @@ export const Button = ({ children, size, color, type, handleClick }: ButtonProps
       btnSize = "px-2 py-1 text-xs font-normal";
       break;
     case "sm":
-      btnSize = "px-4 py-2 text-sm font-normal";
+      btnSize = "px-4 py-2 text-sm font-medium";
       break;
     case "md":
       btnSize = "px-8 py-2 text-md font-medium";
@@ -32,7 +32,8 @@ export const Button = ({ children, size, color, type, handleClick }: ButtonProps
       btnColor = "bg-white hover:bg-rent-bg-gray border border-rent-dark-blue";
       break;
     case "trinary":
-      btnColor = "bg-white hover:bg-rent-blue text-rent-blue hover:text-white";
+      btnColor =
+        "bg-rent-pagination-very-light-blue hover:bg-rent-pagination-light-blue text-rent-pagination-blue";
       break;
     case "danger":
       btnColor = "bg-red-600 hover:bg-red-400 text-white";

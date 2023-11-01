@@ -75,10 +75,14 @@ export enum Order {
 }
 
 export type QueryParams = {
-  sortBy: SortBy;
-  order: Order;
-  page: number;
-  per_page: number;
+  sort_by?: SortBy;
+  order?: Order;
+  is_furnished?: boolean;
+  is_pet_friendly?: boolean;
+  price_min?: number;
+  price_max?: number;
+  page?: number;
+  per_page?: number;
 };
 
 export type UploadPhoto = {

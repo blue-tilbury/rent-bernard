@@ -7,7 +7,7 @@ type ErrorMsgProps = {
 
 export const ErrorMsg = ({ msg, isReloadBtn }: ErrorMsgProps) => {
   return (
-    <section className="container flex h-[65vh] flex-col items-center pt-24">
+    <section className="flex h-[65vh] flex-col items-center pt-24 mx-auto">
       <p className="pb-10">{msg}</p>
       {isReloadBtn && (
         <Button

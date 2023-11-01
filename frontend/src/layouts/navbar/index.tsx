@@ -22,7 +22,7 @@ export const Navbar = () => {
 
   return (
     <nav className="shadow-md">
-      <div className="container flex items-center">
+      <div className="flex items-center lg:w-[1124px] xl:w-[1280px] 2xl:w-[1536px] mx-auto">
         <CustomLink to="/" type="noStyle">
           <Logo className="h-8 w-40" />
         </CustomLink>

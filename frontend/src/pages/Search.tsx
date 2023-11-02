@@ -54,7 +54,7 @@ export const Search = () => {
         <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />
       ) : (
         <div className="flex flex-col items-stretch justify-between">
-          <div>
+          <div className="flex flex-col">
             <div className="flex h-14 justify-between">
               <h2 className="p-2 text-sm">
                 Showing {pageIndex * ItemsPerPage + 1}-{(pageIndex + 1) * ItemsPerPage} of{" "}
@@ -62,7 +62,7 @@ export const Search = () => {
               </h2>
               <SelectBox handleSelect={handleSelectBox} sortType={sortType} />
             </div>
-            <ul className="flex flex-col flex-wrap sm:flex-row">{galleries}</ul>
+            <ul className="flex h-full flex-col flex-wrap sm:flex-row">{galleries}</ul>
           </div>
           <Pagination
             handlePagination={handlePagination}

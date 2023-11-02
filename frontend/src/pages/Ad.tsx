@@ -4,6 +4,14 @@ import { useParams } from "react-router-dom";
 import { ErrorPage } from "./ErrorPage";
 import { RoomAPI } from "../apis/roomAPI";
 import { Spinner } from "../components/Spinner";
+import {
+  Contact,
+  CustomChip,
+  Header,
+  ImageGallery,
+  Map,
+  UpdatedDate,
+} from "../layouts/listing/detail";
 import { GetRoom } from "../types/room.type";
 
 export const Ad = (): ReactElement => {
@@ -26,10 +34,21 @@ export const Ad = (): ReactElement => {
   if (room == null) return <ErrorPage />;
 
   return (
-    <>
-      <section className="container pb-16 pt-8">
-        <h2 className="pb-4 pl-2 text-sm">{room.description}</h2>
-      </section>
-    </>
+    <section className="container flex space-x-20 pb-16 pt-8">
+      <div className="flex-3">
+        <Header room={room} />
+        <ImageGallery image_urls={room.image_urls} />
+        <div className="flex space-x-6 pb-10">
+          <CustomChip roomPropType={room.is_furnished} name="Furnished" />
+          <CustomChip roomPropType={room.is_pet_friendly} name="Pet friendly" />
+        </div>
+        <p className="pb-4 pl-2">{room.description}</p>
+      </div>
+      <div className="flex flex-2 flex-col pt-12">
+        <Contact email={room.email} />
+        <Map place_id={room.place_id} formatted_address={room.formatted_address} />
+        <UpdatedDate updated_at={room.updated_at} />
+      </div>
+    </section>
   );
 };

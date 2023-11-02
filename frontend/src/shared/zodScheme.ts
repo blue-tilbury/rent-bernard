@@ -25,16 +25,20 @@ export const scheme = z.object({
 });
 
 export const filterSchema = z.object({
-  price_min: z.nan().or(
-    z
-      .number()
-      .nonnegative({ message: "Price must be greater than or equal to 0." })
-      .int({ message: "Price must be integer." }),
-  ),
-  price_max: z.nan().or(
-    z
-      .number()
-      .positive({ message: "Price must be greater than 0." })
-      .int({ message: "Price must be integer." }),
-  ),
+  price_min: z
+    .nan()
+    .or(
+      z
+        .number()
+        .nonnegative({ message: "Price must be greater than or equal to 0." })
+        .int({ message: "Price must be integer." }),
+    ),
+  price_max: z
+    .nan()
+    .or(
+      z
+        .number()
+        .positive({ message: "Price must be greater than 0." })
+        .int({ message: "Price must be integer." }),
+    ),
 });

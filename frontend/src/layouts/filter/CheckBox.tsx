@@ -1,7 +1,7 @@
 import { useController } from "react-hook-form";
 
-import { ControlledInputProps } from "../../types/form.type";
 import { FilterType } from "../../types/filter.type";
+import { ControlledInputProps } from "../../types/form.type";
 
 export const CheckBox = ({ control, name }: ControlledInputProps<FilterType>) => {
   const { field } = useController({ control, name });

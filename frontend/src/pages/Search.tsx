@@ -1,15 +1,15 @@
 import { useState } from "react";
 
 import { ErrorMsg } from "../components/ErrorMsg";
-import { Filter } from "../layouts/filter";
 import { Pagination } from "../components/Pagination";
 import { SelectBox } from "../components/SelectBox";
 import { Spinner } from "../components/Spinner";
 import { useRoom } from "../hooks/useAxios";
+import { Filter } from "../layouts/filter";
 import { Gallery } from "../layouts/listing/gallery/index";
 import { errorMessage } from "../shared/errorMessage";
-import { Order, QueryParams, SortBy } from "../types/room.type";
 import { FilterType } from "../types/filter.type";
+import { Order, QueryParams, SortBy } from "../types/room.type";
 
 export type SortType = "new" | "old" | "low" | "high";
 
@@ -48,12 +48,12 @@ export const Search = () => {
   };
 
   return (
-    <section className="flex min-h-screen justify-stretch py-6 xl:w-[1280px] 2xl:w-[1536px] px-8">
+    <section className="flex min-h-screen justify-stretch px-8 py-6 xl:w-[1280px] 2xl:w-[1536px]">
       <Filter handleFilter={handleFilter} filter={filter} />
       {!data || data?.count === 0 ? (
         <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />
       ) : (
-        <div className="flex flex-col justify-between items-stretch">
+        <div className="flex flex-col items-stretch justify-between">
           <div>
             <div className="flex h-14 justify-between">
               <h2 className="p-2 text-sm">

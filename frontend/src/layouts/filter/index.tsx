@@ -1,12 +1,12 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Divider } from "@mui/material";
 import { useForm } from "react-hook-form";
 
 import { CheckBox } from "./CheckBox";
 import { PriceInput } from "./PriceInput";
 import { Button } from "../../components/Button";
-import { FilterType } from "../../types/filter.type";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { filterSchema } from "../../shared/zodScheme";
-import { Divider } from "@mui/material";
+import { FilterType } from "../../types/filter.type";
 
 export type FilterProps = {
   handleFilter(newValues: FilterType): void;
@@ -36,7 +36,7 @@ export const Filter = ({ handleFilter, filter }: FilterProps) => {
   return (
     <form
       onSubmit={handleSubmit(submit)}
-      className="mt-14 h-fit w-56 flex-none rounded-md border bg-white px-4 py-6 text-sm mr-2"
+      className="mr-2 mt-14 h-fit w-56 flex-none rounded-md border bg-white px-4 py-6 text-sm"
     >
       <p className="px-1 pb-4 text-lg font-medium">Find Apartments / Housing for Rent</p>
       <Divider sx={{ mb: 2 }} />

@@ -27,8 +27,11 @@ export const Gallery = (props: ListItem) => {
   }, [props.updated_at]);
 
   return (
-    <li onClick={onClick} className="flex-1 pb-2 sm:flex-1/3 sm:px-1 flex flex-col justify-stretch">
-      <div className="rounded-md bg-white p-6 shadow-sm hover:shadow-lg h-full flex flex-col justify-between">
+    <li
+      onClick={onClick}
+      className="flex flex-1 flex-col justify-stretch pb-2 sm:flex-1/3 sm:px-1"
+    >
+      <div className="flex h-full flex-col justify-between rounded-md bg-white p-6 shadow-sm hover:shadow-lg">
         <img className="rounded-lg object-cover" src={props.thumbnail_url} />
         <div className="flex flex-col px-2 pt-4">
           <h2 className="text-lg font-medium text-rent-blue">{props.title}</h2>

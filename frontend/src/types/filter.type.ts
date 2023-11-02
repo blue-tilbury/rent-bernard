@@ -1,11 +1,6 @@
-import { FieldError } from "react-hook-form";
-import { UseFormRegister } from "react-hook-form/dist/types/form";
+import { FieldError, UseFormRegister } from "react-hook-form";
 
-export type FilterName =
-  | "price_min"
-  | "price_max"
-  | "is_furnished"
-  | "is_pet_friendly";
+export type FilterName = "price_min" | "price_max" | "is_furnished" | "is_pet_friendly";
 
 export type FilterType = {
   is_furnished?: boolean;

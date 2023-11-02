@@ -30,7 +30,12 @@ export const Filter = ({ handleFilter, filter }: FilterProps) => {
   });
 
   const submit = (formValues: FilterType) => {
-    handleFilter(formValues);
+    const filteredObject = Object.fromEntries(
+      Object.entries(formValues).filter(([, value]) => {
+        return value !== undefined && !Number.isNaN(value) && value !== false;
+      }),
+    );
+    handleFilter(filteredObject);
   };
 
   return (

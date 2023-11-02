@@ -200,21 +200,22 @@ impl Room {
             query_builder.push(" AND w.user_id =").push_bind(user_id);
         }
         query_builder.push(" GROUP BY r.id ");
-        if filter.is_furnished.is_some()
-            || filter.is_pet_friendly.is_some()
+        let is_furnished = filter.is_furnished.is_some_and(|is_furnished| is_furnished);
+        let is_pet_friendly = filter
+            .is_pet_friendly
+            .is_some_and(|is_pet_friendly| is_pet_friendly);
+        if is_furnished
+            || is_pet_friendly
             || filter.price_min.is_some()
             || filter.price_max.is_some()
         {
             query_builder.push(" HAVING ");
         }
         let mut separated_by_and = query_builder.separated(" AND ");
-        if filter.is_furnished.is_some_and(|is_furnished| is_furnished) {
+        if is_furnished {
             separated_by_and.push("r.is_furnished = TRUE");
         }
-        if filter
-            .is_pet_friendly
-            .is_some_and(|is_pet_friendly| is_pet_friendly)
-        {
+        if is_pet_friendly {
             separated_by_and.push("r.is_pet_friendly = TRUE");
         }
         if let Some(price_min) = filter.price_min {

@@ -1,5 +1,6 @@
 import {
   FieldError,
+  FieldValues,
   Merge,
   UseControllerProps,
   UseFormRegister,
@@ -24,15 +25,12 @@ export type RawInputProps = InputProps & {
   style?: string;
 };
 
-export type InputProps = RegisterType & {
+export type InputProps = {
+  register: UseFormRegister<PostRoom>;
   error?: FieldError;
 };
 
-export type RegisterType = {
-  register: UseFormRegister<PostRoom>;
-};
-
-export type ControlledInputProps = UseControllerProps<PostRoom> & {
+export type ControlledInputProps<T extends FieldValues> = UseControllerProps<T> & {
   error?: FieldError;
 };
 

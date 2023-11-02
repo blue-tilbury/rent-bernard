@@ -36,7 +36,7 @@ export const WishlistEditIcon = ({ roomId, isDefaultFav }: WishlistEditIconProps
   return isFav ? (
     <SolidHeartIcon
       onClick={(e) => handleFavAction(e, "delete")}
-      className="h-6 w-6 text-pink-400"
+      className="h-6 w-6 text-pink-500"
     />
   ) : (
     <OutlinedHeartIcon

@@ -6,8 +6,12 @@ import { GetRoom, ListRoom, Order, Room, SortBy, UpdateRoom } from "../types/roo
 type RoomAPIType = {
   show: (id: string) => Promise<GetRoom>;
   index: (
-    sortBy?: SortBy,
+    sort_by?: SortBy,
     order?: Order,
+    is_furnished?: boolean,
+    is_pet_friendly?: boolean,
+    price_min?: number,
+    price_max?: number,
     page?: number,
     per_page?: number,
   ) => Promise<ListRoom>;
@@ -27,10 +31,28 @@ export const RoomAPI: RoomAPIType = {
 
     return response.data;
   },
-  index: async (sortBy?: SortBy, order?: Order, page?: number, per_page?: number) => {
+  index: async (
+    sort_by?: SortBy,
+    order?: Order,
+    is_furnished?: boolean,
+    is_pet_friendly?: boolean,
+    price_min?: number,
+    price_max?: number,
+    page?: number,
+    per_page?: number,
+  ) => {
     const response = await api.request({
       url: `/rooms`,
-      params: { sort_by: sortBy, order, page, per_page },
+      params: {
+        sort_by,
+        order,
+        is_furnished,
+        is_pet_friendly,
+        price_min,
+        price_max,
+        page,
+        per_page,
+      },
       method: "GET",
     });
 

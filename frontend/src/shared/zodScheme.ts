@@ -23,3 +23,22 @@ export const scheme = z.object({
     .min(1, { message: "Email is required." })
     .email({ message: "Invalid email address." }),
 });
+
+export const filterSchema = z.object({
+  price_min: z
+    .nan()
+    .or(
+      z
+        .number()
+        .nonnegative({ message: "Price must be greater than or equal to 0." })
+        .int({ message: "Price must be integer." }),
+    ),
+  price_max: z
+    .nan()
+    .or(
+      z
+        .number()
+        .positive({ message: "Price must be greater than 0." })
+        .int({ message: "Price must be integer." }),
+    ),
+});

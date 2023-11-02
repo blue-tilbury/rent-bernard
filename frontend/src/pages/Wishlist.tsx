@@ -17,7 +17,7 @@ export const Wishlist = () => {
 
   return (
     <section className="container pb-16 pt-8">
-      <h2 className="pb-4 pl-2 text-sm">Showing 1-2 of 2 results</h2>
+      <h1 className="pb-4 pl-2 text-lg font-medium">Your Wishlist</h1>
       <ul className="flex list-none flex-col space-y-4">{thumbs}</ul>
     </section>
   );

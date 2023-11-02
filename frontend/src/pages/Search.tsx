@@ -48,12 +48,12 @@ export const Search = () => {
   };
 
   return (
-    <section className="mx-auto flex min-h-screen justify-stretch py-6 lg:w-[1124px] xl:w-[1280px] 2xl:w-[1536px]">
+    <section className="flex min-h-screen justify-stretch py-6 xl:w-[1280px] 2xl:w-[1536px] px-8">
       <Filter handleFilter={handleFilter} filter={filter} />
       {!data || data?.count === 0 ? (
         <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />
       ) : (
-        <div className="flex flex-col justify-between">
+        <div className="flex flex-col justify-between items-stretch">
           <div>
             <div className="flex h-14 justify-between">
               <h2 className="p-2 text-sm">

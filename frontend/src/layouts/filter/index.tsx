@@ -36,7 +36,7 @@ export const Filter = ({ handleFilter, filter }: FilterProps) => {
   return (
     <form
       onSubmit={handleSubmit(submit)}
-      className="mt-14 h-fit w-56 flex-none rounded-md border bg-white px-4 py-6 text-sm"
+      className="mt-14 h-fit w-56 flex-none rounded-md border bg-white px-4 py-6 text-sm mr-2"
     >
       <p className="px-1 pb-4 text-lg font-medium">Find Apartments / Housing for Rent</p>
       <Divider sx={{ mb: 2 }} />

@@ -20,8 +20,8 @@ impl Get {
             name: user.name,
             email: user.email,
             picture: user.picture,
-            created_at: user.created_at.to_string(),
-            updated_at: user.updated_at.to_string(),
+            created_at: user.created_at.to_rfc3339(),
+            updated_at: user.updated_at.to_rfc3339(),
         })
     }
 }

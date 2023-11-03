@@ -13,7 +13,7 @@ export const Map = ({ place_id, formatted_address }: MapProps) => {
     <>
       <div className="pt-10">Map here</div>
       <div className="flex pb-20">
-        <MapPinIcon className="h-7 w-7" />
+        <MapPinIcon className="my-1 h-4 w-4 shrink-0" />
         <p className="pl-1">{formatted_address}</p>
       </div>
     </>

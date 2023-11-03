@@ -50,29 +50,31 @@ export const Search = () => {
   };
 
   return (
-    <section className="flex min-h-screen justify-stretch px-8 py-6 xl:w-[1280px] 2xl:w-[1536px]">
-      <Filter handleFilter={handleFilter} filter={filter} />
-      {!data || data?.count === 0 ? (
-        <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />
-      ) : (
-        <div className="flex flex-col items-stretch justify-between">
-          <div className="flex flex-col">
-            <div className="flex h-14 justify-between">
-              <h2 className="p-2 text-sm">
-                Showing {pageIndex * ItemsPerPage + 1}-{(pageIndex + 1) * ItemsPerPage} of{" "}
-                {data.count} results
-              </h2>
-              <SelectBox handleSelect={handleSelectBox} sortType={sortType} />
+    <section className="mx-auto min-h-screen px-8 py-6 xl:w-[1280px] 2xl:w-[1536px]">
+      <div className="flex">
+        <Filter handleFilter={handleFilter} filter={filter} />
+        {!data || data?.count === 0 ? (
+          <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />
+        ) : (
+          <div className="flex flex-1 flex-col items-stretch justify-between">
+            <div className="flex flex-col">
+              <div className="flex h-14 justify-between">
+                <h2 className="p-2 text-sm">
+                  Showing {pageIndex * ItemsPerPage + 1}-{(pageIndex + 1) * ItemsPerPage}{" "}
+                  of {data.count} results
+                </h2>
+                <SelectBox handleSelect={handleSelectBox} sortType={sortType} />
+              </div>
+              <ul className="flex h-full flex-col flex-wrap sm:flex-row">{galleries}</ul>
             </div>
-            <ul className="flex h-full flex-col flex-wrap sm:flex-row">{galleries}</ul>
+            <Pagination
+              handlePagination={handlePagination}
+              pageCount={Math.ceil(data.count / ItemsPerPage)}
+              pageIndex={pageIndex}
+            />
           </div>
-          <Pagination
-            handlePagination={handlePagination}
-            pageCount={Math.ceil(data.count / ItemsPerPage)}
-            pageIndex={pageIndex}
-          />
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 };

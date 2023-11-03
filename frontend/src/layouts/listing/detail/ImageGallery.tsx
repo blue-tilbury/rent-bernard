@@ -27,7 +27,7 @@ export const ImageGallery = ({ image_urls, title }: ImageGalleryProps) => {
         <img
           src={image_urls[currentIndex]}
           alt={title}
-          className=" h-80 w-full object-contain"
+          className="h-80 w-full object-contain"
         />
         <ChevronLeftIcon
           onClick={handlePrev}

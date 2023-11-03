@@ -24,7 +24,10 @@ export const Search = () => {
   const [sortType, setSortType] = useState<SortType>("new");
   const [filter, setFilter] = useState<FilterType>({});
   const [pageIndex, setPageIndex] = useState(0);
-  const { data, isError, isLoading, isValidating } = useRoom(queryParams);
+  const { data, isError, isLoading, isValidating } = useRoom({
+    ...queryParams,
+    ...filter,
+  });
 
   if (isError) return <ErrorMsg msg={errorMessage.connection} isReloadBtn={true} />;
   if (isLoading || isValidating) return <Spinner />;
@@ -39,7 +42,6 @@ export const Search = () => {
 
   const handleFilter = (newValues: FilterType) => {
     setFilter(newValues);
-    setQueryParams((prev) => ({ ...prev, ...newValues }));
   };
 
   const handlePagination = (page: number) => {

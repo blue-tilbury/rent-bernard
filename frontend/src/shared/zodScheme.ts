@@ -41,4 +41,6 @@ export const filterSchema = z.object({
         .positive({ message: "Price must be greater than 0." })
         .int({ message: "Price must be integer." }),
     ),
+  is_furnished: z.boolean().optional(),
+  is_pet_friendly: z.boolean().optional(),
 });

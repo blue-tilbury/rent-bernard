@@ -10,27 +10,18 @@ import { AuthParams } from "../types/user.type";
 
 // Room
 export const useRoom = (queryParams: QueryParams) => {
-  const params = new URLSearchParams({
-    sortBy: queryParams.sort_by || "",
-    order: queryParams.order || "",
-    is_furnished: queryParams.is_furnished?.toString() || "",
-    is_pet_friendly: queryParams.is_pet_friendly?.toString() || "",
-    price_min: queryParams.price_min?.toString() || "",
-    price_max: queryParams.price_max?.toString() || "",
-    page: queryParams.page?.toString() || "",
-    per_page: queryParams.per_page?.toString() || "",
-  });
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(queryParams)) {
+    if (value !== null && value !== undefined) {
+      if (typeof value === "boolean" || typeof value === "number") {
+        params.append(key, value.toString());
+      } else {
+        params.append(key, value);
+      }
+    }
+  }
   const { data, error, isLoading, isValidating } = useSWR(`/rooms?${params}`, () =>
-    RoomAPI.index(
-      queryParams.sort_by,
-      queryParams.order,
-      queryParams.is_furnished,
-      queryParams.is_pet_friendly,
-      queryParams.price_min,
-      queryParams.price_max,
-      queryParams.page,
-      queryParams.per_page,
-    ),
+    RoomAPI.index(queryParams),
   );
   return { data, isError: error, isLoading, isValidating };
 };

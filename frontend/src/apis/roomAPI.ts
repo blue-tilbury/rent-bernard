@@ -1,20 +1,11 @@
 import { api } from "./config/axiosConfig";
 import { defineCancelApiObj } from "./config/axiosUtils";
 import { Id } from "../types/common.type";
-import { GetRoom, ListRoom, Order, Room, SortBy, UpdateRoom } from "../types/room.type";
+import { GetRoom, ListRoom, QueryParams, Room, UpdateRoom } from "../types/room.type";
 
 type RoomAPIType = {
   show: (id: string) => Promise<GetRoom>;
-  index: (
-    sort_by?: SortBy,
-    order?: Order,
-    is_furnished?: boolean,
-    is_pet_friendly?: boolean,
-    price_min?: number,
-    price_max?: number,
-    page?: number,
-    per_page?: number,
-  ) => Promise<ListRoom>;
+  index: (queryParams: QueryParams) => Promise<ListRoom>;
   update: (room: UpdateRoom, cancel?: boolean) => Promise<void>;
   delete: (id: string, cancel?: boolean) => Promise<void>;
   create: (room: Room, cancel?: boolean) => Promise<Id>;
@@ -31,28 +22,10 @@ export const RoomAPI: RoomAPIType = {
 
     return response.data;
   },
-  index: async (
-    sort_by?: SortBy,
-    order?: Order,
-    is_furnished?: boolean,
-    is_pet_friendly?: boolean,
-    price_min?: number,
-    price_max?: number,
-    page?: number,
-    per_page?: number,
-  ) => {
+  index: async (queryParams: QueryParams) => {
     const response = await api.request({
       url: `/rooms`,
-      params: {
-        sort_by,
-        order,
-        is_furnished,
-        is_pet_friendly,
-        price_min,
-        price_max,
-        page,
-        per_page,
-      },
+      params: queryParams,
       method: "GET",
     });
 

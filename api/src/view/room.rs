@@ -65,8 +65,8 @@ impl Get {
             image_urls,
             email,
             user_id: user_id.to_string(),
-            created_at: created_at.to_string(),
-            updated_at: updated_at.to_string(),
+            created_at: created_at.to_rfc3339(),
+            updated_at: updated_at.to_rfc3339(),
         })
     }
 }
@@ -133,8 +133,8 @@ pub mod private {
                     email: room.email,
                     thumbnail_url,
                     user_id: room.user_id.to_string(),
-                    created_at: room.created_at.to_string(),
-                    updated_at: room.updated_at.to_string(),
+                    created_at: room.created_at.to_rfc3339(),
+                    updated_at: room.updated_at.to_rfc3339(),
                 };
                 list_items.push(item);
             }
@@ -208,8 +208,8 @@ pub mod public {
                     thumbnail_url,
                     user_id: room.user_id.to_string(),
                     is_favorite: room.is_favorite,
-                    created_at: room.created_at.to_string(),
-                    updated_at: room.updated_at.to_string(),
+                    created_at: room.created_at.to_rfc3339(),
+                    updated_at: room.updated_at.to_rfc3339(),
                 };
                 list_items.push(item);
             }

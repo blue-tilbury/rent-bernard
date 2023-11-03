@@ -7,6 +7,11 @@ services:
       - ./api:/app
     ports:
       - 58000:8000
+    depends_on:
+      - postgres
+      - test_postgres
+      - s3
+      - redis
     env_file:
       - ./api/.env
   frontend:

@@ -4,6 +4,7 @@ import moment from "moment";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { formatDate } from "../../../shared/date";
 import { loggedIn, userAtom } from "../../../shared/globalStateConfig";
 import { ListItem } from "../../../types/room.type";
 import { WishlistEditIcon } from "../thumb/WishlistEditIcon";
@@ -16,14 +17,7 @@ export const Gallery = (props: ListItem) => {
   const postedAt = useMemo(() => {
     const updatedAt = moment(props.updated_at);
     const now = moment();
-    const diff = now.diff(updatedAt, "minutes");
-    if (diff < 60) {
-      return `${diff} mins ago`;
-    } else if (60 <= diff && diff < 24 * 60) {
-      return `${Math.floor(diff / 60)}h ago`;
-    } else {
-      return updatedAt.format("YYYY/MM/DD");
-    }
+    return formatDate(updatedAt, now);
   }, [props.updated_at]);
 
   return (

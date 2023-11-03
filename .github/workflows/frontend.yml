@@ -25,6 +25,8 @@ jobs:
         run: docker exec $(docker ps | grep frontend | cut -d ' ' -f1) npm install
       - name: Build
         run: docker exec $(docker ps | grep frontend | cut -d ' ' -f1) npm run build
+      - name: Test
+        run: docker exec $(docker ps | grep frontend | cut -d ' ' -f1) npm run test:ci
       - name: ESLint
         run: docker exec $(docker ps | grep frontend | cut -d ' ' -f1) npm run lint
       - name: Prettier

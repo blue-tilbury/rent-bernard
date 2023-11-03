@@ -18,8 +18,20 @@ pub mod public {
     };
 
     #[get("/rooms/<id>")]
-    pub async fn show(id: String, db: &DB) -> Result<Json<view::room::Get>, Status> {
-        let room = match Room::get(db, id.clone()).await {
+    pub async fn show(
+        id: String,
+        db: &DB,
+        cookies: &CookieJar<'_>,
+    ) -> Result<Json<view::room::Get>, Status> {
+        let session = match Session::get(cookies).await {
+            Ok(option) => option,
+            Err(err) => {
+                eprintln!("{err}");
+                return Err(Status::InternalServerError);
+            }
+        };
+        let user_id = session.and_then(|session| Uuid::parse_str(&session.user_id).ok());
+        let room = match Room::get(db, id.clone(), user_id).await {
             Ok(option_room) => match option_room {
                 Some(room) => room,
                 None => {

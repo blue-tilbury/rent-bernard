@@ -2,7 +2,7 @@ use rocket::{http::Status, serde::json::Json};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    model::room::model::{AddressComponent, Room},
+    model::room::model::{AddressComponent, GetRoom},
     utils::s3::S3Operation,
 };
 
@@ -16,6 +16,7 @@ pub struct Get {
     formatted_address: String,
     is_furnished: bool,
     is_pet_friendly: bool,
+    is_favorite: bool,
     description: String,
     image_urls: Vec<String>,
     email: String,
@@ -25,13 +26,13 @@ pub struct Get {
 }
 
 impl Get {
-    pub async fn generate(room: Room, client: impl S3Operation) -> Result<Json<Get>, Status> {
+    pub async fn generate(room: GetRoom, client: impl S3Operation) -> Result<Json<Get>, Status> {
         let json = Json(Self::to_get(room, client).await?);
         Ok(json)
     }
 
-    async fn to_get(room: Room, client: impl S3Operation) -> Result<Get, Status> {
-        let Room {
+    async fn to_get(room: GetRoom, client: impl S3Operation) -> Result<Get, Status> {
+        let GetRoom {
             id,
             title,
             price,
@@ -40,6 +41,7 @@ impl Get {
             address_components,
             is_furnished,
             is_pet_friendly,
+            is_favorite,
             description,
             email,
             created_at,
@@ -61,6 +63,7 @@ impl Get {
             city,
             is_furnished,
             is_pet_friendly,
+            is_favorite,
             description,
             image_urls,
             email,
@@ -271,7 +274,7 @@ mod tests {
                 "#,
         )
         .unwrap();
-        let room = Room {
+        let room = GetRoom {
             id,
             title: "title".to_string(),
             price: 10000,
@@ -280,6 +283,7 @@ mod tests {
             address_components,
             is_furnished: true,
             is_pet_friendly: false,
+            is_favorite: true,
             description: "description".to_string(),
             s3_keys: vec!["key".to_string()],
             email: "email".to_string(),
@@ -296,6 +300,7 @@ mod tests {
         assert_eq!(json.formatted_address, "formatted_address".to_string());
         assert!(json.is_furnished);
         assert!(!json.is_pet_friendly);
+        assert!(json.is_favorite);
         assert_eq!(json.image_urls[0], "object".to_string());
         assert_eq!(json.email, "email".to_string());
         assert_eq!(json.description, "description".to_string());

@@ -7,7 +7,7 @@ export const Root = () => {
   return (
     <div className="bg-rent-bg-gray">
       <Navbar />
-      <main className="flex min-h-screen justify-center">
+      <main className="min-h-screen">
         <Outlet />
       </main>
       <Footer />

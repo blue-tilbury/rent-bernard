@@ -26,13 +26,13 @@ export const Gallery = (props: ListItem) => {
       className="flex flex-1 flex-col justify-stretch pb-2 sm:flex-1/3 sm:px-1"
     >
       <div className="flex h-full flex-col justify-between rounded-md bg-white p-6 shadow-sm hover:shadow-lg">
-        <div className="h-3/5 w-full">
+        <div className="h-48 w-full rounded-lg">
           <img
-            className="h-full w-full rounded-lg object-cover"
+            className="h-48 w-full rounded-lg object-contain"
             src={props.thumbnail_url}
           />
         </div>
-        <div className="flex flex-col px-2">
+        <div className="flex flex-col px-2 pt-4">
           <h2 className="text-lg font-medium text-rent-blue">{props.title}</h2>
           <p className="text-lg font-semibold text-rent-dark-green">${props.price}</p>
           <div className="flex items-center">

@@ -14,6 +14,7 @@ module.exports = {
         "rent-blue": "#0080FF",
         "rent-dark-blue": "#283C63",
         "rent-icon-blue": "#332885",
+        "rent-most-light-blue": "#e5f0fc",
         "rent-pagination-very-light-blue": "#d3e3fa",
         "rent-pagination-light-blue": "#afccf6",
         "rent-pagination-blue": "#1457ba",

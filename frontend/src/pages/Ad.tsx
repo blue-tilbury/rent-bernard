@@ -37,7 +37,7 @@ export const Ad = (): ReactElement => {
     <section className="container flex space-x-20 pb-16 pt-8">
       <div className="flex-3">
         <Header room={room} />
-        <ImageGallery image_urls={room.image_urls} />
+        <ImageGallery image_urls={room.image_urls} title={room.title} />
         <div className="flex space-x-6 pb-10">
           <CustomChip roomPropType={room.is_furnished} name="Furnished" />
           <CustomChip roomPropType={room.is_pet_friendly} name="Pet friendly" />

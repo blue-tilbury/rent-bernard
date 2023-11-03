@@ -24,6 +24,25 @@ pub struct Room {
 }
 
 #[derive(Debug, Clone, FromRow)]
+pub struct GetRoom {
+    pub id: Uuid,
+    pub title: String,
+    pub price: i32,
+    pub place_id: String,
+    pub formatted_address: String,
+    pub address_components: Json<Vec<AddressComponent>>,
+    pub is_furnished: bool,
+    pub is_pet_friendly: bool,
+    pub description: String,
+    pub s3_keys: Vec<String>,
+    pub email: String,
+    pub user_id: Uuid,
+    pub is_favorite: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, FromRow)]
 pub struct ListRoom {
     pub id: Uuid,
     pub title: String,
@@ -142,23 +161,65 @@ impl Room {
         rec.try_get("id")
     }
 
-    pub async fn get(db: &PgPool, id: String) -> Result<Option<Room>, sqlx::Error> {
+    pub async fn get(
+        db: &PgPool,
+        id: String,
+        user_id: Option<Uuid>,
+    ) -> Result<Option<GetRoom>, sqlx::Error> {
+        #[derive(FromRow, Debug)]
+        struct Record {
+            id: Uuid,
+            title: String,
+            price: i32,
+            place_id: String,
+            formatted_address: String,
+            address_components: Json<Vec<AddressComponent>>,
+            is_furnished: bool,
+            is_pet_friendly: bool,
+            description: String,
+            s3_keys: Vec<String>,
+            email: String,
+            user_id: Uuid,
+            wishlist_count: i64,
+            created_at: DateTime<Utc>,
+            updated_at: DateTime<Utc>,
+        }
         let uuid = match Uuid::parse_str(&id) {
             Ok(uuid) => uuid,
             Err(_) => return Ok(None),
         };
-        let rec: Room = sqlx::query_as(
+        let rec: Record = sqlx::query_as(
             r#"
-                SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys FROM rooms r
+                SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys, COUNT(DISTINCT w.id) wishlist_count
+                FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
-                WHERE r.id = $1
+                LEFT OUTER JOIN wishlists w ON r.id = w.room_id AND w.user_id = $1
+                WHERE r.id = $2
                 GROUP BY r.id
             "#,
         )
+        .bind(user_id)
         .bind(uuid)
         .fetch_one(db)
         .await?;
-        Ok(Some(rec))
+        let room = GetRoom {
+            id: rec.id,
+            title: rec.title,
+            price: rec.price,
+            place_id: rec.place_id,
+            formatted_address: rec.formatted_address,
+            address_components: rec.address_components,
+            is_furnished: rec.is_furnished,
+            is_pet_friendly: rec.is_pet_friendly,
+            description: rec.description,
+            s3_keys: rec.s3_keys,
+            email: rec.email,
+            user_id: rec.user_id,
+            is_favorite: rec.wishlist_count == 1,
+            created_at: rec.created_at,
+            updated_at: rec.updated_at,
+        };
+        Ok(Some(room))
     }
 
     pub async fn list(
@@ -190,7 +251,7 @@ impl Room {
         }
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"
-                SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys, COUNT(w.id) wishlist_count, COUNT(*) OVER() count
+                SELECT r.*, ARRAY_REMOVE(ARRAY_AGG(ri.s3_key), NULL) s3_keys, COUNT(DISTINCT w.id) wishlist_count, COUNT(*) OVER() count
                 FROM rooms r
                 LEFT OUTER JOIN room_images ri ON r.id = ri.room_id
                 LEFT OUTER JOIN wishlists w ON r.id = w.room_id
@@ -478,7 +539,10 @@ mod tests {
             description: params.description,
         };
         let result = Room::update(&db.pool, update_room_params).await.unwrap();
-        let room = Room::get(&db.pool, id.to_string()).await.unwrap().unwrap();
+        let room = Room::get(&db.pool, id.to_string(), None)
+            .await
+            .unwrap()
+            .unwrap();
         assert!(result.is_some());
         assert_eq!(room.title, "new_title".to_string());
         db.clean_up().await;
@@ -529,6 +593,7 @@ mod tests {
         #[tokio::test]
         async fn test_get() {
             let mut db = TestConnection::new().await;
+            // Create a room
             let user_id = UserFactory::create(&db.pool, Faker.fake()).await;
             let params = RoomFactoryParams {
                 title: "title".to_string(),
@@ -542,12 +607,28 @@ mod tests {
                 user_id: Some(user_id),
             };
             let id = RoomFactory::create(&db.pool, params).await;
+
+            // Create a wishlist
+            let login_user_id = UserFactory::create(&db.pool, Faker.fake()).await;
+            WishlistFactory::create(&db.pool, {
+                WishlistFactoryParams {
+                    user_id: login_user_id,
+                    room_id: id,
+                }
+            })
+            .await;
+
+            // Create room images
             let room_image_params = RoomImageFactoryParams {
                 room_id: id,
                 ..Faker.fake()
             };
             RoomImageFactory::create_many(&db.pool, room_image_params, 2).await;
-            let result = Room::get(&db.pool, id.to_string()).await.unwrap().unwrap();
+
+            let result = Room::get(&db.pool, id.to_string(), Some(login_user_id))
+                .await
+                .unwrap()
+                .unwrap();
             assert!(!result.id.to_string().is_empty());
             assert_eq!(result.title, "title".to_string());
             assert_eq!(result.price, 10000);
@@ -560,6 +641,7 @@ mod tests {
             assert_eq!(result.description, "description".to_string());
             assert_eq!(result.email, "email".to_string());
             assert_eq!(result.user_id, user_id);
+            assert!(result.is_favorite);
             assert!(!result.created_at.to_string().is_empty());
             assert!(!result.updated_at.to_string().is_empty());
             db.clean_up().await;
@@ -569,7 +651,7 @@ mod tests {
         async fn test_get_not_found() {
             let mut db = TestConnection::new().await;
             let id = "random_id".to_string();
-            let result = Room::get(&db.pool, id).await.unwrap();
+            let result = Room::get(&db.pool, id, None).await.unwrap();
             assert!(result.is_none());
             db.clean_up().await;
         }

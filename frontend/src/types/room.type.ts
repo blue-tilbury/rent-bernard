@@ -35,6 +35,7 @@ export type GetRoom = {
   place_id: string;
   is_furnished: boolean;
   is_pet_friendly: boolean;
+  is_favorite: boolean;
   description: string;
   image_urls: string[];
   email: string;

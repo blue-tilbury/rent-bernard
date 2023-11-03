@@ -19,12 +19,16 @@ export const ImageGallery = ({ image_urls, title }: ImageGalleryProps) => {
 
   const handleImageClick = (i: number) => {
     setCurrentIndex(i);
-  }
+  };
 
   return (
     <div className="flex flex-col pb-6">
       <div className="relative h-80 w-full">
-        <img src={image_urls[currentIndex]} alt={title} className=" object-contain h-80 w-full"/>
+        <img
+          src={image_urls[currentIndex]}
+          alt={title}
+          className=" h-80 w-full object-contain"
+        />
         <ChevronLeftIcon
           onClick={handlePrev}
           className="absolute left-1 top-1/2 h-8 w-8 cursor-pointer rounded-full hover:bg-rent-very-light-gray"

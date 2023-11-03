@@ -51,7 +51,7 @@ export const Search = () => {
 
   return (
     <section className="mx-auto min-h-screen px-8 py-6 xl:w-[1280px] 2xl:w-[1536px]">
-      <div className="flex">
+      <div className="flex min-h-[inherit]">
         <Filter handleFilter={handleFilter} filter={filter} />
         {!data || data?.count === 0 ? (
           <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />

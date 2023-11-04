@@ -1,8 +1,10 @@
 import Divider from "@mui/material/Divider";
+import moment from "moment";
 import { useNavigate } from "react-router-dom";
 
 import { WishlistEditIcon } from "./WishlistEditIcon";
 import { YourAdsEditIcons } from "./YourAdsEditIcons";
+import { formatDate } from "../../../shared/date";
 import { ListItem } from "../../../types/room.type";
 
 type ThumbProps = {
@@ -14,6 +16,7 @@ export const Thumb = ({ room, page }: ThumbProps) => {
   const navigate = useNavigate();
   const isWishlistPage = page === "wishlist";
   const isYourAdsPage = page === "yourAds";
+  const updatedAt = formatDate(moment(room.updated_at), moment());
 
   const onClick = () => navigate(`/ads/${room.id}`);
 
@@ -28,7 +31,7 @@ export const Thumb = ({ room, page }: ThumbProps) => {
           <div className="flex space-x-2 text-sm">
             <span>{room.city}</span>
             <Divider orientation="vertical" flexItem />
-            <span>{room.updated_at} mins ago</span>
+            <span>{updatedAt}</span>
           </div>
           <h2 className="pb-4 text-lg font-medium text-rent-blue">{room.title}</h2>
           <p className="text-rent-dark-green">$ {room.price}</p>

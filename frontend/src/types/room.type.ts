@@ -5,7 +5,8 @@ export type Room = {
   price: number;
   formatted_address: string;
   address_components: string;
-  place_id: string;
+  longitude: number;
+  latitude: number;
   is_furnished: boolean;
   is_pet_friendly: boolean;
   s3_keys: string[];
@@ -16,7 +17,7 @@ export type Room = {
 export type PostRoom = {
   title: string;
   price: number | null;
-  place_id: string;
+  formatted_address: string;
   is_furnished: boolean | null;
   is_pet_friendly: boolean | null;
   s3_keys: string[];
@@ -32,7 +33,8 @@ export type GetRoom = {
   price: number;
   formatted_address: string;
   city: string;
-  place_id: string;
+  longitude: number;
+  latitude: number;
   is_furnished: boolean;
   is_pet_friendly: boolean;
   is_favorite: boolean;
@@ -54,7 +56,6 @@ export type ListItem = {
   price: number;
   formatted_address: string;
   city: string;
-  place_id: string;
   is_furnished: boolean;
   is_pet_friendly: boolean;
   description: string;

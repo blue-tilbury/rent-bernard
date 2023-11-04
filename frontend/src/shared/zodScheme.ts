@@ -8,7 +8,7 @@ export const scheme = z.object({
     .number({ invalid_type_error: "Number is required." })
     .positive({ message: "Price must be positive number." })
     .int({ message: "Price must be integer." }),
-  place_id: z
+  formatted_address: z
     .string({ required_error: "Address is required." })
     .min(1, { message: "Address is required." }),
   description: z

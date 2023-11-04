@@ -10,7 +10,8 @@ pub struct Room {
     pub id: Uuid,
     pub title: String,
     pub price: i32,
-    pub place_id: String,
+    pub longitude: f64,
+    pub latitude: f64,
     pub formatted_address: String,
     pub address_components: Json<Vec<AddressComponent>>,
     pub is_furnished: bool,
@@ -28,7 +29,8 @@ pub struct GetRoom {
     pub id: Uuid,
     pub title: String,
     pub price: i32,
-    pub place_id: String,
+    pub longitude: f64,
+    pub latitude: f64,
     pub formatted_address: String,
     pub address_components: Json<Vec<AddressComponent>>,
     pub is_furnished: bool,
@@ -47,7 +49,8 @@ pub struct ListRoom {
     pub id: Uuid,
     pub title: String,
     pub price: i32,
-    pub place_id: String,
+    pub longitude: f64,
+    pub latitude: f64,
     pub formatted_address: String,
     pub address_components: Json<Vec<AddressComponent>>,
     pub is_furnished: bool,
@@ -66,7 +69,8 @@ pub struct ListRoom {
 pub struct CreateRoom {
     pub title: String,
     pub price: i32,
-    pub place_id: String,
+    pub longitude: f64,
+    pub latitude: f64,
     pub formatted_address: String,
     pub address_components: Json<Vec<AddressComponent>>,
     pub is_furnished: bool,
@@ -81,7 +85,8 @@ pub struct UpdateRoom {
     pub id: Uuid,
     pub title: String,
     pub price: i32,
-    pub place_id: String,
+    pub longitude: f64,
+    pub latitude: f64,
     pub formatted_address: String,
     pub address_components: Json<Vec<AddressComponent>>,
     pub is_furnished: bool,
@@ -140,15 +145,16 @@ impl Room {
         let rec = sqlx::query(
             r#"
                 INSERT INTO rooms (
-                    title, price, place_id, formatted_address, address_components, is_furnished, is_pet_friendly, description, email, user_id
+                    title, price, longitude, latitude, formatted_address, address_components, is_furnished, is_pet_friendly, description, email, user_id
                 )
-                VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 )
+                VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 )
                 RETURNING id
             "#,
         )
         .bind(room.title)
         .bind(room.price)
-        .bind(room.place_id)
+        .bind(room.longitude)
+        .bind(room.latitude)
         .bind(room.formatted_address)
         .bind(room.address_components)
         .bind(room.is_furnished)
@@ -171,7 +177,8 @@ impl Room {
             id: Uuid,
             title: String,
             price: i32,
-            place_id: String,
+            longitude: f64,
+            latitude: f64,
             formatted_address: String,
             address_components: Json<Vec<AddressComponent>>,
             is_furnished: bool,
@@ -206,7 +213,8 @@ impl Room {
             id: rec.id,
             title: rec.title,
             price: rec.price,
-            place_id: rec.place_id,
+            longitude: rec.longitude,
+            latitude: rec.latitude,
             formatted_address: rec.formatted_address,
             address_components: rec.address_components,
             is_furnished: rec.is_furnished,
@@ -235,7 +243,8 @@ impl Room {
             id: Uuid,
             title: String,
             price: i32,
-            place_id: String,
+            longitude: f64,
+            latitude: f64,
             formatted_address: String,
             address_components: Json<Vec<AddressComponent>>,
             is_furnished: bool,
@@ -302,7 +311,8 @@ impl Room {
                 id: room.id,
                 title: room.title,
                 price: room.price,
-                place_id: room.place_id,
+                longitude: room.longitude,
+                latitude: room.latitude,
                 formatted_address: room.formatted_address,
                 address_components: room.address_components,
                 is_furnished: room.is_furnished,
@@ -358,14 +368,15 @@ impl Room {
         let rec = sqlx::query(
             r#"
                 UPDATE rooms
-                SET title = $1, price = $2, place_id = $3, formatted_address = $4,
-                address_components = $5, is_furnished = $6, is_pet_friendly = $7, description = $8
-                WHERE id = $9
+                SET title = $1, price = $2, longitude = $3, latitude = $4, formatted_address = $5,
+                address_components = $6, is_furnished = $7, is_pet_friendly = $8, description = $9
+                WHERE id = $10
             "#,
         )
         .bind(room.title)
         .bind(room.price)
-        .bind(room.place_id)
+        .bind(room.longitude)
+        .bind(room.latitude)
         .bind(room.formatted_address)
         .bind(room.address_components)
         .bind(room.is_furnished)
@@ -418,7 +429,8 @@ mod tests {
         let params = CreateRoom {
             title: "title".to_string(),
             price: 10000,
-            place_id: "place_id".to_string(),
+            longitude: 0.0,
+            latitude: 0.0,
             formatted_address: "formatted_address".to_string(),
             address_components: Json(vec![]),
             is_furnished: true,
@@ -530,7 +542,8 @@ mod tests {
             id,
             title: "new_title".to_string(),
             price: params.price,
-            place_id: params.place_id,
+            longitude: params.longitude,
+            latitude: params.latitude,
             formatted_address: params.formatted_address,
             address_components: Json(vec![]),
             is_furnished: params.is_furnished,
@@ -598,7 +611,8 @@ mod tests {
             let params = RoomFactoryParams {
                 title: "title".to_string(),
                 price: 10000,
-                place_id: "place_id".to_string(),
+                longitude: 0.0,
+                latitude: 0.0,
                 formatted_address: "formatted_address".to_string(),
                 is_furnished: true,
                 is_pet_friendly: false,
@@ -632,7 +646,8 @@ mod tests {
             assert!(!result.id.to_string().is_empty());
             assert_eq!(result.title, "title".to_string());
             assert_eq!(result.price, 10000);
-            assert_eq!(result.place_id, "place_id".to_string());
+            assert_eq!(result.longitude, 0.0);
+            assert_eq!(result.latitude, 0.0);
             assert_eq!(result.formatted_address, "formatted_address".to_string());
             assert_eq!(result.address_components.len(), 1);
             assert!(result.is_furnished);

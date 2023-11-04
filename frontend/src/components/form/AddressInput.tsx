@@ -22,14 +22,15 @@ export const AddressInput = ({
       if (!autocompleteRef.current) return;
       const autocomplete = new Autocomplete(autocompleteRef.current as HTMLInputElement, {
         componentRestrictions: { country: "ca" },
-        fields: ["place_id", "address_components", "formatted_address"],
+        fields: ["address_components", "formatted_address", "geometry"],
       });
 
       const onPlaceChanged = () => {
         const place = autocomplete.getPlace();
         if (
           !place ||
-          !place.place_id ||
+          !place.geometry ||
+          !place.geometry.location ||
           !place.formatted_address ||
           !place.address_components
         ) {
@@ -37,14 +38,16 @@ export const AddressInput = ({
           handleAddress({
             formatted_address: "",
             address_components: [],
-            inputValue: "",
+            longitude: NaN,
+            latitude: NaN,
           });
         } else {
-          field.onChange(place.place_id);
+          field.onChange(place.formatted_address);
           handleAddress({
             formatted_address: place.formatted_address,
             address_components: place.address_components,
-            inputValue: place.formatted_address,
+            longitude: place.geometry.location.lng(),
+            latitude: place.geometry.location.lat(),
           });
         }
       };
@@ -57,14 +60,15 @@ export const AddressInput = ({
     <div className="flex basis-4/6 flex-col">
       <input
         {...field}
-        value={addressInfo.inputValue}
+        value={addressInfo.formatted_address}
         ref={autocompleteRef}
         onChange={(e) => {
           field.onChange("");
           handleAddress({
-            formatted_address: "",
+            formatted_address: e.target.value,
             address_components: [],
-            inputValue: e.target.value,
+            longitude: NaN,
+            latitude: NaN,
           });
         }}
         placeholder=""

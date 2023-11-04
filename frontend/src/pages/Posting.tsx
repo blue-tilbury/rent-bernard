@@ -31,7 +31,8 @@ export const Posting = () => {
     return {
       address_components: [],
       formatted_address: "",
-      inputValue: "",
+      latitude: NaN,
+      longitude: NaN,
     };
   }, []);
   const [addressInfo, setAddressInfo] = useState<AddressInfoType>(addressDefaultVals);
@@ -43,10 +44,10 @@ export const Posting = () => {
     return {
       title: "",
       price: null,
-      place_id: "",
       is_furnished: null,
       is_pet_friendly: null,
       s3_keys: [],
+      formatted_address: "",
       description: "",
       email: "",
     };
@@ -90,7 +91,7 @@ export const Posting = () => {
 
     setAddressInfo({
       ...addressInfo,
-      inputValue: room.city,
+      formatted_address: room.formatted_address,
     });
     return Converter.GetRoomToPostRoom(room, resolvedFiles);
   }
@@ -153,8 +154,8 @@ export const Posting = () => {
           <Price register={register} error={errors.price} />
           <Address
             control={control}
-            error={errors.place_id}
-            name="place_id"
+            error={errors.formatted_address}
+            name="formatted_address"
             handleAddress={handleAddress}
             addressInfo={addressInfo}
           />

@@ -10,7 +10,8 @@ pub mod tests {
     pub struct RoomFactoryParams {
         pub title: String,
         pub price: i32,
-        pub place_id: String,
+        pub longitude: f64,
+        pub latitude: f64,
         pub formatted_address: String,
         pub is_furnished: bool,
         pub is_pet_friendly: bool,
@@ -44,15 +45,16 @@ pub mod tests {
             let rec = sqlx::query(
                 r#"
                     INSERT INTO rooms (
-                        title, price, place_id, formatted_address, address_components, is_furnished, is_pet_friendly, description, email, user_id
+                        title, price, longitude, latitude, formatted_address, address_components, is_furnished, is_pet_friendly, description, email, user_id
                     )
-                    VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 )
+                    VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 )
                     RETURNING id
                 "#
             )
             .bind(params.title)
             .bind(params.price)
-            .bind(params.place_id)
+            .bind(params.longitude)
+            .bind(params.latitude)
             .bind(params.formatted_address)
             .bind(address_components)
             .bind(params.is_furnished)

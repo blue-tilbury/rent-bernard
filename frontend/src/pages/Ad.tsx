@@ -46,7 +46,11 @@ export const Ad = (): ReactElement => {
       </div>
       <div className="flex flex-2 flex-col pt-12">
         <Contact email={room.email} />
-        <Map place_id={room.place_id} formatted_address={room.formatted_address} />
+        <Map
+          formatted_address={room.formatted_address}
+          latitude={room.latitude}
+          longitude={room.longitude}
+        />
         <UpdatedDate updated_at={room.updated_at} />
       </div>
     </section>

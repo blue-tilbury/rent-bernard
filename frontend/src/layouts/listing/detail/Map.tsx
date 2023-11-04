@@ -1,17 +1,52 @@
 import { MapPinIcon } from "@heroicons/react/24/solid";
+import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
+import { useCallback, useMemo } from "react";
 
 type MapProps = {
-  place_id: string;
   formatted_address: string;
+  latitude: number;
+  longitude: number;
 };
 
-// TODO: Implement the map
-export const Map = ({ place_id, formatted_address }: MapProps) => {
-  console.log(place_id);
+const containerStyle = {
+  width: "400px",
+  height: "400px",
+};
+
+export const Map = ({ formatted_address, latitude, longitude }: MapProps) => {
+  const center = useMemo(
+    () => ({
+      lat: latitude,
+      lng: longitude,
+    }),
+    [latitude, longitude],
+  );
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_API_KEY,
+  });
+
+  const onLoad = useCallback(
+    (map: google.maps.Map) => {
+      new google.maps.Marker({
+        map: map,
+        position: center,
+      });
+    },
+    [center],
+  );
 
   return (
     <>
-      <div className="pt-10">Map here</div>
+      <div className="pt-10">
+        {isLoaded && (
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={center}
+            zoom={15}
+            onLoad={onLoad}
+          />
+        )}
+      </div>
       <div className="flex pb-20">
         <MapPinIcon className="my-1 h-4 w-4 shrink-0" />
         <p className="pl-1">{formatted_address}</p>

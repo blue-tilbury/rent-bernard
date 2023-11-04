@@ -12,7 +12,8 @@ pub struct Get {
     title: String,
     price: i32,
     city: Option<String>,
-    place_id: String,
+    longitude: f64,
+    latitude: f64,
     formatted_address: String,
     is_furnished: bool,
     is_pet_friendly: bool,
@@ -36,7 +37,8 @@ impl Get {
             id,
             title,
             price,
-            place_id,
+            longitude,
+            latitude,
             formatted_address,
             address_components,
             is_furnished,
@@ -58,7 +60,8 @@ impl Get {
             id: id.to_string(),
             title,
             price,
-            place_id,
+            longitude,
+            latitude,
             formatted_address,
             city,
             is_furnished,
@@ -93,7 +96,8 @@ pub mod private {
         pub title: String,
         pub price: i32,
         pub city: Option<String>,
-        pub place_id: String,
+        pub longitude: f64,
+        pub latitude: f64,
         pub formatted_address: String,
         pub is_furnished: bool,
         pub is_pet_friendly: bool,
@@ -128,7 +132,8 @@ pub mod private {
                     title: room.title,
                     price: room.price,
                     city,
-                    place_id: room.place_id,
+                    longitude: room.longitude,
+                    latitude: room.latitude,
                     formatted_address: room.formatted_address,
                     is_furnished: room.is_furnished,
                     is_pet_friendly: room.is_pet_friendly,
@@ -166,7 +171,8 @@ pub mod public {
         pub title: String,
         pub price: i32,
         pub city: Option<String>,
-        pub place_id: String,
+        pub longitude: f64,
+        pub latitude: f64,
         pub formatted_address: String,
         pub is_furnished: bool,
         pub is_pet_friendly: bool,
@@ -202,7 +208,8 @@ pub mod public {
                     title: room.title,
                     price: room.price,
                     city,
-                    place_id: room.place_id,
+                    longitude: room.longitude,
+                    latitude: room.latitude,
                     formatted_address: room.formatted_address,
                     is_furnished: room.is_furnished,
                     is_pet_friendly: room.is_pet_friendly,
@@ -278,7 +285,8 @@ mod tests {
             id,
             title: "title".to_string(),
             price: 10000,
-            place_id: "place_id".to_string(),
+            longitude: 0.0,
+            latitude: 0.0,
             formatted_address: "formatted_address".to_string(),
             address_components,
             is_furnished: true,
@@ -296,7 +304,8 @@ mod tests {
         assert_eq!(json.title, "title".to_string());
         assert_eq!(json.price, 10000);
         assert_eq!(json.city, Some("city".to_string()));
-        assert_eq!(json.place_id, "place_id".to_string());
+        assert_eq!(json.longitude, 0.0);
+        assert_eq!(json.latitude, 0.0);
         assert_eq!(json.formatted_address, "formatted_address".to_string());
         assert!(json.is_furnished);
         assert!(!json.is_pet_friendly);
@@ -336,7 +345,8 @@ mod tests {
                 id,
                 title: "title".to_string(),
                 price: 10000,
-                place_id: "place_id".to_string(),
+                longitude: 0.0,
+                latitude: 0.0,
                 formatted_address: "formatted_address".to_string(),
                 address_components,
                 is_furnished: true,
@@ -359,7 +369,8 @@ mod tests {
             assert_eq!(room.title, "title".to_string());
             assert_eq!(room.price, 10000);
             assert_eq!(room.city, Some("city".to_string()));
-            assert_eq!(room.place_id, "place_id".to_string());
+            assert_eq!(room.longitude, 0.0);
+            assert_eq!(room.latitude, 0.0);
             assert_eq!(room.formatted_address, "formatted_address".to_string());
             assert!(room.is_furnished);
             assert!(!room.is_pet_friendly);
@@ -400,7 +411,8 @@ mod tests {
                 id,
                 title: "title".to_string(),
                 price: 10000,
-                place_id: "place_id".to_string(),
+                longitude: 0.0,
+                latitude: 0.0,
                 formatted_address: "formatted_address".to_string(),
                 address_components,
                 is_furnished: true,
@@ -420,7 +432,8 @@ mod tests {
             assert_eq!(room.title, "title".to_string());
             assert_eq!(room.price, 10000);
             assert_eq!(room.city, Some("city".to_string()));
-            assert_eq!(room.place_id, "place_id".to_string());
+            assert_eq!(room.longitude, 0.0);
+            assert_eq!(room.latitude, 0.0);
             assert_eq!(room.formatted_address, "formatted_address".to_string());
             assert!(room.is_furnished);
             assert!(!room.is_pet_friendly);

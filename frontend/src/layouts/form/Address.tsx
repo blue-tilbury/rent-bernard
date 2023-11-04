@@ -14,7 +14,7 @@ export const Address = ({
       <div className="basis-4/6">
         <AddressInput
           control={control}
-          name="place_id"
+          name="formatted_address"
           error={error}
           handleAddress={handleAddress}
           addressInfo={addressInfo}

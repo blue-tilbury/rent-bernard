@@ -10,7 +10,6 @@ import {
 import { PostRoom } from "./room.type";
 
 export type RegisterName =
-  | "place_id"
   | "title"
   | "price"
   | "is_furnished"
@@ -50,5 +49,6 @@ export type AddressInputProps = UseControllerProps<PostRoom> & {
 export type AddressInfoType = {
   address_components: google.maps.GeocoderAddressComponent[];
   formatted_address: string;
-  inputValue: string;
+  longitude: number;
+  latitude: number;
 };

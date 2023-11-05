@@ -14,9 +14,9 @@ export const UpdatedDate = ({ updated_at }: UpdatedDateProps) => {
   }, [updated_at]);
 
   return (
-    <div className="flex items-center">
-      <InformationCircleIcon className="h-5 w-5" />
-      <p className="pl-1 text-sm">Updated {updatedAt}</p>
+    <div className="flex items-center pl-2">
+      <InformationCircleIcon className="h-4 w-4" />
+      <p className="pl-1 text-xs">Updated {updatedAt}</p>
     </div>
   );
 };

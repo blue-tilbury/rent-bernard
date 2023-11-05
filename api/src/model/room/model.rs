@@ -13,7 +13,7 @@ pub struct Room {
     pub longitude: f64,
     pub latitude: f64,
     pub formatted_address: String,
-    pub address_components: Json<Vec<AddressComponent>>,
+    pub address_components: AddressComponents,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
@@ -32,7 +32,7 @@ pub struct GetRoom {
     pub longitude: f64,
     pub latitude: f64,
     pub formatted_address: String,
-    pub address_components: Json<Vec<AddressComponent>>,
+    pub address_components: AddressComponents,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
@@ -52,7 +52,7 @@ pub struct ListRoom {
     pub longitude: f64,
     pub latitude: f64,
     pub formatted_address: String,
-    pub address_components: Json<Vec<AddressComponent>>,
+    pub address_components: AddressComponents,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
@@ -72,7 +72,7 @@ pub struct CreateRoom {
     pub longitude: f64,
     pub latitude: f64,
     pub formatted_address: String,
-    pub address_components: Json<Vec<AddressComponent>>,
+    pub address_components: AddressComponents,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
@@ -88,12 +88,14 @@ pub struct UpdateRoom {
     pub longitude: f64,
     pub latitude: f64,
     pub formatted_address: String,
-    pub address_components: Json<Vec<AddressComponent>>,
+    pub address_components: AddressComponents,
     pub is_furnished: bool,
     pub is_pet_friendly: bool,
     pub description: String,
     pub email: String,
 }
+
+pub type AddressComponents = Json<Vec<AddressComponent>>;
 
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct AddressComponent {

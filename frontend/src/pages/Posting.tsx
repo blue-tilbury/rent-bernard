@@ -90,8 +90,10 @@ export const Posting = () => {
     setFiles(resolvedFiles);
 
     setAddressInfo({
-      ...addressInfo,
       formatted_address: room.formatted_address,
+      longitude: room.longitude,
+      latitude: room.latitude,
+      address_components: room.address_components,
     });
     return Converter.GetRoomToPostRoom(room, resolvedFiles);
   }

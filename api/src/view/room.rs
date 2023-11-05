@@ -2,7 +2,7 @@ use rocket::{http::Status, serde::json::Json};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    model::room::model::{AddressComponent, GetRoom},
+    model::room::model::{AddressComponent, AddressComponents, GetRoom},
     utils::s3::S3Operation,
 };
 
@@ -15,6 +15,7 @@ pub struct Get {
     longitude: f64,
     latitude: f64,
     formatted_address: String,
+    address_components: AddressComponents,
     is_furnished: bool,
     is_pet_friendly: bool,
     is_favorite: bool,
@@ -64,6 +65,7 @@ impl Get {
             latitude,
             formatted_address,
             city,
+            address_components,
             is_furnished,
             is_pet_friendly,
             is_favorite,
@@ -245,7 +247,6 @@ fn extract_city(address_components: Vec<AddressComponent>) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use chrono::Utc;
-    use sqlx::types::Json;
     use uuid::Uuid;
 
     use super::*;
@@ -267,7 +268,7 @@ mod tests {
     async fn test_get_room() {
         let id = Uuid::new_v4();
         let user_id = Uuid::new_v4();
-        let address_components: Json<Vec<AddressComponent>> = serde_json::from_str(
+        let address_components: AddressComponents = serde_json::from_str(
             r#"
                 [
                     {
@@ -327,7 +328,7 @@ mod tests {
         async fn test_list_rooms() {
             let id = Uuid::new_v4();
             let user_id = Uuid::new_v4();
-            let address_components: Json<Vec<AddressComponent>> = serde_json::from_str(
+            let address_components: AddressComponents = serde_json::from_str(
                 r#"
                 [
                     {
@@ -393,7 +394,7 @@ mod tests {
         async fn test_list_rooms() {
             let id = Uuid::new_v4();
             let user_id = Uuid::new_v4();
-            let address_components: Json<Vec<AddressComponent>> = serde_json::from_str(
+            let address_components: AddressComponents = serde_json::from_str(
                 r#"
                 [
                     {

@@ -32,6 +32,7 @@ export type GetRoom = {
   title: string;
   price: number;
   formatted_address: string;
+  address_components: google.maps.GeocoderAddressComponent[];
   city: string;
   longitude: number;
   latitude: number;

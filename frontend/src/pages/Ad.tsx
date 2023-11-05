@@ -42,7 +42,8 @@ export const Ad = (): ReactElement => {
           <CustomChip roomPropType={room.is_furnished} name="Furnished" />
           <CustomChip roomPropType={room.is_pet_friendly} name="Pet friendly" />
         </div>
-        <p className="pb-4 pl-2">{room.description}</p>
+        <p className="pb-20 pl-2">{room.description}</p>
+        <UpdatedDate updated_at={room.updated_at} />
       </div>
       <div className="flex flex-2 flex-col pt-12">
         <Contact email={room.email} />
@@ -51,7 +52,6 @@ export const Ad = (): ReactElement => {
           latitude={room.latitude}
           longitude={room.longitude}
         />
-        <UpdatedDate updated_at={room.updated_at} />
       </div>
     </section>
   );

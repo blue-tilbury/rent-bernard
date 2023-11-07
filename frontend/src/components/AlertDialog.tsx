@@ -28,7 +28,7 @@ export default function AlertDialog({ id }: Id) {
 
   return (
     <div>
-      <TrashIcon onClick={handleClick} className="h-6 w-6 text-red-600" />
+      <TrashIcon onClick={handleClick} className="h-4 w-4 text-red-600 md:h-6 md:w-6" />
       <Dialog fullWidth maxWidth="xs" open={open} onClick={handleClick}>
         <DialogTitle>{"Delete this ad?"}</DialogTitle>
         <DialogActions>

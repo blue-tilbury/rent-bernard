@@ -14,7 +14,7 @@ export const YourAdsEditIcons = ({ id }: Id) => {
 
   return (
     <>
-      <PencilIcon onClick={handleClick} className="h-6 w-6" />
+      <PencilIcon onClick={handleClick} className="h-4 w-4 md:h-6 md:w-6" />
       <AlertDialog id={id} />
     </>
   );

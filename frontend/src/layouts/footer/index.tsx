@@ -12,7 +12,7 @@ export const Footer = () => {
       <div className="mx-auto px-8 py-10 text-white xl:w-[1280px] 2xl:w-[1536px]">
         <div className="flex flex-col sm:flex-row">
           <div className="flex-3 pb-2">
-            <Logo className="h-7 w-32 sm:h-8 sm:w-36" />
+            <Logo className="h-7 w-32 md:h-8 md:w-36" />
           </div>
           <div className="flex flex-2 flex-col gap-1 pb-8 text-sm font-light md:text-base">
             <CustomLink to="/" type="footer">

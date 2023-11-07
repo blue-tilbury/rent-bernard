@@ -8,7 +8,7 @@ export const CheckBox = ({ control, name }: ControlledInputProps<FilterType>) =>
   const label = name === "is_furnished" ? "Furnished" : "Pet Friendly";
 
   return (
-    <label className="flex items-center pb-2">
+    <label className="flex items-center pb-2 pr-6">
       <input
         type="checkbox"
         {...field}

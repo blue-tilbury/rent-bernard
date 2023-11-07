@@ -51,7 +51,7 @@ export const Search = () => {
 
   return (
     <section className="mx-auto min-h-screen px-8 py-6 xl:w-[1280px] 2xl:w-[1536px]">
-      <div className="flex min-h-[inherit]">
+      <div className="flex min-h-[inherit] flex-col lg:flex-row">
         <Filter handleFilter={handleFilter} filter={filter} />
         {!data || data?.count === 0 ? (
           <ErrorMsg msg={errorMessage.noRoom} isReloadBtn={false} />
@@ -65,7 +65,9 @@ export const Search = () => {
                 </h2>
                 <SelectBox handleSelect={handleSelectBox} sortType={sortType} />
               </div>
-              <ul className="flex h-full flex-col flex-wrap sm:flex-row">{galleries}</ul>
+              <ul className="flex h-full flex-col flex-wrap pt-4 sm:flex-row lg:pt-0">
+                {galleries}
+              </ul>
             </div>
             <Pagination
               handlePagination={handlePagination}

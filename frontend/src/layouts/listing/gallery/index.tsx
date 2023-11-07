@@ -23,7 +23,7 @@ export const Gallery = (props: ListItem) => {
   return (
     <li
       onClick={onClick}
-      className="flex flex-1 flex-col justify-stretch pb-2 sm:flex-1/3 sm:px-1"
+      className="flex flex-1 flex-col justify-stretch pb-2 sm:flex-1/2 sm:px-1 lg:flex-1/3"
     >
       <div className="flex h-full flex-col justify-between rounded-md bg-white p-6 shadow-sm hover:shadow-lg">
         <div className="h-48 w-full rounded-lg">

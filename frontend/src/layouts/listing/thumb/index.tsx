@@ -32,8 +32,12 @@ export const Thumb = ({ room, page }: ThumbProps) => {
       <div className="flex flex-1 flex-col justify-between px-4 py-6 md:flex-row md:p-8">
         <div>
           <div className="flex space-x-2 text-xs md:text-sm">
-            <span>{room.city}</span>
-            <Divider orientation="vertical" flexItem />
+            {room.city && (
+              <>
+                <span>{room.city}</span>
+                <Divider orientation="vertical" flexItem />
+              </>
+            )}
             <span>{updatedAt}</span>
           </div>
           <h2 className="pb-2 font-medium text-rent-blue md:pb-4 md:text-lg">

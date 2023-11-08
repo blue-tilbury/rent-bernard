@@ -145,7 +145,7 @@ export const Posting = () => {
     <form className="container p-4" onSubmit={handleSubmit(submit)}>
       <div className="mx-2 mb-6 mt-4 rounded-xl bg-white px-8 py-10 md:m-8">
         <Heading index={1} title="Posting Details" />
-        <div className="flex flex-col gap-4 py-6">
+        <div className="flex flex-col gap-5 py-6">
           <Title register={register} error={errors.title} />
           <Furnished control={control} error={errors.is_furnished} name="is_furnished" />
           <PetFriendly

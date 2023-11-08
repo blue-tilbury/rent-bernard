@@ -9,7 +9,7 @@ export const Title = ({ register, error }: InputProps) => {
       <TextInput
         register={register}
         name="title"
-        style="rounded border-rent-input-gray p-1 md:p-2"
+        style="rounded border-rent-input-gray px-2 py-1 md:py-2"
         error={error}
       />
     </label>

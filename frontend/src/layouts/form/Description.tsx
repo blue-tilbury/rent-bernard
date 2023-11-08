@@ -8,7 +8,7 @@ export const Description = ({ register, error }: InputProps) => {
       <div className="flex flex-1 flex-col lg:flex-none lg:basis-2/3">
         <textarea
           {...register("description")}
-          className="rounded border-rent-input-gray p-1 md:p-2"
+          className="rounded border-rent-input-gray px-2 py-1 md:py-2"
         />
         {error?.message && (
           <p className="pl-1 pt-1 text-sm text-red-600">{error.message}</p>

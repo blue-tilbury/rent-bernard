@@ -8,7 +8,7 @@ export const NumberInput = ({ register, name, error }: RawInputProps) => {
         <input
           type="number"
           {...register(name, { valueAsNumber: true })}
-          className="max-w-full rounded border-rent-input-gray p-1 md:p-2"
+          className="max-w-full rounded border-rent-input-gray px-2 py-1 md:py-2"
         />
       </div>
       {error?.message && (

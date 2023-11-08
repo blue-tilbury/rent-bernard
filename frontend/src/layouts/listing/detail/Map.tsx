@@ -37,13 +37,13 @@ export const Map = ({ formatted_address, latitude, longitude }: MapProps) => {
   );
 
   return (
-    <>
-      <div className="flex py-3 md:pb-20">
+    <div className="flex flex-col pb-10 lg:flex-col-reverse lg:pt-10">
+      <div className="flex pb-3 lg:pb-0 lg:pt-3">
         <MapPinIcon className="my-1 h-4 w-4 shrink-0" />
         <p className="pl-1">{formatted_address}</p>
       </div>
       {isLoaded && (
-        <div className="flex justify-center pb-16 md:pb-1 md:pt-10">
+        <div className="flex justify-center">
           <GoogleMap
             mapContainerStyle={containerStyle}
             center={center}
@@ -52,6 +52,6 @@ export const Map = ({ formatted_address, latitude, longitude }: MapProps) => {
           />
         </div>
       )}
-    </>
+    </div>
   );
 };

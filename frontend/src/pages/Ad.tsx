@@ -35,17 +35,17 @@ export const Ad = (): ReactElement => {
 
   return (
     <section className="container pb-16 pt-10">
-      <div className="flex flex-col pb-2 lg:flex-row lg:space-x-20">
-        <div className="flex-3">
+      <div className="flex flex-col pb-3 lg:flex-row lg:space-x-20">
+        <div className="flex-3 pb-16">
           <Header room={room} />
           <ImageGallery image_urls={room.image_urls} title={room.title} />
           <div className="flex space-x-6 pb-10">
             <CustomChip roomPropType={room.is_furnished} name="Furnished" />
             <CustomChip roomPropType={room.is_pet_friendly} name="Pet friendly" />
           </div>
-          <p className="pb-20 pl-2">{room.description}</p>
+          <p className="pl-2">{room.description}</p>
         </div>
-        <div className="flex flex-2 flex-col pb-6 pt-12 md:flex-col-reverse md:justify-end">
+        <div className="flex flex-2 flex-col lg:flex-col-reverse lg:justify-end lg:pt-12">
           <Map
             formatted_address={room.formatted_address}
             latitude={room.latitude}

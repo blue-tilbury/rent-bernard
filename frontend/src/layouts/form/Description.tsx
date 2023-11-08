@@ -3,12 +3,12 @@ import { InputProps } from "../../types/form.type";
 
 export const Description = ({ register, error }: InputProps) => {
   return (
-    <label className="flex items-baseline gap-3">
+    <label className="flex flex-col gap-2 md:flex-row md:items-baseline md:gap-3">
       <Label name="Description" required={true} />
-      <div className="flex basis-4/6 flex-col">
+      <div className="flex flex-1 flex-col lg:flex-none lg:basis-2/3">
         <textarea
           {...register("description")}
-          className="rounded border-rent-input-gray"
+          className="rounded border-rent-input-gray p-1 md:p-2"
         />
         {error?.message && (
           <p className="pl-1 pt-1 text-sm text-red-600">{error.message}</p>

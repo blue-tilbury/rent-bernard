@@ -7,7 +7,7 @@ export const RadioButton = ({ control, name, error }: ControlledInputProps<PostR
   const { field } = useController({ control, name });
 
   return (
-    <div className="flex flex-col pl-3">
+    <div className="flex flex-col text-sm md:pl-3 md:text-base">
       <div className="flex">
         <label className="pr-6">
           <input

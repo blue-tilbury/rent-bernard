@@ -20,7 +20,7 @@ export const Images = ({
   setValue,
 }: ImageInputProps) => {
   return (
-    <div className="flex gap-3">
+    <div className="flex flex-col items-start gap-2 pb-4 md:flex-row md:gap-3 md:pb-0">
       <Label name="Images" required={true} />
       <div className="flex basis-5/6 flex-col">
         <button className="absolute rounded border border-dashed border-rent-gray px-8 py-1 text-sm text-rent-gray">

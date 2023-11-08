@@ -23,11 +23,11 @@ export const ImageGallery = ({ image_urls, title }: ImageGalleryProps) => {
 
   return (
     <div className="flex flex-col pb-6">
-      <div className="relative h-80 w-full">
+      <div className="relative h-56 w-full sm:h-80">
         <img
           src={image_urls[currentIndex]}
           alt={title}
-          className="h-80 w-full object-contain"
+          className="h-56 w-full object-contain sm:h-80"
         />
         <ChevronLeftIcon
           onClick={handlePrev}

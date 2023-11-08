@@ -20,11 +20,13 @@ export const Header = ({ room }: HeaderProps) => {
 
   return (
     <>
-      <h1 className="pb-2 text-2xl font-medium">{room.title}</h1>
+      <h1 className="pb-2 text-xl font-medium md:text-2xl">{room.title}</h1>
       <div className="flex items-center space-x-4 pb-10">
-        <h2 className="text-xl font-semibold text-rent-dark-green">${room.price}</h2>
+        <h2 className="text-base font-semibold text-rent-dark-green md:text-xl">
+          ${room.price}
+        </h2>
         <Divider orientation="vertical" variant="middle" flexItem />
-        <p className=" text-sm">Posted {postedAt}</p>
+        <p className="text-xs md:text-sm">Posted {postedAt}</p>
         {loggedIn(user) && (
           <WishlistEditIcon roomId={room.id} isDefaultFav={room.is_favorite} />
         )}

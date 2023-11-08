@@ -34,25 +34,27 @@ export const Ad = (): ReactElement => {
   if (room == null) return <ErrorPage />;
 
   return (
-    <section className="container flex space-x-20 pb-16 pt-8">
-      <div className="flex-3">
-        <Header room={room} />
-        <ImageGallery image_urls={room.image_urls} title={room.title} />
-        <div className="flex space-x-6 pb-10">
-          <CustomChip roomPropType={room.is_furnished} name="Furnished" />
-          <CustomChip roomPropType={room.is_pet_friendly} name="Pet friendly" />
+    <section className="container pb-16 pt-10">
+      <div className="flex flex-col pb-2 lg:flex-row lg:space-x-20">
+        <div className="flex-3">
+          <Header room={room} />
+          <ImageGallery image_urls={room.image_urls} title={room.title} />
+          <div className="flex space-x-6 pb-10">
+            <CustomChip roomPropType={room.is_furnished} name="Furnished" />
+            <CustomChip roomPropType={room.is_pet_friendly} name="Pet friendly" />
+          </div>
+          <p className="pb-20 pl-2">{room.description}</p>
         </div>
-        <p className="pb-20 pl-2">{room.description}</p>
-        <UpdatedDate updated_at={room.updated_at} />
+        <div className="flex flex-2 flex-col pb-6 pt-12 md:flex-col-reverse md:justify-end">
+          <Map
+            formatted_address={room.formatted_address}
+            latitude={room.latitude}
+            longitude={room.longitude}
+          />
+          <Contact email={room.email} />
+        </div>
       </div>
-      <div className="flex flex-2 flex-col pt-12">
-        <Contact email={room.email} />
-        <Map
-          formatted_address={room.formatted_address}
-          latitude={room.latitude}
-          longitude={room.longitude}
-        />
-      </div>
+      <UpdatedDate updated_at={room.updated_at} />
     </section>
   );
 };

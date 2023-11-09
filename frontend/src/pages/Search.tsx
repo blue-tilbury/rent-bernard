@@ -60,8 +60,9 @@ export const Search = () => {
             <div className="flex flex-col">
               <div className="flex h-14 justify-between">
                 <h2 className="p-2 text-sm">
-                  Showing {pageIndex * ItemsPerPage + 1}-{(pageIndex + 1) * ItemsPerPage}{" "}
-                  of {data.count} results
+                  Showing {pageIndex * ItemsPerPage + 1}-
+                  {Math.min((pageIndex + 1) * ItemsPerPage, data.count)} of {data.count}{" "}
+                  results
                 </h2>
                 <SelectBox handleSelect={handleSelectBox} sortType={sortType} />
               </div>

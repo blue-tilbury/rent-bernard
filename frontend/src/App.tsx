@@ -10,7 +10,7 @@ import {
   ThankYou,
   Wishlist,
   YourAds,
-  YourReviews,
+  // YourReviews,
 } from "./pages";
 import { Ad } from "./pages/Ad";
 import { Root } from "./routes/Root";
@@ -58,11 +58,11 @@ export default function App() {
               element: <YourAds />,
               loader: () => (!loggedIn(user) ? redirect("/") : null),
             },
-            {
-              path: "your-reviews",
-              element: <YourReviews />,
-              loader: () => (!loggedIn(user) ? redirect("/") : null),
-            },
+            // {
+            //   path: "your-reviews",
+            //   element: <YourReviews />,
+            //   loader: () => (!loggedIn(user) ? redirect("/") : null),
+            // },
             { path: "error", element: <ErrorPage /> },
             { path: "*", element: <ErrorPage /> },
           ],

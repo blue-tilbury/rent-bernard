@@ -5,6 +5,7 @@ import { Search } from "./Search";
 import { ThankYou } from "./ThankYou";
 import { Wishlist } from "./Wishlist";
 import { YourAds } from "./YourAds";
-import { YourReviews } from "./YourReviews";
+// import { YourReviews } from "./YourReviews";
 
-export { ErrorPage, Login, Posting, Search, ThankYou, Wishlist, YourAds, YourReviews };
+// export { ErrorPage, Login, Posting, Search, ThankYou, Wishlist, YourAds, YourReviews };
+export { ErrorPage, Login, Posting, Search, ThankYou, Wishlist, YourAds };

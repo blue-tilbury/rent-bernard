@@ -36,12 +36,12 @@ export const WishlistEditIcon = ({ roomId, isDefaultFav }: WishlistEditIconProps
   return isFav ? (
     <SolidHeartIcon
       onClick={(e) => handleFavAction(e, "delete")}
-      className="h-6 w-6 text-pink-500"
+      className="h-5 w-5 text-pink-500 md:h-6 md:w-6"
     />
   ) : (
     <OutlinedHeartIcon
       onClick={(e) => handleFavAction(e, "add")}
-      className="h-6 w-6 text-rent-gray"
+      className="h-5 w-5 text-rent-gray md:h-6 md:w-6"
     />
   );
 };

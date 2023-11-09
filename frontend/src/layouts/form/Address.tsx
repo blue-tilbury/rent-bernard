@@ -9,17 +9,15 @@ export const Address = ({
   addressInfo,
 }: AddressInputProps) => {
   return (
-    <div className="flex items-baseline gap-3">
+    <div className="flex flex-col gap-2 md:flex-row md:items-baseline md:gap-3">
       <Label name="Address" required={true} />
-      <div className="basis-4/6">
-        <AddressInput
-          control={control}
-          name="formatted_address"
-          error={error}
-          handleAddress={handleAddress}
-          addressInfo={addressInfo}
-        />
-      </div>
+      <AddressInput
+        control={control}
+        name="formatted_address"
+        error={error}
+        handleAddress={handleAddress}
+        addressInfo={addressInfo}
+      />
     </div>
   );
 };

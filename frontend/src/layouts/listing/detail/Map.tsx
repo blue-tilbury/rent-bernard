@@ -11,6 +11,7 @@ type MapProps = {
 const containerStyle = {
   width: "400px",
   height: "320px",
+  flex: 1,
 };
 
 export const Map = ({ formatted_address, latitude, longitude }: MapProps) => {
@@ -36,21 +37,21 @@ export const Map = ({ formatted_address, latitude, longitude }: MapProps) => {
   );
 
   return (
-    <>
-      <div className="flex justify-center pt-10">
-        {isLoaded && (
+    <div className="flex flex-col pb-10 lg:flex-col-reverse lg:pt-10">
+      <div className="flex pb-3 lg:pb-0 lg:pt-3">
+        <MapPinIcon className="my-1 h-4 w-4 shrink-0" />
+        <p className="pl-1">{formatted_address}</p>
+      </div>
+      {isLoaded && (
+        <div className="flex justify-center">
           <GoogleMap
             mapContainerStyle={containerStyle}
             center={center}
             zoom={15}
             onLoad={onLoad}
           />
-        )}
-      </div>
-      <div className="flex pb-20 pt-3">
-        <MapPinIcon className="my-1 h-4 w-4 shrink-0" />
-        <p className="pl-1">{formatted_address}</p>
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
 };

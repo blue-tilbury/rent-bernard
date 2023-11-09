@@ -57,7 +57,7 @@ export const AddressInput = ({
   });
 
   return (
-    <div className="flex basis-4/6 flex-col">
+    <div className="flex flex-1 flex-col lg:flex-none lg:basis-2/3">
       <input
         {...field}
         value={addressInfo.formatted_address}
@@ -72,7 +72,7 @@ export const AddressInput = ({
           });
         }}
         placeholder=""
-        className="rounded border-rent-input-gray"
+        className="rounded border-rent-input-gray px-2 py-1 md:py-2"
       />
       {error?.message && (
         <p className="pl-1 pt-1 text-sm text-red-600">{error.message}</p>

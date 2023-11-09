@@ -4,12 +4,12 @@ import { InputProps } from "../../types/form.type";
 
 export const Title = ({ register, error }: InputProps) => {
   return (
-    <label className="flex items-baseline gap-3">
+    <label className="flex flex-col gap-2 md:flex-row md:items-baseline md:gap-3">
       <Label name="Title" required={true} />
       <TextInput
         register={register}
         name="title"
-        style="rounded border-rent-input-gray"
+        style="rounded border-rent-input-gray px-2 py-1 md:py-2"
         error={error}
       />
     </label>

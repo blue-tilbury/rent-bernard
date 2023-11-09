@@ -26,10 +26,10 @@ export const Login = () => {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center bg-cover bg-center">
+    <div className="flex h-screen items-center justify-center">
       <div className="flex flex-col items-center rounded-md border p-12 shadow-md">
-        <h2 className="text-2xl font-bold">Welcome</h2>
-        <Logo className="h-28 w-44 pb-10" />
+        <h2 className="pb-1 text-xl font-bold sm:pb-0 sm:text-2xl">Welcome</h2>
+        <Logo className="h-20 w-40 pb-10 sm:h-28 sm:w-44" />
         <GoogleLogin
           onSuccess={(res) => handleResponse(res)}
           onError={() => console.log("Login Failed")}

@@ -24,7 +24,7 @@ export const Navbar = () => {
     <nav className="shadow-md">
       <div className="mx-auto flex items-center px-8 xl:w-[1280px] 2xl:w-[1536px]">
         <CustomLink to="/" type="noStyle">
-          <Logo className="h-8 w-40" />
+          <Logo className="h-7 w-36 md:h-8 md:w-40" />
         </CustomLink>
         <div className="flex flex-1 justify-end py-6">
           <div

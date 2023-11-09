@@ -41,7 +41,7 @@ export const Filter = ({ handleFilter, filter }: FilterProps) => {
   return (
     <form
       onSubmit={handleSubmit(submit)}
-      className="mr-2 mt-14 h-fit w-56 flex-none rounded-md border bg-white px-4 py-6 text-sm"
+      className="mb-10 mr-2 mt-2 h-fit w-full flex-none rounded-md border bg-white px-4 py-6 text-sm lg:mt-14 lg:w-56"
     >
       <p className="px-1 pb-4 text-lg font-medium">Find Apartments / Housing for Rent</p>
       <Divider sx={{ mb: 2 }} />
@@ -53,8 +53,10 @@ export const Filter = ({ handleFilter, filter }: FilterProps) => {
           <PriceInput register={register} name="price_max" error={errors.price_max} />
         </div>
       </div>
-      <CheckBox control={control} name="is_furnished" />
-      <CheckBox control={control} name="is_pet_friendly" />
+      <div className="flex flex-col md:flex-row lg:flex-col">
+        <CheckBox control={control} name="is_furnished" />
+        <CheckBox control={control} name="is_pet_friendly" />
+      </div>
       <div className="pb-2 pt-6 text-center">
         <Button size="sm" color="trinary" type="submit">
           Apply

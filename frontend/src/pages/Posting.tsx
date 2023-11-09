@@ -143,9 +143,9 @@ export const Posting = () => {
 
   return (
     <form className="container p-4" onSubmit={handleSubmit(submit)}>
-      <div className="m-8 rounded-xl bg-white p-8">
+      <div className="mx-2 mb-6 mt-4 rounded-xl bg-white px-8 py-10 md:m-8">
         <Heading index={1} title="Posting Details" />
-        <div className="flex flex-col gap-3 py-6">
+        <div className="flex flex-col gap-5 py-6">
           <Title register={register} error={errors.title} />
           <Furnished control={control} error={errors.is_furnished} name="is_furnished" />
           <PetFriendly
@@ -173,7 +173,7 @@ export const Posting = () => {
         </div>
       </div>
 
-      <div className="mx-8 mb-8 rounded-xl bg-white p-8">
+      <div className="mx-2 mb-12 rounded-xl bg-white px-8 py-10 md:mx-8">
         <Heading index={2} title="Contact Information" />
         <div className="py-6">
           <Email register={register} error={errors.email} />

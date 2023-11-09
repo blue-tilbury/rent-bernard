@@ -21,7 +21,7 @@ export const Button = ({ children, size, color, type, handleClick }: ButtonProps
       btnSize = "px-8 py-2 text-md font-medium";
       break;
     case "lg":
-      btnSize = "px-20 py-2 text-lg font-medium";
+      btnSize = "px-10 lg:px-20 py-2 lg:text-lg font-medium";
       break;
   }
   switch (color) {

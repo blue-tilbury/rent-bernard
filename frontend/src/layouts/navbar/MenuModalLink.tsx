@@ -1,6 +1,6 @@
 import {
   ArrowLeftOnRectangleIcon,
-  ChatBubbleLeftRightIcon,
+  // ChatBubbleLeftRightIcon,
   ClipboardDocumentListIcon,
   HeartIcon,
   HomeIcon,
@@ -17,7 +17,8 @@ type MenuModalLinkProps = {
 
 export const MenuModalLink = ({ to, handleClick }: MenuModalLinkProps) => {
   let icon: React.ReactNode;
-  let title: "Home" | "Login" | "Wishlist" | "Post Ad" | "Your Ads" | "Your Reviews";
+  // let title: "Home" | "Login" | "Wishlist" | "Post Ad" | "Your Ads" | "Your Reviews";
+  let title: "Home" | "Login" | "Wishlist" | "Post Ad" | "Your Ads";
 
   switch (to) {
     case "/":
@@ -40,10 +41,10 @@ export const MenuModalLink = ({ to, handleClick }: MenuModalLinkProps) => {
       icon = <ClipboardDocumentListIcon className="h-6 w-6" />;
       title = "Your Ads";
       break;
-    case "your-reviews":
-      icon = <ChatBubbleLeftRightIcon className="h-6 w-6" />;
-      title = "Your Reviews";
-      break;
+    // case "your-reviews":
+    //   icon = <ChatBubbleLeftRightIcon className="h-6 w-6" />;
+    //   title = "Your Reviews";
+    //   break;
   }
 
   return (

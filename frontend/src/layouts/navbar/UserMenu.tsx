@@ -1,5 +1,5 @@
 import {
-  ChatBubbleLeftRightIcon,
+  // ChatBubbleLeftRightIcon,
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import Divider from "@mui/material/Divider";
@@ -34,13 +34,13 @@ export const UserMenu = ({ user, isUserMenuOpen, handleClick }: UserMenuProps) =
             <p>Your ads</p>
           </CustomLink>
         </li>
-        <Divider component="li" role="presentation" sx={{ my: 0.5 }} />
-        <li>
+        {/* <Divider component="li" role="presentation" sx={{ my: 0.5 }} /> */}
+        {/* <li>
           <CustomLink to="your-reviews" type="userMenu" handleClick={handleClick}>
             <ChatBubbleLeftRightIcon className="h-4 w-4" />
             <p>Your reviews</p>
           </CustomLink>
-        </li>
+        </li> */}
         <Divider component="li" role="presentation" sx={{ my: 0.5 }} />
         <Logout type="userMenu" handleClick={handleClick} />
       </ul>

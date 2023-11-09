@@ -8,5 +8,5 @@ export type PagePath =
   | "posting"
   | "thankyou"
   | "your-ads"
-  | "your-reviews"
+  // | "your-reviews"
   | "login";

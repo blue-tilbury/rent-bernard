@@ -4,6 +4,12 @@
 
 Welcome to Rent Bernard, a web application designed for seamless and efficient searching of rooms or houses for rent. Modeled on the simplicity and convenience of platforms like Craigslist, Rent Bernard offers a user-friendly interface for both renters and property owners.
 
+
+
+https://github.com/blue-tilbury/rent-bernard/assets/61976102/8c62295c-53e6-447e-a5a4-7184aa7217a1
+
+
+
 ## Features
 
 ### For Renters
@@ -20,7 +26,7 @@ Welcome to Rent Bernard, a web application designed for seamless and efficient s
 ## Technology Stack
 
 - **Backend**: Rust with the Rocket framework.
-- **Frontend**: React.
+- **Frontend**: TypeScript, React, Tailwind CSS, Jotai.
 - **Database**: PostgreSQL.
 - **Image Storage**: Amazon S3 for storing room/house images.
 - **Session Management**: Redis.

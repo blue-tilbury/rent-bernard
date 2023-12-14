@@ -3,7 +3,6 @@ import { useState } from "react";
 import { ErrorMsg } from "../components/ErrorMsg";
 import { Pagination } from "../components/Pagination";
 import { SelectBox } from "../components/SelectBox";
-import { Spinner } from "../components/Spinner";
 import { useRoom } from "../hooks/useAxios";
 import { Filter } from "../layouts/filter";
 import { Gallery } from "../layouts/listing/gallery/index";
@@ -24,13 +23,12 @@ export const Search = () => {
   const [sortType, setSortType] = useState<SortType>("new");
   const [filter, setFilter] = useState<FilterType>({});
   const [pageIndex, setPageIndex] = useState(0);
-  const { data, isError, isLoading, isValidating } = useRoom({
+  const { data, isError } = useRoom({
     ...queryParams,
     ...filter,
   });
 
   if (isError) return <ErrorMsg msg={errorMessage.connection} isReloadBtn={true} />;
-  if (isLoading || isValidating) return <Spinner />;
 
   const rooms = data?.rooms;
   const galleries = rooms?.map((room) => <Gallery key={room.id} {...room} />);

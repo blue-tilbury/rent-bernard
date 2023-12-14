@@ -13,7 +13,7 @@ import { Order, QueryParams, SortBy } from "../types/room.type";
 export type SortType = "new" | "old" | "low" | "high";
 
 export const Search = () => {
-  const ItemsPerPage = 3;
+  const ItemsPerPage = 9;
   const [queryParams, setQueryParams] = useState<QueryParams>({
     sort_by: SortBy.UPDATED_AT,
     order: Order.DESC,
